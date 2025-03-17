@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import CategoriesSettings from '@/components/admin/settings/CategoriesSettings';
 import FeaturedContentSettings from '@/components/admin/settings/FeaturedContentSettings';
 import GeneralSettings from '@/components/admin/settings/GeneralSettings';
+import FeaturedCategoriesSettings from '@/components/admin/settings/FeaturedCategoriesSettings';
 
 const AdminSettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('categories');
@@ -26,6 +27,9 @@ const AdminSettings: React.FC = () => {
           <TabsTrigger value="featured" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Featured Content
           </TabsTrigger>
+          <TabsTrigger value="featuredCategories" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+            Featured Categories
+          </TabsTrigger>
           <TabsTrigger value="general" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             General
           </TabsTrigger>
@@ -38,6 +42,10 @@ const AdminSettings: React.FC = () => {
           
           <TabsContent value="featured" className="mt-0">
             <FeaturedContentSettings />
+          </TabsContent>
+          
+          <TabsContent value="featuredCategories" className="mt-0">
+            <FeaturedCategoriesSettings />
           </TabsContent>
           
           <TabsContent value="general" className="mt-0">
