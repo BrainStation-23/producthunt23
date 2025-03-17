@@ -32,9 +32,23 @@ const CommentItem: React.FC<CommentItemProps> = ({
 }) => {
   const { user } = useAuth();
   const [isReplying, setIsReplying] = useState(false);
-  const username = comment.profile?.username || 'Anonymous';
+  
+  // Get username and avatar URL from the profile, with better fallbacks
+  const username = comment.profile?.username || 'User';
   const avatarUrl = comment.profile?.avatar_url || '';
-  const initials = username.substring(0, 2).toUpperCase();
+  
+  // Generate meaningful initials from username or email
+  const getInitials = () => {
+    if (comment.profile?.username) {
+      // Get first two letters of username
+      return comment.profile.username.substring(0, 2).toUpperCase();
+    } else {
+      // If we have user_id but no profile info, use "U" as fallback
+      return "U";
+    }
+  };
+  
+  const initials = getInitials();
   const formattedDate = comment.created_at 
     ? formatDistanceToNow(new Date(comment.created_at), { addSuffix: true }) 
     : 'recently';
