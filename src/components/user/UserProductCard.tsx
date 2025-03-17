@@ -116,7 +116,7 @@ const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
               </Button>
             )}
             <Button variant="ghost" size="sm" asChild>
-              <Link to={`/preview/${product.id}`}>
+              <Link to={`/products/${product.id}`}>
                 <Eye className="h-3.5 w-3.5 mr-1" />
                 Preview
               </Link>

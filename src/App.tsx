@@ -48,6 +48,7 @@ function App() {
             <Route path="/products" element={<MainLayout />}>
               <Route index element={<ProductsPage />} />
               <Route path="submit" element={<SubmitProductPage />} />
+              <Route path="edit/:productId" element={<EditProductPage />} />
             </Route>
 
             {/* Admin Routes */}

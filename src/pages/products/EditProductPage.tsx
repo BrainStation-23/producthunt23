@@ -50,7 +50,7 @@ const EditProductPage: React.FC = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => navigate('/admin/products')}
+              onClick={() => navigate('/user/products')}
               className="p-0 h-8 w-8"
             >
               <ArrowLeft className="h-5 w-5" />
