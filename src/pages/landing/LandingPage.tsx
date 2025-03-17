@@ -23,6 +23,8 @@ interface FeaturedCategory {
 // Type for featured products
 interface FeaturedProduct extends Product {
   display_order: number;
+  profile_username?: string;
+  profile_avatar_url?: string;
 }
 
 const LandingPage: React.FC = () => {
@@ -82,22 +84,34 @@ const LandingPage: React.FC = () => {
       if (selectedCategory === 'all') {
         const { data, error } = await supabase
           .from('products')
-          .select('*')
+          .select('*, profiles:created_by(username, avatar_url)')
           .eq('status', 'approved')
           .limit(8);
         
         if (error) throw error;
-        return data as Product[];
+        
+        // Format data to match the expected shape
+        return data.map(product => ({
+          ...product,
+          profile_username: product.profiles?.username,
+          profile_avatar_url: product.profiles?.avatar_url
+        })) as Product[];
       } else {
         const { data, error } = await supabase
           .from('products')
-          .select('*')
+          .select('*, profiles:created_by(username, avatar_url)')
           .eq('status', 'approved')
           .contains('tags', [selectedCategory])
           .limit(8);
         
         if (error) throw error;
-        return data as Product[];
+        
+        // Format data to match the expected shape
+        return data.map(product => ({
+          ...product,
+          profile_username: product.profiles?.username,
+          profile_avatar_url: product.profiles?.avatar_url
+        })) as Product[];
       }
     }
   });
@@ -146,47 +160,51 @@ const LandingPage: React.FC = () => {
                   </div>
                 </div>
               ) : featuredProducts && featuredProducts.length > 0 ? (
-                <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200">
-                  <div className="bg-white rounded-lg overflow-hidden">
-                    <img 
-                      src={featuredProducts[0].image_url || "/placeholder.svg"} 
-                      alt={featuredProducts[0].name} 
-                      className="w-full h-auto object-cover"
-                    />
-                    <div className="p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Badge className="bg-hunt-600 hover:bg-hunt-700">New</Badge>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                          <span className="ml-1 text-sm font-medium">{featuredProducts[0].upvotes || 0}</span>
+                <Link to={`/products/${featuredProducts[0].id}`} className="block">
+                  <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200">
+                    <div className="bg-white rounded-lg overflow-hidden">
+                      <img 
+                        src={featuredProducts[0].image_url || "/placeholder.svg"} 
+                        alt={featuredProducts[0].name} 
+                        className="w-full h-auto object-cover"
+                      />
+                      <div className="p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Badge className="bg-hunt-600 hover:bg-hunt-700">New</Badge>
+                          <div className="flex items-center">
+                            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                            <span className="ml-1 text-sm font-medium">{featuredProducts[0].upvotes || 0}</span>
+                          </div>
                         </div>
+                        <h3 className="font-semibold text-lg">{featuredProducts[0].name}</h3>
+                        <p className="text-sm text-muted-foreground">{featuredProducts[0].tagline}</p>
                       </div>
-                      <h3 className="font-semibold text-lg">{featuredProducts[0].name}</h3>
-                      <p className="text-sm text-muted-foreground">{featuredProducts[0].tagline}</p>
                     </div>
                   </div>
-                </div>
+                </Link>
               ) : (
-                <div className="glass-card rounded-xl p-2 shadow-xl">
-                  <div className="bg-white rounded-lg overflow-hidden">
-                    <img 
-                      src="/placeholder.svg" 
-                      alt="Product Showcase" 
-                      className="w-full h-auto object-cover"
-                    />
-                    <div className="p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Badge className="bg-hunt-600 hover:bg-hunt-700">New</Badge>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                          <span className="ml-1 text-sm font-medium">0</span>
+                <Link to="/products" className="block">
+                  <div className="glass-card rounded-xl p-2 shadow-xl">
+                    <div className="bg-white rounded-lg overflow-hidden">
+                      <img 
+                        src="/placeholder.svg" 
+                        alt="Product Showcase" 
+                        className="w-full h-auto object-cover"
+                      />
+                      <div className="p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Badge className="bg-hunt-600 hover:bg-hunt-700">New</Badge>
+                          <div className="flex items-center">
+                            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                            <span className="ml-1 text-sm font-medium">0</span>
+                          </div>
                         </div>
+                        <h3 className="font-semibold text-lg">Featured Product</h3>
+                        <p className="text-sm text-muted-foreground">No featured products found</p>
                       </div>
-                      <h3 className="font-semibold text-lg">Featured Product</h3>
-                      <p className="text-sm text-muted-foreground">No featured products found</p>
                     </div>
                   </div>
-                </div>
+                </Link>
               )}
               <div className="absolute -z-10 top-8 left-8 right-8 bottom-8 bg-hunt-100 rounded-xl transform rotate-2" />
             </div>
@@ -249,38 +267,40 @@ const LandingPage: React.FC = () => {
               ) : categoryProducts && categoryProducts.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {categoryProducts.map((product) => (
-                    <div key={product.id} className="group relative overflow-hidden rounded-lg border bg-background p-2 transition-all hover:shadow-md">
-                      <div className="aspect-video overflow-hidden rounded-md bg-muted">
-                        <img
-                          src={product.image_url || "/placeholder.svg"}
-                          alt={`${product.name} thumbnail`}
-                          width={400}
-                          height={225}
-                          className="h-full w-full object-cover transition-all group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="p-2">
-                        <h3 className="font-semibold">{product.name}</h3>
-                        <p className="text-sm text-muted-foreground">{product.tagline}</p>
-                        <div className="mt-2 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                              <AvatarFallback>{product.profile_username?.charAt(0) || 'U'}</AvatarFallback>
-                              {product.profile_avatar_url && (
-                                <AvatarImage src={product.profile_avatar_url} />
-                              )}
-                            </Avatar>
-                            <span className="text-xs text-muted-foreground">
-                              By {product.profile_username || 'Maker'}
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                            <span className="ml-1 text-xs">{product.upvotes || 0}</span>
+                    <Link key={product.id} to={`/products/${product.id}`}>
+                      <div className="group relative overflow-hidden rounded-lg border bg-background p-2 transition-all hover:shadow-md">
+                        <div className="aspect-video overflow-hidden rounded-md bg-muted">
+                          <img
+                            src={product.image_url || "/placeholder.svg"}
+                            alt={`${product.name} thumbnail`}
+                            width={400}
+                            height={225}
+                            className="h-full w-full object-cover transition-all group-hover:scale-105"
+                          />
+                        </div>
+                        <div className="p-2">
+                          <h3 className="font-semibold">{product.name}</h3>
+                          <p className="text-sm text-muted-foreground">{product.tagline}</p>
+                          <div className="mt-2 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6">
+                                <AvatarFallback>{product.profile_username?.charAt(0) || 'U'}</AvatarFallback>
+                                {product.profile_avatar_url && (
+                                  <AvatarImage src={product.profile_avatar_url} />
+                                )}
+                              </Avatar>
+                              <span className="text-xs text-muted-foreground">
+                                By {product.profile_username || 'Maker'}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                              <span className="ml-1 text-xs">{product.upvotes || 0}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               ) : (
@@ -319,14 +339,14 @@ const LandingPage: React.FC = () => {
                   <Button asChild size="lg" variant="secondary" className="font-medium">
                     <Link to="/submit">Submit your product</Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white/10 font-medium">
+                  <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white/10 hover:text-white font-medium">
                     <Link to="/learn-more">Learn more</Link>
                   </Button>
                 </div>
               </div>
               <div className="hidden md:block">
                 <img 
-                  src="/placeholder.svg" 
+                  src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" 
                   alt="Product Launch" 
                   className="w-full h-auto rounded-xl object-cover"
                 />
