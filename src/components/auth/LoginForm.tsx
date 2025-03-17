@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/sonner';
 import { Eye, EyeOff, Github } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -20,19 +21,40 @@ const LoginForm: React.FC = () => {
     setLoading(true);
     
     try {
-      // This will be replaced with actual Supabase authentication
-      console.log('Login attempt with:', { email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      // Simulate login success
-      setTimeout(() => {
-        toast.success('Successfully logged in');
-        navigate('/');
-      }, 1000);
-    } catch (error) {
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Successfully logged in');
+      navigate('/');
+    } catch (error: any) {
       console.error('Login error:', error);
-      toast.error('Login failed. Please check your credentials.');
+      toast.error(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      console.error('GitHub login error:', error);
+      toast.error(error.message || 'GitHub login failed.');
     }
   };
 
@@ -105,7 +127,7 @@ const LoginForm: React.FC = () => {
         <Separator className="flex-1" />
       </div>
       
-      <Button variant="outline" className="w-full rounded-md" type="button">
+      <Button variant="outline" className="w-full rounded-md" type="button" onClick={handleGithubLogin}>
         <Github className="mr-2 h-4 w-4" />
         Continue with GitHub
       </Button>
