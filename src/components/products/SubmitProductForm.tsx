@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -7,7 +6,7 @@ import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Screenshot, Video } from '@/types/product';
+import { Screenshot, Video, ProductFormValues } from '@/types/product';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import TechnologiesSelector from '@/components/products/TechnologiesSelector';
@@ -48,12 +47,10 @@ const productSchema = z.object({
     title: z.string().optional(),
     video_url: z.string().url({ message: 'Please enter a valid URL.' }),
   })),
-  agreed_to_policies: z.literal(true, {
-    errorMap: () => ({ message: 'You must agree to the policies before submitting.' }),
+  agreed_to_policies: z.boolean().refine(val => val === true, {
+    message: 'You must agree to the policies before submitting.',
   }),
 });
-
-type ProductFormValues = z.infer<typeof productSchema>;
 
 const SubmitProductForm: React.FC = () => {
   const { user } = useAuth();
@@ -334,7 +331,7 @@ const SubmitProductForm: React.FC = () => {
                       <FormLabel>Screenshots</FormLabel>
                       <FormControl>
                         <ScreenshotsManager 
-                          screenshots={field.value} 
+                          screenshots={field.value as Screenshot[]} 
                           onChange={(screenshots: Screenshot[]) => field.onChange(screenshots)} 
                         />
                       </FormControl>
@@ -360,7 +357,7 @@ const SubmitProductForm: React.FC = () => {
                       <FormLabel>Videos</FormLabel>
                       <FormControl>
                         <VideosManager 
-                          videos={field.value} 
+                          videos={field.value as Video[]} 
                           onChange={(videos: Video[]) => field.onChange(videos)} 
                         />
                       </FormControl>

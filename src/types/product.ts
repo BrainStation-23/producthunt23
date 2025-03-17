@@ -67,3 +67,17 @@ export interface Video {
   title?: string;
   video_url: string;
 }
+
+// Form values interface
+export interface ProductFormValues {
+  name: string;
+  tagline: string;
+  description: string;
+  website_url: string;
+  image_url: string;
+  technologies: string[];
+  tags: string[];
+  screenshots: Screenshot[];
+  videos: Video[];
+  agreed_to_policies: boolean;
+}
