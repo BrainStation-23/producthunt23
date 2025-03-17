@@ -1,20 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Search, Tag } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
-// Categories data
-const categories = [
-  { value: 'ai', label: 'AI & Machine Learning' },
-  { value: 'productivity', label: 'Productivity' },
-  { value: 'developer-tools', label: 'Developer Tools' },
-  { value: 'design', label: 'Design Tools' },
-  { value: 'finance', label: 'Finance' },
-  { value: 'education', label: 'Education' },
-];
+interface Category {
+  id: string;
+  name: string;
+  status: string;
+}
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
@@ -39,6 +36,34 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   searchParams 
 }) => {
   const [searchInput, setSearchInput] = useState(searchQuery);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('categories')
+          .select('id, name, status')
+          .eq('status', 'active')
+          .order('name');
+        
+        if (error) {
+          console.error('Error fetching categories:', error);
+          return;
+        }
+        
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Unexpected error fetching categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +112,12 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     }
   };
 
+  // Helper function to find category name by value
+  const getCategoryNameByValue = (value: string): string => {
+    const category = categories.find(c => c.id === value);
+    return category ? category.name : value;
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {/* Search and Filters */}
@@ -105,15 +136,15 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         
         {/* Category Filter */}
         <div className="md:col-span-3">
-          <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+          <Select value={selectedCategory} onValueChange={handleCategoryChange} disabled={isLoading}>
             <SelectTrigger>
-              <SelectValue placeholder="All categories" />
+              <SelectValue placeholder={isLoading ? "Loading..." : "All categories"} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
               {categories.map((category) => (
-                <SelectItem key={category.value} value={category.value}>
-                  {category.label}
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -158,7 +189,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           {selectedCategory && (
             <Badge variant="secondary" className="flex items-center gap-1">
               <Tag className="h-3 w-3" />
-              {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
+              {getCategoryNameByValue(selectedCategory)}
               <button 
                 className="ml-1 hover:bg-muted rounded" 
                 onClick={() => clearFilter('category')}
