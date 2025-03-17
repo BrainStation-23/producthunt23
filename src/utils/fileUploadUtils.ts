@@ -35,10 +35,12 @@ export const uploadImageToStorage = async (
     onProgressUpdate(0);
     progressInterval = setInterval(() => {
       const increment = Math.random() * 10 + 5;
-      onProgressUpdate((prev) => {
-        const newProgress = Math.min(prev + increment, 95);
-        return newProgress;
-      });
+      // Here's the fix: Instead of passing a function to onProgressUpdate,
+      // calculate the new progress value and pass it directly
+      const simulatedProgress = Math.min(95, Math.random() * 10 + 5);
+      if (onProgressUpdate) {
+        onProgressUpdate(simulatedProgress);
+      }
     }, 500);
   }
   
