@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Package, 
@@ -16,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar,
   SidebarContent,
@@ -32,11 +32,15 @@ import {
 } from '@/components/ui/sidebar';
 
 const UserLayout: React.FC = () => {
-  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
 
   const handleLogout = () => {
-    // Handle logout logic
-    navigate('/login');
+    signOut();
+  };
+
+  const getUserInitials = () => {
+    if (!user || !user.email) return 'U';
+    return user.email.charAt(0).toUpperCase();
   };
 
   return (
@@ -144,7 +148,7 @@ const UserLayout: React.FC = () => {
             </Button>
             
             <Avatar className="h-8 w-8">
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarFallback>{getUserInitials()}</AvatarFallback>
             </Avatar>
           </header>
           

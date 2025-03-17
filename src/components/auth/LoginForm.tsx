@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/sonner';
 import { Eye, EyeOff, Github } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -15,26 +14,28 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn, signInWithGithub, userRole } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
+      await signIn(email, password);
       toast.success('Successfully logged in');
-      navigate('/');
+      
+      // Wait a moment for userRole to be set
+      setTimeout(() => {
+        if (userRole === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/user');
+        }
+      }, 500);
+      
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.error(error.message || 'Login failed. Please check your credentials.');
+      // Error is already handled in the useAuth hook
     } finally {
       setLoading(false);
     }
@@ -42,19 +43,10 @@ const LoginForm: React.FC = () => {
 
   const handleGithubLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-          redirectTo: window.location.origin,
-        },
-      });
-      
-      if (error) {
-        throw error;
-      }
+      await signInWithGithub();
     } catch (error: any) {
       console.error('GitHub login error:', error);
-      toast.error(error.message || 'GitHub login failed.');
+      // Error is already handled in the useAuth hook
     }
   };
 

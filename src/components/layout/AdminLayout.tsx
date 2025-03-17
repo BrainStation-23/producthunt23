@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Package, 
@@ -14,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar,
   SidebarContent,
@@ -30,11 +30,15 @@ import {
 } from '@/components/ui/sidebar';
 
 const AdminLayout: React.FC = () => {
-  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
 
   const handleLogout = () => {
-    // Handle logout logic
-    navigate('/login');
+    signOut();
+  };
+
+  const getUserInitials = () => {
+    if (!user || !user.email) return 'AD';
+    return 'A' + user.email.charAt(0).toUpperCase();
   };
 
   return (
@@ -97,17 +101,15 @@ const AdminLayout: React.FC = () => {
               onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              Logout
             </Button>
           </SidebarFooter>
         </Sidebar>
         
         <div className="flex-1">
           <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
-            <SidebarTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
+            <SidebarTrigger>
+              <ChevronLeft className="h-4 w-4" />
             </SidebarTrigger>
             
             <div className="w-full flex-1">
@@ -128,7 +130,7 @@ const AdminLayout: React.FC = () => {
             </Button>
             
             <Avatar className="h-8 w-8">
-              <AvatarFallback>AD</AvatarFallback>
+              <AvatarFallback>{getUserInitials()}</AvatarFallback>
             </Avatar>
           </header>
           
