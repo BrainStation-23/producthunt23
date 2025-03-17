@@ -94,6 +94,7 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
     <div className="space-y-4">
       <div className="flex gap-2 mb-4">
         <Button
+          type="button" // Explicitly set type to button
           variant={activeTab === 'gallery' ? "default" : "outline"}
           onClick={() => setActiveTab('gallery')}
           className="flex-1"
@@ -102,6 +103,7 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
           Gallery {screenshots.length > 0 && `(${screenshots.length})`}
         </Button>
         <Button
+          type="button" // Explicitly set type to button
           variant={activeTab === 'add' ? "default" : "outline"}
           onClick={() => {
             setActiveTab('add');
@@ -305,6 +307,7 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button 
+              type="button" // Explicitly set type to button
               variant="outline" 
               onClick={() => {
                 setActiveTab('gallery');
@@ -316,6 +319,7 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
               Cancel
             </Button>
             <Button
+              type="button" // Explicitly set type to button
               onClick={addScreenshot}
               disabled={!newScreenshotUrl}
             >

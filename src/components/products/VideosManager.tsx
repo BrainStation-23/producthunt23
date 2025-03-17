@@ -171,6 +171,7 @@ const VideosManager: React.FC<VideosManagerProps> = ({ videos, onChange }) => {
     <div className="space-y-4">
       <div className="flex gap-2 mb-4">
         <Button
+          type="button" // Explicitly set type to button
           variant={activeTab === 'gallery' ? "default" : "outline"}
           onClick={() => setActiveTab('gallery')}
           className="flex-1"
@@ -179,6 +180,7 @@ const VideosManager: React.FC<VideosManagerProps> = ({ videos, onChange }) => {
           Gallery {videos.length > 0 && `(${videos.length})`}
         </Button>
         <Button
+          type="button" // Explicitly set type to button
           variant={activeTab === 'add' ? "default" : "outline"}
           onClick={() => {
             setActiveTab('add');
@@ -387,6 +389,7 @@ const VideosManager: React.FC<VideosManagerProps> = ({ videos, onChange }) => {
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button 
+              type="button" // Explicitly set type to button
               variant="outline" 
               onClick={() => {
                 setActiveTab('gallery');
@@ -398,6 +401,7 @@ const VideosManager: React.FC<VideosManagerProps> = ({ videos, onChange }) => {
               Cancel
             </Button>
             <Button
+              type="button" // Explicitly set type to button
               onClick={addVideo}
               disabled={!newVideoUrl || !!urlError}
             >
