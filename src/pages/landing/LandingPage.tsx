@@ -21,7 +21,7 @@ interface FeaturedCategory {
 }
 
 // Type for featured products
-interface FeaturedProduct extends Product {
+interface FeaturedProduct extends Omit<Product, 'technologies'> {
   display_order: number;
   profile_username?: string;
   profile_avatar_url?: string;
@@ -95,7 +95,7 @@ const LandingPage: React.FC = () => {
           ...product,
           profile_username: product.profiles?.username,
           profile_avatar_url: product.profiles?.avatar_url
-        })) as Product[];
+        })) as unknown as FeaturedProduct[];
       } else {
         const { data, error } = await supabase
           .from('products')
@@ -111,7 +111,7 @@ const LandingPage: React.FC = () => {
           ...product,
           profile_username: product.profiles?.username,
           profile_avatar_url: product.profiles?.avatar_url
-        })) as Product[];
+        })) as unknown as FeaturedProduct[];
       }
     }
   });
