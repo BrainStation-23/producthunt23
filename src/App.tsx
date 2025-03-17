@@ -29,6 +29,8 @@ import AdminSettings from './pages/admin/AdminSettings';
 // User Pages
 import UserDashboard from './pages/user/UserDashboard';
 import UserProfile from './pages/user/UserProfile';
+import UserProducts from './pages/user/UserProducts';
+import UserSettings from './pages/user/UserSettings';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -75,6 +77,10 @@ function App() {
             >
               <Route index element={<UserDashboard />} />
               <Route path="profile" element={<UserProfile />} />
+              <Route path="products" element={<UserProducts />} />
+              <Route path="settings" element={<UserSettings />} />
+              <Route path="saved" element={<UserDashboard />} />
+              <Route path="messages" element={<UserDashboard />} />
             </Route>
 
             <Route path="/404" element={<NotFound />} />
