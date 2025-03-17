@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,10 +44,16 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
   
   // Function to render an icon safely
   const renderIcon = (name: string) => {
-    if (name in LucideIcons && typeof LucideIcons[name as LucideIconName] !== 'undefined') {
+    if (name in LucideIcons) {
+      // Check if it's a valid icon component
       const IconComponent = LucideIcons[name as LucideIconName];
-      return <IconComponent className="h-4 w-4" />;
+      // Make sure it's a valid React component that can be rendered
+      if (typeof IconComponent === 'function' || 
+          (typeof IconComponent === 'object' && IconComponent !== null)) {
+        return React.createElement(IconComponent, { className: "h-4 w-4" });
+      }
     }
+    // Fallback to Image icon if the name is not found
     return <Image className="h-4 w-4" />;
   };
 
@@ -267,10 +274,16 @@ const FeaturedCategoriesSettings = () => {
 
   // Function to safely render an icon
   const renderIcon = (name: string | null) => {
-    if (name && name in LucideIcons && typeof LucideIcons[name as LucideIconName] !== 'undefined') {
+    if (name && name in LucideIcons) {
+      // Check if it's a valid icon component
       const IconComponent = LucideIcons[name as LucideIconName];
-      return <IconComponent className="h-4 w-4 mr-2" />;
+      // Make sure it's a valid React component that can be rendered
+      if (typeof IconComponent === 'function' || 
+          (typeof IconComponent === 'object' && IconComponent !== null)) {
+        return React.createElement(IconComponent, { className: "h-4 w-4 mr-2" });
+      }
     }
+    // Fallback to Image icon if the name is not found
     return <Image className="h-4 w-4 mr-2" />;
   };
 
