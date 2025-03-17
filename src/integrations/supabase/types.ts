@@ -257,6 +257,7 @@ export type Database = {
       }
       products: {
         Row: {
+          categories: string[] | null
           created_at: string | null
           created_by: string | null
           description: string
@@ -265,11 +266,11 @@ export type Database = {
           name: string
           status: string
           tagline: string
-          tags: string[] | null
           upvotes: number | null
           website_url: string | null
         }
         Insert: {
+          categories?: string[] | null
           created_at?: string | null
           created_by?: string | null
           description: string
@@ -278,11 +279,11 @@ export type Database = {
           name: string
           status?: string
           tagline: string
-          tags?: string[] | null
           upvotes?: number | null
           website_url?: string | null
         }
         Update: {
+          categories?: string[] | null
           created_at?: string | null
           created_by?: string | null
           description?: string
@@ -291,7 +292,6 @@ export type Database = {
           name?: string
           status?: string
           tagline?: string
-          tags?: string[] | null
           upvotes?: number | null
           website_url?: string | null
         }
@@ -432,7 +432,7 @@ export type Database = {
           tagline: string
           image_url: string
           website_url: string
-          tags: string[]
+          categories: string[]
           upvotes: number
           created_at: string
           created_by: string
@@ -469,7 +469,7 @@ export type Database = {
           tagline: string
           image_url: string
           website_url: string
-          tags: string[]
+          categories: string[]
           upvotes: number
           created_at: string
           created_by: string

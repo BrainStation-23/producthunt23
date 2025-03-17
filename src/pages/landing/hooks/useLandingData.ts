@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -86,7 +85,7 @@ export function useLandingData() {
           .from('products')
           .select('*, profiles:created_by(username, avatar_url)')
           .eq('status', 'approved')
-          .contains('tags', [selectedCategory])
+          .contains('categories', [selectedCategory])
           .limit(8);
         
         if (error) throw error;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,7 @@ interface Product {
   image_url: string | null;
   website_url: string | null;
   tags: string[] | null;
+  categories: string[] | null;
   upvotes: number;
 }
 
@@ -31,7 +31,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [hasUpvoted, setHasUpvoted] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   
-  // Fetch comment count for this product
   useEffect(() => {
     const fetchCommentCount = async () => {
       const { count, error } = await supabase
@@ -49,7 +48,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     fetchCommentCount();
   }, [product.id]);
   
-  // Check if the user has already upvoted this product
   useEffect(() => {
     const checkUserUpvote = async () => {
       if (!user) return;
@@ -70,8 +68,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [user, product.id]);
 
   const handleUpvote = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigating to product page
-    e.stopPropagation(); // Prevent event bubbling
+    e.preventDefault();
+    e.stopPropagation();
     
     if (!user) {
       toast.error('Please sign in to upvote products');
@@ -79,7 +77,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
     
     if (hasUpvoted) {
-      // Remove upvote
       const { error } = await supabase
         .from('upvotes')
         .delete()
@@ -96,7 +93,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       setHasUpvoted(false);
       toast.success('Upvote removed');
     } else {
-      // Add upvote
       const { error } = await supabase
         .from('upvotes')
         .insert({ product_id: product.id, user_id: user.id });
@@ -138,16 +134,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <CardContent className="p-4 space-y-2 flex-grow">
           <div className="line-clamp-2 text-sm">{product.description}</div>
           
-          {product.tags && product.tags.length > 0 && (
+          {product.categories && product.categories.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {product.tags.slice(0, 3).map((tag) => (
+              {product.categories.slice(0, 3).map((tag) => (
                 <Badge key={tag} variant="secondary" className="text-xs">
                   {tag}
                 </Badge>
               ))}
-              {product.tags.length > 3 && (
+              {product.categories.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{product.tags.length - 3}
+                  +{product.categories.length - 3}
                 </Badge>
               )}
             </div>
