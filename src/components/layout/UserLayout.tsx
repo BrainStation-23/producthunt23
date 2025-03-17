@@ -115,17 +115,15 @@ const UserLayout: React.FC = () => {
               onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              Logout
             </Button>
           </SidebarFooter>
         </Sidebar>
         
         <div className="flex-1">
           <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
-            <SidebarTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
+            <SidebarTrigger>
+              <ChevronLeft className="h-4 w-4" />
             </SidebarTrigger>
             
             <div className="w-full flex-1">
