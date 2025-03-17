@@ -334,6 +334,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string | null
+          email: string | null
           id: string
           username: string | null
           website: string | null
@@ -342,6 +343,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          email?: string | null
           id: string
           username?: string | null
           website?: string | null
@@ -350,6 +352,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          email?: string | null
           id?: string
           username?: string | null
           website?: string | null
@@ -450,6 +453,24 @@ export type Database = {
           profile_id: string
           profile_username: string
           profile_avatar_url: string
+          total_count: number
+        }[]
+      }
+      get_admin_users: {
+        Args: {
+          search_text?: string
+          role_filter?: string
+          page_num?: number
+          page_size?: number
+        }
+        Returns: {
+          id: string
+          username: string
+          email: string
+          avatar_url: string
+          role: string
+          created_at: string
+          product_count: number
           total_count: number
         }[]
       }

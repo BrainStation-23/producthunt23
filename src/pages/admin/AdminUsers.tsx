@@ -45,100 +45,43 @@ const AdminUsers: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Function to fetch users
+  // Function to fetch users using our new database function
   const fetchUsers = async () => {
     try {
-      // First get users from auth.users
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers({
-        page: currentPage,
-        perPage: ITEMS_PER_PAGE
-      });
+      const { data, error, count } = await supabase
+        .rpc('get_admin_users', {
+          search_text: searchQuery,
+          role_filter: roleFilter,
+          page_num: currentPage,
+          page_size: ITEMS_PER_PAGE
+        });
 
-      if (authError) throw authError;
+      if (error) throw error;
 
-      if (!authUsers || !authUsers.users) {
+      if (!data) {
         return [];
       }
 
-      // Extract user IDs to fetch profiles and roles
-      const userIds = authUsers.users.map(user => user.id);
-      
-      // Fetch profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', userIds);
-
-      if (profilesError) throw profilesError;
-
-      // Fetch roles
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('*')
-        .in('user_id', userIds);
-
-      if (rolesError) throw rolesError;
-
-      // Count products by user - use a different approach for counting
-      // Some Supabase clients may not have groupBy method
-      const productCountsMap = new Map();
-      
-      // First, get all products created by these users
-      const { data: products, error: productsError } = await supabase
-        .from('products')
-        .select('created_by')
-        .in('created_by', userIds);
-        
-      if (productsError) throw productsError;
-      
-      // Count products manually
-      if (products) {
-        products.forEach(product => {
-          const userId = product.created_by;
-          if (userId) {
-            productCountsMap.set(userId, (productCountsMap.get(userId) || 0) + 1);
-          }
-        });
+      // Set total pages based on the total_count returned from the function
+      if (data.length > 0) {
+        const totalCount = data[0].total_count;
+        setTotalPages(Math.ceil(totalCount / ITEMS_PER_PAGE));
+      } else {
+        setTotalPages(1);
       }
 
-      // Combine data
-      const users: User[] = authUsers.users.map(authUser => {
-        const profile = profiles?.find(p => p.id === authUser.id);
-        const role = userRoles?.find(r => r.user_id === authUser.id)?.role || 'user';
-        const productCount = productCountsMap.get(authUser.id) || 0;
-        
-        return {
-          id: authUser.id,
-          email: authUser.email || '',
-          username: profile?.username || authUser.email?.split('@')[0] || 'User',
-          avatar_url: profile?.avatar_url,
-          role: role,
-          created_at: authUser.created_at,
-          product_count: productCount
-        };
-      });
-
-      // Filter by search query if provided
-      let filteredUsers = users;
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filteredUsers = users.filter(user => 
-          user.username?.toLowerCase().includes(query) || 
-          user.email.toLowerCase().includes(query)
-        );
-      }
-
-      // Filter by role if provided
-      if (roleFilter) {
-        filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
-      }
-
-      // Calculate total pages
-      setTotalPages(Math.ceil(filteredUsers.length / ITEMS_PER_PAGE));
-
-      return filteredUsers;
+      return data.map(user => ({
+        id: user.id,
+        email: user.email || '',
+        username: user.username || user.email?.split('@')[0] || 'User',
+        avatar_url: user.avatar_url,
+        role: user.role || 'user',
+        created_at: user.created_at,
+        product_count: user.product_count
+      }));
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
       throw error;
     }
   };
@@ -151,6 +94,7 @@ const AdminUsers: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1); // Reset to first page when searching
+    refetch();
   };
 
   const handleRoleChange = async (userId: string, newRole: 'admin' | 'user') => {
