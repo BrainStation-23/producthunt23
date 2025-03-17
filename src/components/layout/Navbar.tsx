@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, Bell, User } from 'lucide-react';
+import { Search, Menu, Bell, User, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -13,12 +13,21 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NavbarProps {
   isLoggedIn?: boolean;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
+  const { user, userRole } = useAuth();
+  
+  // Determine if user is actually logged in from auth context
+  const userIsLoggedIn = !!user;
+  
+  // Determine dashboard path based on role
+  const dashboardPath = userRole === 'admin' ? '/admin' : '/user';
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -46,8 +55,15 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
         </div>
 
         <div className="flex items-center gap-4">
-          {isLoggedIn ? (
+          {userIsLoggedIn ? (
             <>
+              <Button variant="ghost" asChild className="hidden md:flex items-center gap-2">
+                <Link to={dashboardPath}>
+                  <LayoutDashboard className="h-4 w-4 mr-1" />
+                  Dashboard
+                </Link>
+              </Button>
+              
               <Button variant="ghost" size="icon" className="hidden md:flex">
                 <Bell className="h-5 w-5" />
               </Button>
@@ -65,7 +81,7 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">User</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        user@example.com
+                        {user?.email || 'user@example.com'}
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -74,7 +90,7 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
                     <Link to="/user/profile">Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/user/dashboard">Dashboard</Link>
+                    <Link to={dashboardPath}>Dashboard</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/user/settings">Settings</Link>
