@@ -27,6 +27,8 @@ export const useProductComments = (productId: string) => {
         
       if (error) throw error;
       
+      // Process comments to create a hierarchical structure
+      const commentsWithHierarchy = buildCommentHierarchy(data || []);
       setComments(data || []);
     } catch (error: any) {
       console.error('Error fetching comments:', error);

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Comment } from '@/types/comment';
 import CommentItem from './CommentItem';
@@ -11,33 +10,43 @@ interface CommentListProps {
 }
 
 const CommentList: React.FC<CommentListProps> = ({ comments, isLoading, refreshComments }) => {
-  // Organize comments into hierarchical structure
-  const groupCommentsByParent = (allComments: Comment[]) => {
-    const topLevelComments: Comment[] = [];
-    const commentsByParent: Record<string, Comment[]> = {};
-
-    // First, separate top-level from replies
-    allComments.forEach(comment => {
-      if (!comment.parent_id) {
-        topLevelComments.push({ ...comment, replies: [] });
-      } else {
-        if (!commentsByParent[comment.parent_id]) {
-          commentsByParent[comment.parent_id] = [];
+  // Build a hierarchical structure of comments
+  const buildCommentHierarchy = (flatComments: Comment[]): Comment[] => {
+    const commentMap: Record<string, Comment> = {};
+    const rootComments: Comment[] = [];
+    
+    // First pass: Create a map of comments by ID and initialize replies array
+    flatComments.forEach(comment => {
+      commentMap[comment.id] = { ...comment, replies: [] };
+    });
+    
+    // Second pass: Organize comments into a tree structure
+    flatComments.forEach(comment => {
+      const processedComment = commentMap[comment.id];
+      
+      if (comment.parent_id === null) {
+        // This is a root comment
+        rootComments.push(processedComment);
+      } else if (commentMap[comment.parent_id]) {
+        // This is a reply, add it to its parent's replies
+        if (!commentMap[comment.parent_id].replies) {
+          commentMap[comment.parent_id].replies = [];
         }
-        commentsByParent[comment.parent_id].push(comment);
+        commentMap[comment.parent_id].replies!.push(processedComment);
+      } else {
+        // Parent comment might have been deleted, add as root
+        rootComments.push(processedComment);
       }
     });
-
-    // Now, attach replies to their parents
-    const result = topLevelComments.map(topComment => {
-      const replies = commentsByParent[topComment.id] || [];
-      return { ...topComment, replies };
+    
+    // Sort root comments by created_at (newest first)
+    return rootComments.sort((a, b) => {
+      if (!a.created_at || !b.created_at) return 0;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-
-    return result;
   };
 
-  const structuredComments = groupCommentsByParent(comments);
+  const structuredComments = buildCommentHierarchy(comments);
 
   if (isLoading) {
     return (
@@ -90,7 +99,7 @@ const CommentList: React.FC<CommentListProps> = ({ comments, isLoading, refreshC
               key={comment.id} 
               comment={comment} 
               refreshComments={refreshComments}
-              replies={comment.replies}
+              depth={0}
             />
           ))}
         </div>

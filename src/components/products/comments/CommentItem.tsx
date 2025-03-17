@@ -19,15 +19,16 @@ import {
 interface CommentItemProps {
   comment: Comment;
   refreshComments: () => void;
-  isReply?: boolean;
-  replies?: Comment[];
+  depth: number;
 }
+
+// Maximum nesting level to display
+const MAX_NESTING_DEPTH = 5;
 
 const CommentItem: React.FC<CommentItemProps> = ({ 
   comment, 
   refreshComments, 
-  isReply = false, 
-  replies = [] 
+  depth = 0
 }) => {
   const { user } = useAuth();
   const [isReplying, setIsReplying] = useState(false);
@@ -66,8 +67,21 @@ const CommentItem: React.FC<CommentItemProps> = ({
     refreshComments();
   };
 
+  // Calculate the appropriate left padding based on nesting depth
+  const nestingIndent = depth > 0 ? `ml-${Math.min(depth * 4, 16)}` : '';
+  
+  // Decide on the border style based on depth
+  const borderStyle = depth > 0 
+    ? 'border-l-2 border-gray-100 dark:border-gray-800 pl-4' 
+    : '';
+
   return (
-    <div className={`${isReply ? 'pl-8 border-l-2 border-gray-100 dark:border-gray-800 ml-4' : ''}`}>
+    <div className={`${borderStyle} ${nestingIndent} relative`}>
+      {/* Visual connector line for deeply nested comments */}
+      {depth > 1 && (
+        <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-200 dark:bg-gray-700" />
+      )}
+      
       <div className="flex items-start space-x-4 group">
         <Avatar className="w-10 h-10">
           <AvatarImage src={avatarUrl} alt={username} />
@@ -81,7 +95,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
             </div>
             
             <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-              {user && (
+              {user && depth < MAX_NESTING_DEPTH && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -126,14 +140,14 @@ const CommentItem: React.FC<CommentItemProps> = ({
         </div>
       )}
       
-      {replies.length > 0 && (
+      {comment.replies && comment.replies.length > 0 && (
         <div className="mt-4 space-y-4">
-          {replies.map(reply => (
+          {comment.replies.map(reply => (
             <CommentItem 
               key={reply.id} 
               comment={reply} 
               refreshComments={refreshComments}
-              isReply={true}
+              depth={depth + 1}
             />
           ))}
         </div>
