@@ -1,11 +1,16 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Activity, Heart, Package, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useUserDashboard } from '@/hooks/useUserDashboard';
+import UserProductsEmptyState from '@/components/user/UserProductsEmptyState';
 
 const UserDashboard: React.FC = () => {
+  const { isLoading, data } = useUserDashboard();
+
   return (
     <div className="space-y-6">
       <div>
@@ -20,10 +25,16 @@ const UserDashboard: React.FC = () => {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Products you've submitted
-            </p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{data.products.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  Products you've submitted
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         
@@ -33,10 +44,16 @@ const UserDashboard: React.FC = () => {
             <Heart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Products you've saved
-            </p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{data.savedProducts.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  Products you've saved
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         
@@ -46,10 +63,16 @@ const UserDashboard: React.FC = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Comments, votes, etc.
-            </p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{data.activity.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  Comments, votes, etc.
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         
@@ -59,10 +82,16 @@ const UserDashboard: React.FC = () => {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Unread messages
-            </p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{data.messages.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  Unread messages
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -76,13 +105,42 @@ const UserDashboard: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center h-40 border rounded-md">
-              <p className="text-muted-foreground">You haven't submitted any products yet</p>
-            </div>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+            ) : data.products.items.length > 0 ? (
+              <div className="space-y-4">
+                {data.products.items.map(product => (
+                  <div key={product.id} className="flex items-center gap-3 border p-3 rounded-lg">
+                    {product.image_url ? (
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name} 
+                        className="h-12 w-12 object-cover rounded-md"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center">
+                        <Package className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <Link to={`/products/${product.id}`} className="font-medium hover:underline block truncate">
+                        {product.name}
+                      </Link>
+                      <p className="text-sm text-muted-foreground truncate">{product.tagline}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <UserProductsEmptyState />
+            )}
           </CardContent>
           <CardFooter>
             <Button asChild>
-              <Link to="/submit">Submit a product</Link>
+              <Link to="/products/submit">Submit a product</Link>
             </Button>
           </CardFooter>
         </Card>
@@ -95,9 +153,40 @@ const UserDashboard: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center h-40 border rounded-md">
-              <p className="text-muted-foreground">You haven't saved any products yet</p>
-            </div>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+            ) : data.savedProducts.items.length > 0 ? (
+              <div className="space-y-4">
+                {data.savedProducts.items.map(product => (
+                  <div key={product.id} className="flex items-center gap-3 border p-3 rounded-lg">
+                    {product.image_url ? (
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name} 
+                        className="h-12 w-12 object-cover rounded-md"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center">
+                        <Package className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <Link to={`/products/${product.id}`} className="font-medium hover:underline block truncate">
+                        {product.name}
+                      </Link>
+                      <p className="text-sm text-muted-foreground truncate">{product.tagline}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-40 border rounded-md">
+                <p className="text-muted-foreground">You haven't saved any products yet</p>
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button variant="outline" asChild>
@@ -115,9 +204,21 @@ const UserDashboard: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-40 border rounded-md">
-            <p className="text-muted-foreground">No recent activity</p>
-          </div>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : data.activity.count > 0 ? (
+            <div className="flex items-center justify-center h-40 border rounded-md">
+              <p className="text-muted-foreground">Activity history coming soon</p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-40 border rounded-md">
+              <p className="text-muted-foreground">No recent activity</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
