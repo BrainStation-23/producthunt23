@@ -311,7 +311,10 @@ export type Database = {
           bio: string | null
           created_at: string | null
           email: string | null
+          github: string | null
           id: string
+          linkedin: string | null
+          twitter: string | null
           username: string | null
           website: string | null
         }
@@ -320,7 +323,10 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           email?: string | null
+          github?: string | null
           id: string
+          linkedin?: string | null
+          twitter?: string | null
           username?: string | null
           website?: string | null
         }
@@ -329,7 +335,10 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           email?: string | null
+          github?: string | null
           id?: string
+          linkedin?: string | null
+          twitter?: string | null
           username?: string | null
           website?: string | null
         }
