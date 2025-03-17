@@ -18,6 +18,7 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
   const { user } = useAuth();
   const [upvotes, setUpvotes] = useState(product?.upvotes || 0);
   const [hasUpvoted, setHasUpvoted] = useState(false);
+  const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
   
   // Check if the user has already upvoted this product
   useEffect(() => {
@@ -38,6 +39,33 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
     
     checkUserUpvote();
   }, [user, product.id]);
+
+  // Fetch category names based on category IDs
+  useEffect(() => {
+    const fetchCategoryNames = async () => {
+      if (!product.categories || product.categories.length === 0) return;
+      
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name')
+        .in('id', product.categories);
+        
+      if (error) {
+        console.error('Error fetching category names:', error);
+        return;
+      }
+      
+      if (data) {
+        const nameMap: Record<string, string> = {};
+        data.forEach(category => {
+          nameMap[category.id] = category.name;
+        });
+        setCategoryNames(nameMap);
+      }
+    };
+    
+    fetchCategoryNames();
+  }, [product.categories]);
 
   const handleUpvote = async () => {
     if (!user) {
@@ -111,8 +139,10 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
         <div>
           <h3 className="font-medium mb-2">Categories</h3>
           <div className="flex flex-wrap gap-2">
-            {product?.categories && product.categories.map((category, index) => (
-              <Badge key={index} variant="secondary">{category}</Badge>
+            {product?.categories && product.categories.map((categoryId, index) => (
+              <Badge key={index} variant="secondary">
+                {categoryNames[categoryId] || categoryId}
+              </Badge>
             ))}
           </div>
         </div>
