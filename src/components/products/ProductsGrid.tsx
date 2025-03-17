@@ -12,6 +12,7 @@ interface Product {
   image_url: string | null;
   website_url: string | null;
   categories: string[] | null;
+  technologies: string[] | null;
   upvotes: number;
 }
 
@@ -35,6 +36,7 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
   clearFilters
 }) => {
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
+  const [technologies, setTechnologies] = useState<Record<string, string[]>>({});
   
   // Fetch categories to map from IDs to names
   useEffect(() => {
@@ -55,6 +57,38 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
     
     fetchCategories();
   }, []);
+  
+  // Fetch technologies for all products
+  useEffect(() => {
+    const fetchTechnologies = async () => {
+      if (!products || products.length === 0) return;
+      
+      const productIds = products.map(p => p.id);
+      
+      const { data, error } = await supabase
+        .from('product_technologies')
+        .select('product_id, technology_name')
+        .in('product_id', productIds);
+        
+      if (error) {
+        console.error("Error fetching technologies:", error);
+        return;
+      }
+      
+      if (data) {
+        const techMap: Record<string, string[]> = {};
+        data.forEach((item: { product_id: string, technology_name: string }) => {
+          if (!techMap[item.product_id]) {
+            techMap[item.product_id] = [];
+          }
+          techMap[item.product_id].push(item.technology_name);
+        });
+        setTechnologies(techMap);
+      }
+    };
+    
+    fetchTechnologies();
+  }, [products]);
   
   if (isLoading) {
     return (
@@ -88,18 +122,19 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
     );
   }
   
-  // Transform products to include category names
-  const productsWithCategoryNames = products.map(product => {
+  // Transform products to include category names and technologies
+  const enhancedProducts = products.map(product => {
     const mappedCategories = product.categories?.map(catId => categoryMap[catId] || catId) || [];
     return {
       ...product,
-      categoryNames: mappedCategories
+      categoryNames: mappedCategories,
+      productTechnologies: technologies[product.id] || []
     };
   });
   
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {productsWithCategoryNames.map((product) => (
+      {enhancedProducts.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>

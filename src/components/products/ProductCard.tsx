@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent, CardFooter, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowUp, MessageSquare } from 'lucide-react';
+import { ArrowUp, MessageSquare, Code, Database, Server, FileCode, Terminal, Monitor, Layers, Cloud } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,12 +18,37 @@ interface Product {
   image_url: string | null;
   website_url: string | null;
   categories: string[] | null;
+  categoryNames?: string[];
+  productTechnologies?: string[];
   upvotes: number;
 }
 
 interface ProductCardProps {
   product: Product;
 }
+
+const getTechIcon = (techName: string) => {
+  const techLower = techName.toLowerCase();
+  
+  // Map for technology names to icons
+  if (techLower.includes('javascript') || techLower.includes('js') || techLower.includes('typescript') || techLower.includes('ts')) {
+    return <FileCode className="h-3.5 w-3.5" />;
+  } else if (techLower.includes('react') || techLower.includes('vue') || techLower.includes('angular') || techLower.includes('svelte')) {
+    return <Code className="h-3.5 w-3.5" />;
+  } else if (techLower.includes('node') || techLower.includes('express') || techLower.includes('fastify') || techLower.includes('nest')) {
+    return <Server className="h-3.5 w-3.5" />;
+  } else if (techLower.includes('sql') || techLower.includes('postgres') || techLower.includes('mysql') || techLower.includes('mongo')) {
+    return <Database className="h-3.5 w-3.5" />;
+  } else if (techLower.includes('python') || techLower.includes('ruby') || techLower.includes('php')) {
+    return <Terminal className="h-3.5 w-3.5" />;
+  } else if (techLower.includes('html') || techLower.includes('css') || techLower.includes('tailwind') || techLower.includes('bootstrap')) {
+    return <Monitor className="h-3.5 w-3.5" />;
+  } else if (techLower.includes('aws') || techLower.includes('azure') || techLower.includes('gcp') || techLower.includes('cloud')) {
+    return <Cloud className="h-3.5 w-3.5" />;
+  } else {
+    return <Layers className="h-3.5 w-3.5" />;
+  }
+};
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user } = useAuth();
@@ -134,16 +159,34 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <CardContent className="p-4 space-y-2 flex-grow">
           <div className="line-clamp-2 text-sm">{product.description}</div>
           
-          {product.categories && product.categories.length > 0 && (
+          {/* Categories */}
+          {product.categoryNames && product.categoryNames.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {product.categories.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  {tag}
+              {product.categoryNames.slice(0, 3).map((category, index) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  {category}
                 </Badge>
               ))}
-              {product.categories.length > 3 && (
+              {product.categoryNames.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{product.categories.length - 3}
+                  +{product.categoryNames.length - 3}
+                </Badge>
+              )}
+            </div>
+          )}
+          
+          {/* Technologies */}
+          {product.productTechnologies && product.productTechnologies.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {product.productTechnologies.slice(0, 4).map((tech, index) => (
+                <Badge key={index} variant="outline" className="flex items-center gap-1 text-xs">
+                  {getTechIcon(tech)}
+                  {tech}
+                </Badge>
+              ))}
+              {product.productTechnologies.length > 4 && (
+                <Badge variant="outline" className="text-xs">
+                  +{product.productTechnologies.length - 4}
                 </Badge>
               )}
             </div>
