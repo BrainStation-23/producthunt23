@@ -1,32 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Edit, Trash, Check, X, ExternalLink } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { useNavigate } from 'react-router-dom';
 import { Product } from '@/types/product';
 import {
   Pagination,
@@ -36,7 +13,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { Link, useNavigate } from 'react-router-dom';
+import ProductsHeader from '@/components/admin/ProductsHeader';
+import ProductsFilters from '@/components/admin/ProductsFilters';
+import ProductsTable from '@/components/admin/ProductsTable';
+import DeleteProductDialog from '@/components/admin/DeleteProductDialog';
 
 const AdminProducts: React.FC = () => {
   const navigate = useNavigate();
@@ -147,177 +127,32 @@ const AdminProducts: React.FC = () => {
     navigate(`/admin/products/edit/${productId}`);
   };
 
-  // Get badge variant based on status
-  const getStatusBadgeVariant = (status: string): "default" | "destructive" | "outline" | "secondary" => {
-    switch (status) {
-      case 'approved':
-        return 'default'; // Using 'default' instead of 'success'
-      case 'pending':
-        return 'secondary'; // Using 'secondary' instead of 'warning'
-      case 'rejected':
-        return 'destructive';
-      default:
-        return 'secondary';
-    }
+  // Handle delete click
+  const handleDeleteClick = (productId: string) => {
+    setProductToDelete(productId);
+    setIsDeleteDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">Manage all products on the platform.</p>
-        </div>
-        <Button className="sm:w-auto w-full" onClick={() => navigate('/products/submit')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Product
-        </Button>
-      </div>
+      <ProductsHeader />
       
-      <div className="flex flex-col sm:flex-row gap-4">
-        <form onSubmit={handleSearch} className="relative w-full sm:w-80">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search products..."
-            className="w-full pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </form>
-        <div className="flex flex-wrap gap-2">
-          <Button 
-            variant={statusFilter === null ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setStatusFilter(null)}
-          >
-            All
-          </Button>
-          <Button 
-            variant={statusFilter === "approved" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setStatusFilter("approved")}
-          >
-            Approved
-          </Button>
-          <Button 
-            variant={statusFilter === "pending" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setStatusFilter("pending")}
-          >
-            Pending
-          </Button>
-          <Button 
-            variant={statusFilter === "rejected" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setStatusFilter("rejected")}
-          >
-            Rejected
-          </Button>
-        </div>
-      </div>
+      <ProductsFilters 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        handleSearch={handleSearch}
+      />
       
-      <div className="border rounded-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="hidden md:table-cell">Category</TableHead>
-              <TableHead className="hidden md:table-cell">Votes</TableHead>
-              <TableHead className="hidden md:table-cell">Date</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              Array(5).fill(0).map((_, index) => (
-                <TableRow key={index}>
-                  <TableCell><Skeleton className="h-5 w-full max-w-[200px]" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-20" /></TableCell>
-                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-10" /></TableCell>
-                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-9 w-20" /></TableCell>
-                </TableRow>
-              ))
-            ) : products && products.length > 0 ? (
-              products.map((product: any) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(product.status)}>
-                      {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {product.tags && product.tags.length > 0
-                      ? product.tags[0]
-                      : '-'}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">{product.upvotes || 0}</TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {new Date(product.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          Actions
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Manage Product</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleEditProduct(product.id)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <ExternalLink className="mr-2 h-4 w-4" />
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'approved')}>
-                          <Check className="mr-2 h-4 w-4 text-green-500" />
-                          Approve
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'rejected')}>
-                          <X className="mr-2 h-4 w-4 text-red-500" />
-                          Reject
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          className="text-red-500"
-                          onClick={() => {
-                            setProductToDelete(product.id);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-6">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Search className="h-10 w-10 mb-2 opacity-20" />
-                    <p>No products found</p>
-                    {searchQuery && (
-                      <p className="text-sm">Try adjusting your search query</p>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <ProductsTable 
+        products={products as Product[]}
+        isLoading={isLoading}
+        searchQuery={searchQuery}
+        handleStatusChange={handleStatusChange}
+        handleEditProduct={handleEditProduct}
+        handleDeleteClick={handleDeleteClick}
+      />
       
       {totalPages > 1 && (
         <Pagination>
@@ -350,27 +185,11 @@ const AdminProducts: React.FC = () => {
         </Pagination>
       )}
       
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the product
-              and all associated data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setProductToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteProduct}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteProductDialog 
+        isOpen={isDeleteDialogOpen}
+        setIsOpen={setIsDeleteDialogOpen}
+        handleDelete={handleDeleteProduct}
+      />
     </div>
   );
 };
