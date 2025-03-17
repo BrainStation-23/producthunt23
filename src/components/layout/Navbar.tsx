@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, Bell, User, LayoutDashboard } from 'lucide-react';
+import { Search, Menu, Bell, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -27,6 +27,9 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
   
   // Determine dashboard path based on role
   const dashboardPath = userRole === 'admin' ? '/admin' : '/user';
+
+  // Get avatar URL from user metadata if available
+  const avatarUrl = user?.user_metadata?.avatar_url || null;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -72,7 +75,13 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback>U</AvatarFallback>
+                      {avatarUrl ? (
+                        <AvatarImage src={avatarUrl} alt="User profile" />
+                      ) : (
+                        <AvatarFallback>
+                          {user?.email?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
