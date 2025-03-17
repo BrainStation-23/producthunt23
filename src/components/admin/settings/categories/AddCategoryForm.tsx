@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -29,16 +29,25 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({
   existingCategories
 }) => {
   const queryClient = useQueryClient();
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [newCategory, setNewCategory] = useState({
-    name: '',
     categoryId: '',
     icon: ''
   });
 
+  // Update selectedCategory when categoryId changes
+  useEffect(() => {
+    if (newCategory.categoryId && availableCategories) {
+      const category = availableCategories.find(c => c.id === newCategory.categoryId);
+      setSelectedCategory(category || null);
+    } else {
+      setSelectedCategory(null);
+    }
+  }, [newCategory.categoryId, availableCategories]);
+
   // Add new category
   const addCategory = useMutation({
     mutationFn: async (category: {
-      name: string;
       categoryId: string;
       icon: string;
     }) => {
@@ -53,16 +62,17 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({
         ? Math.max(...existingCategories.map(c => c.display_order)) 
         : 0;
       
-      // Generate slug from name
-      const slug = generateSlug(category.name);
+      // Generate slug from category name
+      const slug = generateSlug(selectedCategory.name);
       
       const { data, error } = await supabase
         .from('featured_categories')
         .insert({
-          name: category.name,
+          name: selectedCategory.name,
           slug: slug,
           icon: category.icon || null,
-          display_order: maxOrder + 1
+          display_order: maxOrder + 1,
+          category_id: category.categoryId
         })
         .select();
       
@@ -71,7 +81,8 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['featuredCategories'] });
-      setNewCategory({ name: '', categoryId: '', icon: '' });
+      setNewCategory({ categoryId: '', icon: '' });
+      setSelectedCategory(null);
       toast.success('Category added successfully');
     },
     onError: (error) => {
@@ -81,8 +92,8 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCategory.name || !newCategory.categoryId) {
-      toast.error('Name and category selection are required');
+    if (!newCategory.categoryId) {
+      toast.error('Category selection is required');
       return;
     }
     addCategory.mutate(newCategory);
@@ -91,18 +102,7 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({
   return (
     <div className="bg-muted/50 rounded-lg p-4">
       <h3 className="font-medium mb-3">Add New Featured Category</h3>
-      <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-4">
-        <div>
-          <label htmlFor="name" className="text-sm font-medium">Display Name</label>
-          <Input
-            id="name"
-            name="name"
-            value={newCategory.name}
-            onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Display name"
-            required
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-3">
         <div>
           <label htmlFor="category" className="text-sm font-medium">Category</label>
           <Select 
@@ -127,6 +127,11 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({
               )}
             </SelectContent>
           </Select>
+          {selectedCategory && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Display name: {selectedCategory.name}
+            </p>
+          )}
         </div>
         <div>
           <label htmlFor="icon" className="text-sm font-medium">Icon</label>
@@ -136,7 +141,7 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({
           />
         </div>
         <div className="flex items-end">
-          <Button type="submit" className="w-full" disabled={addCategory.isPending}>
+          <Button type="submit" className="w-full" disabled={addCategory.isPending || !selectedCategory}>
             <Plus className="h-4 w-4 mr-2" />
             Add Category
           </Button>

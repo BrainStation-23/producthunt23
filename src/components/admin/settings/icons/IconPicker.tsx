@@ -20,16 +20,20 @@ interface IconPickerProps {
 export const IconPicker: React.FC<IconPickerProps> = ({ value, onChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Get all icon names from lucide-react
+  // Get all icon names from lucide-react, filtering out non-icon keys
   const iconNames = Object.keys(LucideIcons)
-    .filter(key => key !== 'default' && key !== 'createLucideIcon')
+    .filter(key => 
+      key !== 'default' && 
+      key !== 'createLucideIcon' && 
+      typeof LucideIcons[key as keyof typeof LucideIcons] === 'function'
+    )
     .filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
-          {value && value in LucideIcons ? (
+          {value && typeof LucideIcons[value as keyof typeof LucideIcons] === 'function' ? (
             <>
               <DynamicIcon name={value} className="h-4 w-4 mr-2" />
               <span>{value}</span>

@@ -13,10 +13,12 @@ interface DynamicIconProps {
 }
 
 export const DynamicIcon: React.FC<DynamicIconProps> = ({ name, className }) => {
-  if (!name || !(name in LucideIcons)) {
+  if (!name || typeof LucideIcons[name as IconName] !== 'function') {
     return <Image className={className || "h-4 w-4"} />;
   }
   
-  const IconComponent = LucideIcons[name as IconName] as React.ComponentType<{ className?: string }>;
-  return <IconComponent className={className || "h-4 w-4"} />;
+  // Create the icon element using createElement to avoid TypeScript issues
+  return React.createElement(LucideIcons[name as IconName], {
+    className: className || "h-4 w-4"
+  });
 };
