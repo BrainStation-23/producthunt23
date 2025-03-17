@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,10 +44,10 @@ const AdminUsers: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Function to fetch users using our new database function
+  // Function to fetch users using our database function
   const fetchUsers = async () => {
     try {
-      const { data, error, count } = await supabase
+      const { data, error } = await supabase
         .rpc('get_admin_users', {
           search_text: searchQuery,
           role_filter: roleFilter,
