@@ -49,15 +49,15 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/" element={<MainLayout />}>
+              <Route path="landing" element={<LandingPage />} />
+              <Route path="products" element={<ProductsPage />} />
+              <Route path="products/submit" element={<SubmitProductPage />} />
+              <Route path="products/edit/:productId" element={<EditProductPage />} />
+              <Route path="products/:productId" element={<ProductDetailPage />} />
+            </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/products" element={<MainLayout />}>
-              <Route index element={<ProductsPage />} />
-              <Route path="submit" element={<SubmitProductPage />} />
-              <Route path="edit/:productId" element={<EditProductPage />} />
-              <Route path=":productId" element={<ProductDetailPage />} />
-            </Route>
 
             {/* Admin Routes */}
             <Route
