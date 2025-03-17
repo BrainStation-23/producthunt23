@@ -6,11 +6,15 @@ import { useAuth } from '@/contexts/AuthContext';
 interface ProtectedRouteProps {
   children?: ReactNode;
   allowedRoles?: ('admin' | 'user')[];
+  adminOnly?: boolean; // New prop to explicitly mark admin-only routes
+  userOnly?: boolean; // New prop to explicitly mark user-only routes
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children,
-  allowedRoles = ['admin', 'user']
+  allowedRoles = ['admin', 'user'],
+  adminOnly = false,
+  userOnly = false
 }) => {
   const { user, userRole, isLoading } = useAuth();
   const location = useLocation();
@@ -22,9 +26,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       isLoading, 
       userRole, 
       allowedRoles,
+      adminOnly,
+      userOnly,
       isAllowed: userRole ? allowedRoles.includes(userRole) : false
     });
-  }, [isLoading, userRole, allowedRoles, location]);
+  }, [isLoading, userRole, allowedRoles, adminOnly, userOnly, location]);
 
   // Show loading state
   if (isLoading) {
@@ -43,9 +49,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  // Redirect if not authorized for this route
+  // Check role-specific restrictions
+  if (adminOnly && userRole !== 'admin') {
+    return <Navigate to="/user" replace />;
+  }
+
+  if (userOnly && userRole !== 'user') {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // Redirect if not in allowed roles
   if (!allowedRoles.includes(userRole as 'admin' | 'user')) {
-    // Redirect admins to admin dashboard and users to user dashboard if they try to access the wrong area
     if (userRole === 'admin') {
       return <Navigate to="/admin" replace />;
     } else {
