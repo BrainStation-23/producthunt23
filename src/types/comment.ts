@@ -10,4 +10,5 @@ export interface Comment {
     username: string | null;
     avatar_url: string | null;
   };
+  replies?: Comment[];
 }

@@ -13,8 +13,8 @@ const ProductComments: React.FC<ProductCommentsProps> = ({ productId }) => {
 
   return (
     <div className="space-y-6">
-      <CommentForm productId={productId} onCommentAdded={refreshComments} />
-      <CommentList comments={comments} isLoading={isLoading} />
+      <CommentForm productId={productId} onCommentAdded={refreshComments} parentId={null} />
+      <CommentList comments={comments} isLoading={isLoading} refreshComments={refreshComments} />
     </div>
   );
 };

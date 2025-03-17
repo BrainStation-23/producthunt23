@@ -7,9 +7,38 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 interface CommentListProps {
   comments: Comment[];
   isLoading: boolean;
+  refreshComments: () => void;
 }
 
-const CommentList: React.FC<CommentListProps> = ({ comments, isLoading }) => {
+const CommentList: React.FC<CommentListProps> = ({ comments, isLoading, refreshComments }) => {
+  // Organize comments into hierarchical structure
+  const groupCommentsByParent = (allComments: Comment[]) => {
+    const topLevelComments: Comment[] = [];
+    const commentsByParent: Record<string, Comment[]> = {};
+
+    // First, separate top-level from replies
+    allComments.forEach(comment => {
+      if (!comment.parent_id) {
+        topLevelComments.push({ ...comment, replies: [] });
+      } else {
+        if (!commentsByParent[comment.parent_id]) {
+          commentsByParent[comment.parent_id] = [];
+        }
+        commentsByParent[comment.parent_id].push(comment);
+      }
+    });
+
+    // Now, attach replies to their parents
+    const result = topLevelComments.map(topComment => {
+      const replies = commentsByParent[topComment.id] || [];
+      return { ...topComment, replies };
+    });
+
+    return result;
+  };
+
+  const structuredComments = groupCommentsByParent(comments);
+
   if (isLoading) {
     return (
       <Card>
@@ -56,8 +85,13 @@ const CommentList: React.FC<CommentListProps> = ({ comments, isLoading }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {comments.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} />
+          {structuredComments.map((comment) => (
+            <CommentItem 
+              key={comment.id} 
+              comment={comment} 
+              refreshComments={refreshComments}
+              replies={comment.replies}
+            />
           ))}
         </div>
       </CardContent>

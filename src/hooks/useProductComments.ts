@@ -39,19 +39,19 @@ export const useProductComments = (productId: string) => {
   useEffect(() => {
     fetchComments();
     
-    // Set up a subscription to listen for new comments
+    // Set up a subscription to listen for new, updated, or deleted comments
     const commentsSubscription = supabase
       .channel('comments-changes')
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'comments',
           filter: `product_id=eq.${productId}`
         },
         (payload) => {
-          fetchComments(); // Refresh comments when a new one is added
+          fetchComments(); // Refresh comments when any change occurs
         }
       )
       .subscribe();

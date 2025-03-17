@@ -10,9 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 interface CommentFormProps {
   productId: string;
   onCommentAdded: () => void;
+  parentId: string | null;
 }
 
-const CommentForm: React.FC<CommentFormProps> = ({ productId, onCommentAdded }) => {
+const CommentForm: React.FC<CommentFormProps> = ({ productId, onCommentAdded, parentId }) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,11 +40,12 @@ const CommentForm: React.FC<CommentFormProps> = ({ productId, onCommentAdded }) 
           content: content.trim(),
           product_id: productId,
           user_id: user.id,
+          parent_id: parentId,
         });
         
       if (error) throw error;
       
-      toast.success('Comment added successfully');
+      toast.success(parentId ? 'Reply added successfully' : 'Comment added successfully');
       setContent('');
       onCommentAdded();
     } catch (error: any) {
@@ -53,6 +55,34 @@ const CommentForm: React.FC<CommentFormProps> = ({ productId, onCommentAdded }) 
       setIsSubmitting(false);
     }
   };
+
+  // For reply forms, we use a simpler UI
+  if (parentId) {
+    return (
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <Textarea
+            placeholder="Write a reply..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={2}
+            disabled={!user || isSubmitting}
+            className="resize-none"
+          />
+          <div className="flex justify-end">
+            <Button 
+              type="submit" 
+              disabled={!user || isSubmitting || !content.trim()} 
+              variant="default"
+              size="sm"
+            >
+              {isSubmitting ? 'Posting...' : 'Post Reply'}
+            </Button>
+          </div>
+        </div>
+      </form>
+    );
+  }
 
   return (
     <Card>
