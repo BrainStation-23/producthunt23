@@ -3,20 +3,21 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface ProductsFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  statusFilter: string | null;
-  setStatusFilter: (status: string | null) => void;
+  statusFilters: string[];
+  toggleStatusFilter: (status: string) => void;
   handleSearch: (e: React.FormEvent) => void;
 }
 
 const ProductsFilters: React.FC<ProductsFiltersProps> = ({
   searchQuery,
   setSearchQuery,
-  statusFilter,
-  setStatusFilter,
+  statusFilters,
+  toggleStatusFilter,
   handleSearch,
 }) => {
   return (
@@ -32,31 +33,37 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
         />
       </form>
       <div className="flex flex-wrap gap-2">
+        {statusFilters.length === 0 && (
+          <Badge variant="outline" className="px-3 py-1">
+            All
+          </Badge>
+        )}
+        
         <Button 
-          variant={statusFilter === null ? "default" : "outline"} 
+          variant={statusFilters.includes("draft") ? "default" : "outline"} 
           size="sm"
-          onClick={() => setStatusFilter(null)}
+          onClick={() => toggleStatusFilter("draft")}
         >
-          All
+          Draft
         </Button>
         <Button 
-          variant={statusFilter === "approved" ? "default" : "outline"} 
+          variant={statusFilters.includes("pending") ? "default" : "outline"} 
           size="sm"
-          onClick={() => setStatusFilter("approved")}
-        >
-          Approved
-        </Button>
-        <Button 
-          variant={statusFilter === "pending" ? "default" : "outline"} 
-          size="sm"
-          onClick={() => setStatusFilter("pending")}
+          onClick={() => toggleStatusFilter("pending")}
         >
           Pending
         </Button>
         <Button 
-          variant={statusFilter === "rejected" ? "default" : "outline"} 
+          variant={statusFilters.includes("approved") ? "default" : "outline"} 
           size="sm"
-          onClick={() => setStatusFilter("rejected")}
+          onClick={() => toggleStatusFilter("approved")}
+        >
+          Approved
+        </Button>
+        <Button 
+          variant={statusFilters.includes("rejected") ? "default" : "outline"} 
+          size="sm"
+          onClick={() => toggleStatusFilter("rejected")}
         >
           Rejected
         </Button>

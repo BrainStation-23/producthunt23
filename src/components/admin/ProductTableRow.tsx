@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Edit, Trash, Check, X, ExternalLink } from 'lucide-react';
+import { Edit, Trash, Check, X, ExternalLink, FilePenLine } from 'lucide-react';
 import { Product } from '@/types/product';
 
 interface ProductTableRowProps {
@@ -36,6 +36,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
         return 'secondary'; // Using 'secondary' instead of 'warning'
       case 'rejected':
         return 'destructive';
+      case 'draft':
+        return 'outline';
       default:
         return 'secondary';
     }
@@ -77,14 +79,46 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
               View
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'approved')}>
-              <Check className="mr-2 h-4 w-4 text-green-500" />
-              Approve
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'rejected')}>
-              <X className="mr-2 h-4 w-4 text-red-500" />
-              Reject
-            </DropdownMenuItem>
+            
+            {/* Status change actions based on current status */}
+            {product.status === 'pending' && (
+              <>
+                <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'approved')}>
+                  <Check className="mr-2 h-4 w-4 text-green-500" />
+                  Approve
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'rejected')}>
+                  <X className="mr-2 h-4 w-4 text-red-500" />
+                  Reject
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'draft')}>
+                  <FilePenLine className="mr-2 h-4 w-4 text-blue-500" />
+                  Move to Draft
+                </DropdownMenuItem>
+              </>
+            )}
+            
+            {product.status === 'approved' && (
+              <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'draft')}>
+                <FilePenLine className="mr-2 h-4 w-4 text-blue-500" />
+                Move to Draft
+              </DropdownMenuItem>
+            )}
+            
+            {product.status === 'rejected' && (
+              <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'draft')}>
+                <FilePenLine className="mr-2 h-4 w-4 text-blue-500" />
+                Move to Draft
+              </DropdownMenuItem>
+            )}
+            
+            {product.status === 'draft' && (
+              <DropdownMenuItem onClick={() => handleStatusChange(product.id, 'pending')}>
+                <Check className="mr-2 h-4 w-4 text-yellow-500" />
+                Submit for Review
+              </DropdownMenuItem>
+            )}
+            
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-red-500"

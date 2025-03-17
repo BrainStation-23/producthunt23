@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -21,12 +21,24 @@ import DeleteProductDialog from '@/components/admin/DeleteProductDialog';
 const AdminProducts: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [statusFilters, setStatusFilters] = useState<string[]>(['pending']);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const pageSize = 10;
+
+  // Toggle status filter
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilters(prev => {
+      if (prev.includes(status)) {
+        return prev.filter(s => s !== status);
+      } else {
+        return [...prev, status];
+      }
+    });
+    setCurrentPage(1); // Reset page when changing filters
+  };
 
   // Function to fetch products
   const fetchProducts = async () => {
@@ -43,9 +55,9 @@ const AdminProducts: React.FC = () => {
         query = query.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,tagline.ilike.%${searchQuery}%`);
       }
 
-      // Apply status filter
-      if (statusFilter) {
-        query = query.eq('status', statusFilter);
+      // Apply status filters if any are selected
+      if (statusFilters.length > 0) {
+        query = query.in('status', statusFilters);
       }
 
       // Pagination
@@ -80,7 +92,7 @@ const AdminProducts: React.FC = () => {
   };
 
   const { data: products, isLoading, refetch } = useQuery({
-    queryKey: ['adminProducts', searchQuery, statusFilter, currentPage],
+    queryKey: ['adminProducts', searchQuery, statusFilters, currentPage],
     queryFn: fetchProducts
   });
 
@@ -148,8 +160,8 @@ const AdminProducts: React.FC = () => {
       <ProductsFilters 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
+        statusFilters={statusFilters}
+        toggleStatusFilter={toggleStatusFilter}
         handleSearch={handleSearch}
       />
       
