@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowUp, MessageSquare, Code, Database, Server, FileCode, Terminal, Monitor, Layers, Cloud } from 'lucide-react';
+import { ArrowUp, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,27 +26,49 @@ interface ProductCardProps {
   product: Product;
 }
 
-const getTechIcon = (techName: string) => {
+const getDevIconClass = (techName: string) => {
   const techLower = techName.toLowerCase();
   
-  // Map for technology names to icons
-  if (techLower.includes('javascript') || techLower.includes('js') || techLower.includes('typescript') || techLower.includes('ts')) {
-    return <FileCode className="h-3.5 w-3.5" />;
-  } else if (techLower.includes('react') || techLower.includes('vue') || techLower.includes('angular') || techLower.includes('svelte')) {
-    return <Code className="h-3.5 w-3.5" />;
-  } else if (techLower.includes('node') || techLower.includes('express') || techLower.includes('fastify') || techLower.includes('nest')) {
-    return <Server className="h-3.5 w-3.5" />;
-  } else if (techLower.includes('sql') || techLower.includes('postgres') || techLower.includes('mysql') || techLower.includes('mongo')) {
-    return <Database className="h-3.5 w-3.5" />;
-  } else if (techLower.includes('python') || techLower.includes('ruby') || techLower.includes('php')) {
-    return <Terminal className="h-3.5 w-3.5" />;
-  } else if (techLower.includes('html') || techLower.includes('css') || techLower.includes('tailwind') || techLower.includes('bootstrap')) {
-    return <Monitor className="h-3.5 w-3.5" />;
-  } else if (techLower.includes('aws') || techLower.includes('azure') || techLower.includes('gcp') || techLower.includes('cloud')) {
-    return <Cloud className="h-3.5 w-3.5" />;
-  } else {
-    return <Layers className="h-3.5 w-3.5" />;
-  }
+  // Map technology names to DevIcon classes
+  if (techLower.includes('react')) return 'devicon-react-original colored';
+  if (techLower.includes('angular')) return 'devicon-angularjs-plain colored';
+  if (techLower.includes('vue')) return 'devicon-vuejs-plain colored';
+  if (techLower.includes('next')) return 'devicon-nextjs-original colored';
+  if (techLower.includes('node')) return 'devicon-nodejs-plain colored';
+  if (techLower.includes('express')) return 'devicon-express-original colored';
+  if (techLower.includes('typescript') || techLower === 'ts') return 'devicon-typescript-plain colored';
+  if (techLower.includes('javascript') || techLower === 'js') return 'devicon-javascript-plain colored';
+  if (techLower.includes('python')) return 'devicon-python-plain colored';
+  if (techLower.includes('django')) return 'devicon-django-plain colored';
+  if (techLower.includes('flask')) return 'devicon-flask-original colored';
+  if (techLower.includes('ruby')) return 'devicon-ruby-plain colored';
+  if (techLower.includes('rails')) return 'devicon-rails-plain colored';
+  if (techLower.includes('php')) return 'devicon-php-plain colored';
+  if (techLower.includes('laravel')) return 'devicon-laravel-plain colored';
+  if (techLower.includes('csharp') || techLower === 'c#') return 'devicon-csharp-plain colored';
+  if (techLower.includes('.net') || techLower.includes('dotnet')) return 'devicon-dotnetcore-plain colored';
+  if (techLower.includes('java')) return 'devicon-java-plain colored';
+  if (techLower.includes('spring')) return 'devicon-spring-plain colored';
+  if (techLower.includes('go')) return 'devicon-go-plain colored';
+  if (techLower.includes('rust')) return 'devicon-rust-plain colored';
+  if (techLower.includes('mongo')) return 'devicon-mongodb-plain colored';
+  if (techLower.includes('mysql')) return 'devicon-mysql-plain colored';
+  if (techLower.includes('postgres')) return 'devicon-postgresql-plain colored';
+  if (techLower.includes('redis')) return 'devicon-redis-plain colored';
+  if (techLower.includes('docker')) return 'devicon-docker-plain colored';
+  if (techLower.includes('kubernetes') || techLower === 'k8s') return 'devicon-kubernetes-plain colored';
+  if (techLower.includes('aws')) return 'devicon-amazonwebservices-original colored';
+  if (techLower.includes('azure')) return 'devicon-azure-plain colored';
+  if (techLower.includes('gcp') || techLower.includes('google cloud')) return 'devicon-googlecloud-plain colored';
+  if (techLower.includes('firebase')) return 'devicon-firebase-plain colored';
+  if (techLower.includes('tailwind')) return 'devicon-tailwindcss-plain colored';
+  if (techLower.includes('bootstrap')) return 'devicon-bootstrap-plain colored';
+  if (techLower.includes('sass')) return 'devicon-sass-original colored';
+  if (techLower.includes('supabase')) return 'devicon-supabase-plain colored';
+  if (techLower.includes('graphql')) return 'devicon-graphql-plain colored';
+  
+  // Default icon class for unmatched technologies
+  return 'devicon-github-original'; // Using GitHub as fallback icon
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
@@ -175,12 +196,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           )}
           
-          {/* Technologies */}
+          {/* Technologies with DevIcon */}
           {product.productTechnologies && product.productTechnologies.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {product.productTechnologies.slice(0, 4).map((tech, index) => (
                 <Badge key={index} variant="outline" className="flex items-center gap-1 text-xs">
-                  {getTechIcon(tech)}
+                  <i className={`${getDevIconClass(tech)} text-sm`}></i>
                   {tech}
                 </Badge>
               ))}
