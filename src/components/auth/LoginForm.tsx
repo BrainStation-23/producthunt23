@@ -14,25 +14,21 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn, signInWithGithub, userRole } = useAuth();
+  const { signIn, signInWithGithub } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      await signIn(email, password);
+      const userRole = await signIn(email, password);
       toast.success('Successfully logged in');
       
-      // Wait a moment for userRole to be set
-      setTimeout(() => {
-        if (userRole === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/user');
-        }
-      }, 500);
-      
+      if (userRole === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/user');
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       // Error is already handled in the useAuth hook

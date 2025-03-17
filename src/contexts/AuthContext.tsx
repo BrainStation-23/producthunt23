@@ -12,7 +12,7 @@ interface AuthContextType {
   user: User | null;
   userRole: UserRole;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<UserRole>;
   signUp: (email: string, password: string, userData?: any) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
@@ -62,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserRole = async (userId: string) => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -82,18 +83,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<UserRole> => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) throw error;
+      
+      // Wait for the user to be set
+      if (!user) {
+        await new Promise<void>((resolve) => {
+          const checkUser = setInterval(() => {
+            if (user) {
+              clearInterval(checkUser);
+              resolve();
+            }
+          }, 100);
+        });
+      }
+      
+      // Make sure we have the user's role before proceeding
+      if (user && userRole === null) {
+        await fetchUserRole(user.id);
+      }
+      
+      return userRole || 'user';
     } catch (error: any) {
       console.error('Error signing in:', error);
       toast.error(error.message || 'Error signing in');
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,12 +141,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       navigate('/login');
     } catch (error: any) {
       console.error('Error signing out:', error);
       toast.error(error.message || 'Error signing out');
+    } finally {
+      setIsLoading(false);
     }
   };
 
