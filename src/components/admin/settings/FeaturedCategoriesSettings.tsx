@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,7 +41,7 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
     .filter(key => key !== 'default' && key !== 'createLucideIcon')
     .filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()));
   
-  // Function to safely render an icon
+  // Function to render an icon safely
   const renderIcon = (name: string) => {
     if (name in LucideIcons && typeof LucideIcons[name as LucideIconName] !== 'undefined') {
       const IconComponent = LucideIcons[name as LucideIconName];
@@ -62,7 +61,7 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
             </>
           ) : (
             <>
-              <Image className="mr-2 h-4 w-4" />
+              <Image className="h-4 w-4 mr-2" />
               Select icon
             </>
           )}
@@ -79,21 +78,19 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
         </div>
         <ScrollArea className="h-[300px]">
           <div className="grid grid-cols-3 gap-2 p-2">
-            {iconNames.map((name) => {
-              return (
-                <Button
-                  key={name}
-                  variant="ghost"
-                  className="flex h-10 w-full items-center justify-start gap-2 px-2"
-                  onClick={() => {
-                    onChange(name);
-                  }}
-                >
-                  {renderIcon(name)}
-                  <span className="text-xs truncate">{name}</span>
-                </Button>
-              );
-            })}
+            {iconNames.map((name) => (
+              <Button
+                key={name}
+                variant="ghost"
+                className="flex h-10 w-full items-center justify-start gap-2 px-2"
+                onClick={() => {
+                  onChange(name);
+                }}
+              >
+                {renderIcon(name)}
+                <span className="text-xs truncate">{name}</span>
+              </Button>
+            ))}
           </div>
         </ScrollArea>
       </PopoverContent>
