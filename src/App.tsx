@@ -6,11 +6,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
-import Index from "@/pages/Index";
+import LandingPage from "@/pages/landing/LandingPage";
 import NotFound from "@/pages/NotFound";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
-import LandingPage from "@/pages/landing/LandingPage";
 
 import MainLayout from "@/components/layout/MainLayout";
 import UserLayout from "@/components/layout/UserLayout";
@@ -36,36 +35,47 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/landing" element={<LandingPage />} />
-
-            {/* Auth Routes */}
+            {/* Public routes */}
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<LandingPage />} />
+              <Route path="products" element={<ProductsPage />} />
+              <Route path="products/:id" element={<div className="container py-12">Product detail page (To be implemented)</div>} />
+              <Route path="categories" element={<div className="container py-12">Categories page (To be implemented)</div>} />
+              <Route path="categories/:category" element={<div className="container py-12">Category listing page (To be implemented)</div>} />
+              <Route path="submit" element={<SubmitProductPage />} />
+              <Route path="about" element={<div className="container py-12">About page (To be implemented)</div>} />
+              <Route path="terms" element={<div className="container py-12">Terms page (To be implemented)</div>} />
+              <Route path="privacy" element={<div className="container py-12">Privacy page (To be implemented)</div>} />
+            </Route>
+            
+            {/* Auth routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-
-            {/* Main Layout Routes */}
-            <Route element={<MainLayout />}>
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/submit" element={<SubmitProductPage />} />
-            </Route>
-
-            {/* User Routes */}
+            <Route path="/forgot-password" element={<div>Forgot password page (To be implemented)</div>} />
+            <Route path="/reset-password" element={<div>Reset password page (To be implemented)</div>} />
+            
+            {/* User routes - Protected */}
             <Route element={<ProtectedRoute />}>
-              <Route element={<UserLayout />}>
-                <Route path="/user/dashboard" element={<UserDashboard />} />
-                <Route path="/user/profile" element={<UserProfile />} />
+              <Route path="/user" element={<UserLayout />}>
+                <Route index element={<UserDashboard />} />
+                <Route path="profile" element={<UserProfile />} />
+                <Route path="products" element={<div>User products (To be implemented)</div>} />
+                <Route path="saved" element={<div>Saved products (To be implemented)</div>} />
+                <Route path="messages" element={<div>User messages (To be implemented)</div>} />
+                <Route path="settings" element={<div>User settings (To be implemented)</div>} />
               </Route>
             </Route>
-
-            {/* Admin Routes */}
+            
+            {/* Admin routes - Protected */}
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-              <Route element={<AdminLayout />}>
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="settings" element={<div>Admin settings (To be implemented)</div>} />
               </Route>
             </Route>
-
+            
             {/* Not Found Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
