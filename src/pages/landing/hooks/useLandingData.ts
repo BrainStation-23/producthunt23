@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,7 +24,7 @@ export function useLandingData() {
       return data.map(category => ({
         id: category.id,
         name: category.name,
-        slug: category.name.toLowerCase().replace(/\s+/g, '-'),
+        slug: category.id, // Use ID as slug for proper filtering
         icon: null,
         display_order: category.display_order
       })) as FeaturedCategory[];
@@ -81,11 +82,12 @@ export function useLandingData() {
           profile_avatar_url: product.profiles?.avatar_url
         })) as unknown as FeaturedProduct[];
       } else {
+        // Here's the fix: filter products that contain the selected category ID in their categories array
         const { data, error } = await supabase
           .from('products')
           .select('*, profiles:created_by(username, avatar_url)')
           .eq('status', 'approved')
-          .contains('categories', [selectedCategory])
+          .filter('categories', 'cs', `{"${selectedCategory}"}`) // Use contains operator for array search
           .limit(8);
         
         if (error) throw error;
