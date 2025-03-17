@@ -50,28 +50,20 @@ function App() {
             </Route>
 
             {/* User Routes */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <UserLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/user/dashboard" element={<UserDashboard />} />
-              <Route path="/user/profile" element={<UserProfile />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<UserLayout />}>
+                <Route path="/user/dashboard" element={<UserDashboard />} />
+                <Route path="/user/profile" element={<UserProfile />} />
+              </Route>
             </Route>
 
             {/* Admin Routes */}
-            <Route
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route element={<AdminLayout />}>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+              </Route>
             </Route>
 
             {/* Not Found Route */}

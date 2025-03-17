@@ -1,13 +1,15 @@
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
+  children?: ReactNode;
   allowedRoles?: ('admin' | 'user')[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children,
   allowedRoles = ['admin', 'user']
 }) => {
   const { user, userRole, isLoading } = useAuth();
@@ -39,7 +41,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
 
-  return <Outlet />;
+  // If children are provided, render them, otherwise use Outlet
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default ProtectedRoute;

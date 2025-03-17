@@ -55,3 +55,15 @@ export interface Category {
   created_at: string;
   updated_at: string;
 }
+
+// Form-specific interfaces
+export interface Screenshot {
+  title?: string;
+  image_url: string;
+  description?: string;
+}
+
+export interface Video {
+  title?: string;
+  video_url: string;
+}

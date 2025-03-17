@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -6,12 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ImagePlus, X, MoveUp, MoveDown } from 'lucide-react';
-
-interface Screenshot {
-  title?: string;
-  image_url: string;
-  description?: string;
-}
+import { Screenshot } from '@/types/product';
 
 interface ScreenshotsManagerProps {
   screenshots: Screenshot[];

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { Screenshot, Video } from '@/types/product';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -334,7 +335,7 @@ const SubmitProductForm: React.FC = () => {
                       <FormControl>
                         <ScreenshotsManager 
                           screenshots={field.value} 
-                          onChange={field.onChange} 
+                          onChange={(screenshots: Screenshot[]) => field.onChange(screenshots)} 
                         />
                       </FormControl>
                       <FormDescription>
@@ -360,7 +361,7 @@ const SubmitProductForm: React.FC = () => {
                       <FormControl>
                         <VideosManager 
                           videos={field.value} 
-                          onChange={field.onChange} 
+                          onChange={(videos: Video[]) => field.onChange(videos)} 
                         />
                       </FormControl>
                       <FormDescription>
