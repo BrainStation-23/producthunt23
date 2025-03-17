@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,9 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Link2, Upload } from 'lucide-react';
+import { validateImageFile, uploadImageToStorage } from '@/utils/fileUploadUtils';
 
 interface ProfileData {
   username: string | null;
@@ -23,12 +26,16 @@ const UserProfile: React.FC = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({
     username: '',
     bio: '',
     website: '',
     avatar_url: null
   });
+  const [directAvatarUrl, setDirectAvatarUrl] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch profile data
   useEffect(() => {
@@ -52,6 +59,10 @@ const UserProfile: React.FC = () => {
             website: data.website || '',
             avatar_url: data.avatar_url
           });
+          
+          if (data.avatar_url) {
+            setDirectAvatarUrl(data.avatar_url);
+          }
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -100,44 +111,78 @@ const UserProfile: React.FC = () => {
     if (!user || !e.target.files || e.target.files.length === 0) return;
     
     const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}/avatar.${fileExt}`;
+    
+    // Validate the file
+    const validation = validateImageFile(file);
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Invalid file');
+      return;
+    }
     
     try {
-      setIsSaving(true);
+      setIsUploading(true);
       
-      // Upload file to storage
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
+      // Upload the file using the utility function
+      const publicUrl = await uploadImageToStorage(
+        file, 
+        'avatars',
+        (progress) => setUploadProgress(progress)
+      );
       
-      if (uploadError) throw uploadError;
-      
-      // Get public URL
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-      
-      if (!data) throw new Error('Could not get public URL');
-      
-      // Update profile
+      // Update profile with the new avatar URL
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: data.publicUrl })
+        .update({ avatar_url: publicUrl })
         .eq('id', user.id);
       
       if (updateError) throw updateError;
       
       // Update local state
-      setFormData(prev => ({ ...prev, avatar_url: data.publicUrl }));
+      setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      setDirectAvatarUrl(publicUrl);
       
       toast.success('Avatar uploaded successfully');
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
       toast.error(error.message || 'Failed to upload avatar');
     } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Handle direct URL input
+  const handleDirectUrlSave = async () => {
+    if (!user || !directAvatarUrl.trim()) return;
+    
+    try {
+      setIsSaving(true);
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({ avatar_url: directAvatarUrl })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setFormData(prev => ({ ...prev, avatar_url: directAvatarUrl }));
+      
+      toast.success('Avatar URL updated successfully');
+    } catch (error: any) {
+      console.error('Error updating avatar URL:', error);
+      toast.error(error.message || 'Failed to update avatar URL');
+    } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleDirectUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDirectAvatarUrl(e.target.value);
   };
 
   if (isLoading) {
@@ -280,7 +325,7 @@ const UserProfile: React.FC = () => {
             <CardHeader>
               <CardTitle>Profile Picture</CardTitle>
               <CardDescription>
-                Upload a profile picture to personalize your account.
+                Choose how to update your profile picture.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center space-y-4">
@@ -294,25 +339,72 @@ const UserProfile: React.FC = () => {
                 )}
               </Avatar>
               
-              <div className="flex flex-col items-center">
-                <Label 
-                  htmlFor="avatar" 
-                  className="cursor-pointer bg-muted hover:bg-muted/80 text-sm px-3 py-2 rounded-md transition-colors"
-                >
-                  {isSaving ? 'Uploading...' : 'Upload Picture'}
-                </Label>
-                <Input 
-                  id="avatar" 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
-                  onChange={handleAvatarUpload}
-                  disabled={isSaving}
-                />
-                <p className="text-xs text-muted-foreground mt-2">
-                  JPG, PNG or GIF, max 2MB
-                </p>
-              </div>
+              <Tabs defaultValue="upload" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="upload">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload
+                  </TabsTrigger>
+                  <TabsTrigger value="url">
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Image URL
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="upload" className="mt-4">
+                  <div className="flex flex-col items-center space-y-4">
+                    {isUploading && uploadProgress > 0 && (
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-2">
+                        <div
+                          className="bg-primary h-2.5 rounded-full"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                    )}
+                    
+                    <Label 
+                      htmlFor="avatar" 
+                      className="cursor-pointer bg-muted hover:bg-muted/80 text-sm px-3 py-2 rounded-md transition-colors"
+                    >
+                      {isUploading ? 'Uploading...' : 'Choose File'}
+                    </Label>
+                    <Input 
+                      id="avatar" 
+                      ref={fileInputRef}
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleAvatarUpload}
+                      disabled={isUploading}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG or GIF, max 2MB
+                    </p>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="url" className="mt-4">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="direct-url">Image URL</Label>
+                      <Input
+                        id="direct-url"
+                        type="url"
+                        placeholder="https://example.com/image.jpg"
+                        value={directAvatarUrl}
+                        onChange={handleDirectUrlChange}
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleDirectUrlSave} 
+                      disabled={isSaving || !directAvatarUrl}
+                      className="w-full"
+                    >
+                      {isSaving ? 'Saving...' : 'Use This Image'}
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
