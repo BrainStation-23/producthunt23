@@ -99,7 +99,7 @@ const FeaturedContentSettings: React.FC = () => {
       // Filter out products that are already featured
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, tagline, image_url')
+        .select('*')  // Select all fields to match the Product type
         .eq('status', 'approved')
         .not('id', 'in', featuredIds.length > 0 ? `(${featuredIds.join(',')})` : '()')
         .ilike('name', `%${searchTerm}%`)
@@ -107,6 +107,7 @@ const FeaturedContentSettings: React.FC = () => {
       
       if (error) throw error;
       
+      // Ensure we have a valid Product type array
       setAvailableProducts(data || []);
     } catch (error) {
       console.error('Error searching products:', error);
