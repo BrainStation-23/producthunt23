@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
-import TagsSelector from '@/components/products/TagsSelector';
+import CategorySelector from '@/components/products/CategorySelector';
 
 interface CategoriesSectionProps {
   form: UseFormReturn<ProductFormValues>;
@@ -23,14 +23,14 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ form }) => {
       <CardContent className="pt-6">
         <FormField
           control={form.control}
-          name="tags"
+          name="categories"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Categories*</FormLabel>
               <FormControl>
-                <TagsSelector 
+                <CategorySelector 
                   selected={field.value} 
-                  onSelect={(tags) => field.onChange(tags)} 
+                  onSelect={(categories) => field.onChange(categories)} 
                 />
               </FormControl>
               <FormDescription>

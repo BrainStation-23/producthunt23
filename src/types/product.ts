@@ -6,7 +6,7 @@ export interface Product {
   tagline: string;
   image_url: string | null;
   website_url: string | null;
-  tags: string[] | null;
+  categories: string[] | null;
   technologies: string[] | null;
   upvotes: number;
   created_at: string;
@@ -91,7 +91,7 @@ export interface ProductFormValues {
   website_url: string;
   image_url: string;
   technologies: string[];
-  tags: string[];
+  categories: string[];
   screenshots: Screenshot[];
   videos: Video[];
   makers: Maker[];

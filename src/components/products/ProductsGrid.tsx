@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import ProductCard, { ProductCardSkeleton } from './ProductCard';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Product {
   id: string;
@@ -10,8 +11,14 @@ interface Product {
   tagline: string;
   image_url: string | null;
   website_url: string | null;
-  tags: string[] | null;
+  categories: string[] | null;
   upvotes: number;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive';
 }
 
 interface ProductsGridProps {
@@ -27,6 +34,28 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
   isError,
   clearFilters
 }) => {
+  const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
+  
+  // Fetch categories to map from IDs to names
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name')
+        .eq('status', 'active');
+        
+      if (!error && data) {
+        const catMap: Record<string, string> = {};
+        data.forEach((cat: Category) => {
+          catMap[cat.id] = cat.name;
+        });
+        setCategoryMap(catMap);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
+  
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -59,9 +88,18 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
     );
   }
   
+  // Transform products to include category names
+  const productsWithCategoryNames = products.map(product => {
+    const mappedCategories = product.categories?.map(catId => categoryMap[catId] || catId) || [];
+    return {
+      ...product,
+      categoryNames: mappedCategories
+    };
+  });
+  
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {products.map((product) => (
+      {productsWithCategoryNames.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>

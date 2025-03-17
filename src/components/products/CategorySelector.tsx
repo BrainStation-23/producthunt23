@@ -7,19 +7,14 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Category } from '@/components/admin/settings/categories/types';
 
-interface Category {
-  id: string;
-  name: string;
-  status: string;
-}
-
-interface TagsSelectorProps {
+interface CategorySelectorProps {
   selected: string[];
   onSelect: (categories: string[]) => void;
 }
 
-const TagsSelector: React.FC<TagsSelectorProps> = ({ selected, onSelect }) => {
+const CategorySelector: React.FC<CategorySelectorProps> = ({ selected, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -147,4 +142,4 @@ const TagsSelector: React.FC<TagsSelectorProps> = ({ selected, onSelect }) => {
   );
 };
 
-export default TagsSelector;
+export default CategorySelector;

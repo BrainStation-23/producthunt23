@@ -17,7 +17,7 @@ export const productSchema = z.object({
   website_url: z.string().url({ message: 'Please enter a valid URL.' }).or(z.literal('')),
   image_url: z.string().url({ message: 'Please enter a valid image URL.' }).or(z.literal('')),
   technologies: z.array(z.string()).min(1, { message: 'Please select at least one technology.' }),
-  tags: z.array(z.string()).min(1, { message: 'Please select at least one category.' }),
+  categories: z.array(z.string()).min(1, { message: 'Please select at least one category.' }),
   screenshots: z.array(z.object({
     title: z.string().optional(),
     image_url: z.string().url({ message: 'Please enter a valid URL.' }),
@@ -57,7 +57,7 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
       website_url: '',
       image_url: '',
       technologies: [],
-      tags: [],
+      categories: [],
       screenshots: [],
       videos: [],
       makers: userId ? [{ email: '', id: userId, isCreator: true }] : [],
@@ -147,7 +147,7 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
             website_url: product.website_url || '',
             image_url: product.image_url || '',
             technologies: formattedTechnologies,
-            tags: product.tags || [],
+            categories: product.categories || [],
             screenshots: formattedScreenshots,
             videos: formattedVideos,
             makers: formattedMakers,
@@ -207,7 +207,7 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
         description: values.description,
         website_url: values.website_url,
         image_url: values.image_url,
-        tags: values.tags,
+        categories: values.categories,
         status: saveAsDraft ? 'draft' : isEditing ? undefined : 'pending',
       };
       
