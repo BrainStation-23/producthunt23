@@ -58,7 +58,7 @@ const ProductsPage: React.FC = () => {
       // Add empty technologies array if it doesn't exist
       const productsWithTechnologies = data.map(product => ({
         ...product,
-        technologies: product.technologies || null
+        technologies: null
       }));
       
       return { data: productsWithTechnologies, totalCount };
