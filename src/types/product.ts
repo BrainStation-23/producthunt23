@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -10,9 +9,9 @@ export interface Product {
   upvotes: number;
   created_at: string;
   created_by: string;
-  profile_id: string;
-  profile_username: string | null;
-  profile_avatar_url: string | null;
+  profile_id?: string;
+  profile_username?: string | null;
+  profile_avatar_url?: string | null;
   status?: string;
 }
 

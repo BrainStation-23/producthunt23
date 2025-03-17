@@ -107,8 +107,8 @@ const FeaturedContentSettings: React.FC = () => {
       
       if (error) throw error;
       
-      // Ensure we have a valid Product type array
-      setAvailableProducts(data || []);
+      // Cast the data to Product[] to ensure type compatibility
+      setAvailableProducts((data || []) as Product[]);
     } catch (error) {
       console.error('Error searching products:', error);
       toast.error('Failed to search products');
