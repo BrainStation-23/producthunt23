@@ -18,6 +18,7 @@ import Register from './pages/auth/Register';
 import ProductsPage from './pages/products/ProductsPage';
 import SubmitProductPage from './pages/products/SubmitProductPage';
 import EditProductPage from './pages/products/EditProductPage';
+import ProductDetailPage from './pages/products/ProductDetailPage';
 import NotFound from './pages/NotFound';
 
 // Admin Pages
@@ -49,6 +50,7 @@ function App() {
               <Route index element={<ProductsPage />} />
               <Route path="submit" element={<SubmitProductPage />} />
               <Route path="edit/:productId" element={<EditProductPage />} />
+              <Route path=":productId" element={<ProductDetailPage />} />
             </Route>
 
             {/* Admin Routes */}
