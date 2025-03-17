@@ -34,6 +34,11 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
     setActiveTab('gallery');
   };
 
+  const handleImageUploaded = (screenshot: Screenshot) => {
+    onChange([...screenshots, screenshot]);
+    setActiveTab('gallery');
+  };
+
   const removeScreenshot = (index: number) => {
     const updatedScreenshots = [...screenshots];
     updatedScreenshots.splice(index, 1);
@@ -133,6 +138,7 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
             setNewScreenshotDescription('');
           }}
           onAdd={addScreenshot}
+          onImageUploaded={handleImageUploaded}
         />
       )}
     </div>
