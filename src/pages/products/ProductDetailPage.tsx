@@ -40,6 +40,18 @@ const ProductDetailPage: React.FC = () => {
 
         if (productError) throw productError;
         
+        // Fetch technologies
+        const { data: technologiesData, error: technologiesError } = await supabase
+          .from('product_technologies')
+          .select('technology_name')
+          .eq('product_id', productId)
+          .order('display_order', { ascending: true });
+          
+        if (technologiesError) throw technologiesError;
+        
+        // Extract technology names and add to product data
+        const technologies = technologiesData ? technologiesData.map(tech => tech.technology_name) : null;
+        
         // Fetch screenshots
         const { data: screenshotsData, error: screenshotsError } = await supabase
           .from('product_screenshots')
@@ -58,7 +70,15 @@ const ProductDetailPage: React.FC = () => {
           
         if (videosError) throw videosError;
         
-        setProduct(productData);
+        // Combine product data with technologies
+        const completeProductData = {
+          ...productData,
+          technologies,
+          profile_username: productData.profiles?.username,
+          profile_avatar_url: productData.profiles?.avatar_url
+        };
+        
+        setProduct(completeProductData);
         setScreenshots(screenshotsData || []);
         setVideos(videosData || []);
       } catch (error: any) {
@@ -148,12 +168,12 @@ const ProductDetailPage: React.FC = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">{product.name}</h1>
-          <p className="text-lg text-muted-foreground mt-1">{product.tagline}</p>
+          <h1 className="text-3xl font-bold">{product?.name}</h1>
+          <p className="text-lg text-muted-foreground mt-1">{product?.tagline}</p>
         </div>
       </div>
 
-      {product.status === 'pending' && (
+      {product?.status === 'pending' && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-md">
           <div className="flex">
             <div className="ml-3">
@@ -165,7 +185,7 @@ const ProductDetailPage: React.FC = () => {
         </div>
       )}
 
-      {product.status === 'rejected' && (
+      {product?.status === 'rejected' && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">
           <div className="flex">
             <div className="ml-3">
@@ -179,7 +199,7 @@ const ProductDetailPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {product.image_url && (
+          {product?.image_url && (
             <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 border">
               <img 
                 src={product.image_url} 
@@ -194,7 +214,7 @@ const ProductDetailPage: React.FC = () => {
 
           <div className="prose max-w-none">
             <h2 className="text-2xl font-semibold mb-4">About</h2>
-            <p>{product.description}</p>
+            <p>{product?.description}</p>
           </div>
 
           {(screenshots.length > 0 || videos.length > 0) && (
@@ -265,7 +285,7 @@ const ProductDetailPage: React.FC = () => {
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm" className="gap-1">
                     <ArrowUp className="h-4 w-4" />
-                    {product.upvotes || 0}
+                    {product?.upvotes || 0}
                   </Button>
                   <Button variant="outline" size="sm" className="gap-1">
                     <MessageSquare className="h-4 w-4" />
@@ -274,7 +294,7 @@ const ProductDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {product.website_url && (
+              {product?.website_url && (
                 <Button className="w-full" onClick={() => window.open(product.website_url, '_blank')}>
                   <ExternalLink className="mr-2 h-4 w-4" />
                   Visit Website
@@ -284,18 +304,21 @@ const ProductDetailPage: React.FC = () => {
               <div>
                 <h3 className="font-medium mb-2">Categories</h3>
                 <div className="flex flex-wrap gap-2">
-                  {product.tags && product.tags.map((tag, index) => (
+                  {product?.tags && product.tags.map((tag, index) => (
                     <Badge key={index} variant="secondary">{tag}</Badge>
                   ))}
                 </div>
               </div>
 
-              {product.technologies && product.technologies.length > 0 && (
+              {product?.technologies && product.technologies.length > 0 && (
                 <div>
                   <h3 className="font-medium mb-2">Built with</h3>
                   <div className="flex flex-wrap gap-2">
                     {product.technologies.map((tech, index) => (
-                      <Badge key={index} variant="outline">{tech}</Badge>
+                      <Badge key={index} variant="outline" className="flex items-center gap-1">
+                        <i className={`devicon-${tech.toLowerCase()}-plain colored text-sm`}></i>
+                        {tech}
+                      </Badge>
                     ))}
                   </div>
                 </div>
@@ -304,7 +327,7 @@ const ProductDetailPage: React.FC = () => {
               <div>
                 <h3 className="font-medium mb-2">Launched</h3>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(product.created_at).toLocaleDateString()}
+                  {product?.created_at ? new Date(product.created_at).toLocaleDateString() : ''}
                 </p>
               </div>
             </CardContent>

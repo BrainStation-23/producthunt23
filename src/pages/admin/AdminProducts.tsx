@@ -64,7 +64,15 @@ const AdminProducts: React.FC = () => {
         setTotalPages(Math.ceil(count / pageSize));
       }
 
-      return data || [];
+      // Add empty technologies array if it doesn't exist
+      const productsWithTechnologies = data?.map(product => ({
+        ...product,
+        technologies: null,
+        profile_username: product.profiles?.username,
+        profile_avatar_url: product.profiles?.avatar_url
+      })) || [];
+
+      return productsWithTechnologies;
     } catch (error) {
       console.error('Error fetching products:', error);
       throw error;

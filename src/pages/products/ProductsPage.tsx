@@ -55,7 +55,13 @@ const ProductsPage: React.FC = () => {
       const totalCount = data.length > 0 ? data[0].total_count : 0;
       setTotalPages(Math.ceil(totalCount / 12));
       
-      return { data, totalCount };
+      // Add empty technologies array if it doesn't exist
+      const productsWithTechnologies = data.map(product => ({
+        ...product,
+        technologies: product.technologies || null
+      }));
+      
+      return { data: productsWithTechnologies, totalCount };
     } catch (error) {
       console.error('Error fetching products:', error);
       return { data: [], totalCount: 0 };
