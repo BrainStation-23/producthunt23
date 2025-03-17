@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Comment } from '@/types/comment';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -32,19 +32,50 @@ const CommentItem: React.FC<CommentItemProps> = ({
 }) => {
   const { user } = useAuth();
   const [isReplying, setIsReplying] = useState(false);
+  const [profileData, setProfileData] = useState<{
+    username: string | null;
+    avatar_url: string | null;
+  } | null>(comment.profile || null);
   
-  // Get username and avatar URL from the profile, with better fallbacks
-  const username = comment.profile?.username || 'User';
-  const avatarUrl = comment.profile?.avatar_url || '';
+  // Fetch profile data if not already included with the comment
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!comment.profile && comment.user_id) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('username, avatar_url')
+            .eq('id', comment.user_id)
+            .single();
+            
+          if (error) {
+            console.error('Error fetching profile:', error);
+            return;
+          }
+          
+          if (data) {
+            setProfileData(data);
+          }
+        } catch (error) {
+          console.error('Error in profile fetch:', error);
+        }
+      }
+    };
+    
+    fetchProfileData();
+  }, [comment.user_id, comment.profile]);
   
-  // Generate meaningful initials from username or email
+  // Get username and avatar URL from the profile or state
+  const username = profileData?.username || `User-${comment.user_id.substring(0, 4)}`;
+  const avatarUrl = profileData?.avatar_url || '';
+  
+  // Generate meaningful initials from username or user ID
   const getInitials = () => {
-    if (comment.profile?.username) {
-      // Get first two letters of username
-      return comment.profile.username.substring(0, 2).toUpperCase();
+    if (profileData?.username) {
+      return profileData.username.substring(0, 2).toUpperCase();
     } else {
-      // If we have user_id but no profile info, use "U" as fallback
-      return "U";
+      // Use first two characters from user_id if no username
+      return comment.user_id.substring(0, 2).toUpperCase();
     }
   };
   
