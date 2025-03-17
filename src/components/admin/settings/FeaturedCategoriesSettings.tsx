@@ -12,26 +12,111 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { FeaturedCategory } from '@/pages/landing/types';
-import { Plus, Trash, MoveUp, MoveDown, Save } from 'lucide-react';
+import { Category } from '@/types/product';
+import { Plus, Trash, MoveUp, MoveDown, Save, Check } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { toast } from 'sonner';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+const IconPicker = ({ value, onChange }: { value: string | null, onChange: (value: string) => void }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Get all icon names from lucide-react
+  const iconNames = Object.keys(LucideIcons)
+    .filter(key => key !== 'default' && key !== 'createLucideIcon')
+    .filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()));
+  
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="w-full justify-start">
+          {value && LucideIcons[value as keyof typeof LucideIcons] ? (
+            <>
+              {React.createElement(
+                LucideIcons[value as keyof typeof LucideIcons], 
+                { className: "mr-2 h-4 w-4" }
+              )}
+              {value}
+            </>
+          ) : (
+            <>
+              <LucideIcons.Image className="mr-2 h-4 w-4" />
+              Select icon
+            </>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-0">
+        <div className="p-2">
+          <Input
+            placeholder="Search icons..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="mb-2"
+          />
+        </div>
+        <ScrollArea className="h-[300px]">
+          <div className="grid grid-cols-3 gap-2 p-2">
+            {iconNames.map((name) => {
+              const IconComponent = LucideIcons[name as keyof typeof LucideIcons];
+              if (!IconComponent || typeof IconComponent !== 'function') return null;
+              
+              return (
+                <Button
+                  key={name}
+                  variant="ghost"
+                  className="flex h-10 w-full items-center justify-start gap-2 px-2"
+                  onClick={() => {
+                    onChange(name);
+                  }}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  <span className="text-xs truncate">{name}</span>
+                </Button>
+              );
+            })}
+          </div>
+        </ScrollArea>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 const FeaturedCategoriesSettings = () => {
   const queryClient = useQueryClient();
   const [editMode, setEditMode] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState({
     name: '',
-    slug: '',
+    categoryId: '',
     icon: ''
+  });
+
+  // Fetch all available categories
+  const { data: availableCategories, isLoading: loadingCategories } = useQuery({
+    queryKey: ['adminCategories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('status', 'active')
+        .order('name');
+      
+      if (error) throw error;
+      return data as Category[];
+    }
   });
 
   // Fetch featured categories
@@ -50,7 +135,17 @@ const FeaturedCategoriesSettings = () => {
 
   // Add new category
   const addCategory = useMutation({
-    mutationFn: async (category: Omit<FeaturedCategory, 'id' | 'display_order' | 'created_at'>) => {
+    mutationFn: async (category: {
+      name: string;
+      categoryId: string;
+      icon: string;
+    }) => {
+      // Find the selected category from available categories
+      const selectedCategory = availableCategories?.find(c => c.id === category.categoryId);
+      if (!selectedCategory) {
+        throw new Error('Selected category not found');
+      }
+      
       // Calculate max display order
       const maxOrder = categories && categories.length > 0 
         ? Math.max(...categories.map(c => c.display_order)) 
@@ -60,7 +155,7 @@ const FeaturedCategoriesSettings = () => {
         .from('featured_categories')
         .insert({
           name: category.name,
-          slug: category.slug,
+          slug: selectedCategory.name.toLowerCase().replace(/\s+/g, '-'),
           icon: category.icon || null,
           display_order: maxOrder + 1
         })
@@ -71,7 +166,7 @@ const FeaturedCategoriesSettings = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['featuredCategories'] });
-      setNewCategory({ name: '', slug: '', icon: '' });
+      setNewCategory({ name: '', categoryId: '', icon: '' });
       toast.success('Category added successfully');
     },
     onError: (error) => {
@@ -86,7 +181,6 @@ const FeaturedCategoriesSettings = () => {
         .from('featured_categories')
         .update({
           name: category.name,
-          slug: category.slug,
           icon: category.icon
         })
         .eq('id', category.id)
@@ -168,22 +262,6 @@ const FeaturedCategoriesSettings = () => {
     }
   });
 
-  // Handle input changes for new category
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setNewCategory(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Handle form submission for new category
-  const handleAddCategory = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCategory.name || !newCategory.slug) {
-      toast.error('Name and slug are required');
-      return;
-    }
-    addCategory.mutate(newCategory);
-  };
-
   // Handle category update
   const handleUpdateCategory = (id: string, field: string, value: string) => {
     if (!categories) return;
@@ -205,38 +283,56 @@ const FeaturedCategoriesSettings = () => {
 
       {/* Add new category form */}
       <div className="bg-muted/50 rounded-lg p-4">
-        <h3 className="font-medium mb-3">Add New Category</h3>
-        <form onSubmit={handleAddCategory} className="grid gap-4 md:grid-cols-4">
+        <h3 className="font-medium mb-3">Add New Featured Category</h3>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          if (!newCategory.name || !newCategory.categoryId) {
+            toast.error('Name and category selection are required');
+            return;
+          }
+          addCategory.mutate(newCategory);
+        }} className="grid gap-4 md:grid-cols-4">
           <div>
-            <label htmlFor="name" className="text-sm font-medium">Name</label>
+            <label htmlFor="name" className="text-sm font-medium">Display Name</label>
             <Input
               id="name"
               name="name"
               value={newCategory.name}
-              onChange={handleInputChange}
-              placeholder="Category name"
+              onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="Display name"
               required
             />
           </div>
           <div>
-            <label htmlFor="slug" className="text-sm font-medium">Slug</label>
-            <Input
-              id="slug"
-              name="slug"
-              value={newCategory.slug}
-              onChange={handleInputChange}
-              placeholder="category-slug"
+            <label htmlFor="category" className="text-sm font-medium">Category</label>
+            <Select 
+              value={newCategory.categoryId} 
+              onValueChange={(value) => setNewCategory(prev => ({ ...prev, categoryId: value }))}
               required
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {loadingCategories ? (
+                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                ) : availableCategories?.length === 0 ? (
+                  <SelectItem value="empty" disabled>No categories available</SelectItem>
+                ) : (
+                  availableCategories?.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
           </div>
           <div>
-            <label htmlFor="icon" className="text-sm font-medium">Icon (optional)</label>
-            <Input
-              id="icon"
-              name="icon"
-              value={newCategory.icon}
-              onChange={handleInputChange}
-              placeholder="Icon name or URL"
+            <label htmlFor="icon" className="text-sm font-medium">Icon</label>
+            <IconPicker 
+              value={newCategory.icon} 
+              onChange={(value) => setNewCategory(prev => ({ ...prev, icon: value }))}
             />
           </div>
           <div className="flex items-end">
@@ -250,17 +346,17 @@ const FeaturedCategoriesSettings = () => {
 
       {/* Categories table */}
       <div>
-        <h3 className="font-medium mb-3">Existing Categories</h3>
+        <h3 className="font-medium mb-3">Existing Featured Categories</h3>
         {isLoading ? (
           <div className="text-center py-4">Loading categories...</div>
         ) : !categories || categories.length === 0 ? (
-          <div className="text-center py-4 text-muted-foreground">No categories found</div>
+          <div className="text-center py-4 text-muted-foreground">No featured categories found</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Order</TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead>Display Name</TableHead>
                 <TableHead>Slug</TableHead>
                 <TableHead>Icon</TableHead>
                 <TableHead>Actions</TableHead>
@@ -323,48 +419,22 @@ const FeaturedCategoriesSettings = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    {editMode === `${category.id}-slug` ? (
-                      <div className="flex space-x-2">
-                        <Input 
-                          value={category.slug}
-                          onChange={(e) => {
-                            const updatedCategories = categories.map(c => 
-                              c.id === category.id ? { ...c, slug: e.target.value } : c
-                            );
-                            queryClient.setQueryData(['featuredCategories'], updatedCategories);
-                          }}
-                          className="h-8"
-                        />
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => handleUpdateCategory(category.id, 'slug', category.slug)}
-                        >
-                          <Save className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div 
-                        className="cursor-pointer hover:underline" 
-                        onClick={() => setEditMode(`${category.id}-slug`)}
-                      >
-                        {category.slug}
-                      </div>
-                    )}
+                    {category.slug}
                   </TableCell>
                   <TableCell>
                     {editMode === `${category.id}-icon` ? (
                       <div className="flex space-x-2">
-                        <Input 
-                          value={category.icon || ''}
-                          onChange={(e) => {
-                            const updatedCategories = categories.map(c => 
-                              c.id === category.id ? { ...c, icon: e.target.value } : c
-                            );
-                            queryClient.setQueryData(['featuredCategories'], updatedCategories);
-                          }}
-                          className="h-8"
-                        />
+                        <div className="w-full">
+                          <IconPicker
+                            value={category.icon}
+                            onChange={(value) => {
+                              const updatedCategories = categories.map(c => 
+                                c.id === category.id ? { ...c, icon: value } : c
+                              );
+                              queryClient.setQueryData(['featuredCategories'], updatedCategories);
+                            }}
+                          />
+                        </div>
                         <Button 
                           size="sm" 
                           variant="ghost"
@@ -375,10 +445,20 @@ const FeaturedCategoriesSettings = () => {
                       </div>
                     ) : (
                       <div 
-                        className="cursor-pointer hover:underline" 
+                        className="cursor-pointer hover:underline flex items-center"
                         onClick={() => setEditMode(`${category.id}-icon`)}
                       >
-                        {category.icon || '-'}
+                        {category.icon && LucideIcons[category.icon as keyof typeof LucideIcons] ? (
+                          <>
+                            {React.createElement(
+                              LucideIcons[category.icon as keyof typeof LucideIcons],
+                              { className: "mr-2 h-4 w-4" }
+                            )}
+                            {category.icon}
+                          </>
+                        ) : (
+                          'No icon'
+                        )}
                       </div>
                     )}
                   </TableCell>
