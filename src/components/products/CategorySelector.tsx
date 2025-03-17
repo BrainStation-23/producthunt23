@@ -14,10 +14,17 @@ interface CategorySelectorProps {
   onSelect: (categories: string[]) => void;
 }
 
+// Local type that matches the query response
+interface CategoryItem {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive';
+}
+
 const CategorySelector: React.FC<CategorySelectorProps> = ({ selected, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

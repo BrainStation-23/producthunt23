@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,6 @@ interface Product {
   tagline: string;
   image_url: string | null;
   website_url: string | null;
-  tags: string[] | null;
   categories: string[] | null;
   upvotes: number;
 }

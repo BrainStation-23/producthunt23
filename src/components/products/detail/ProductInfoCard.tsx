@@ -111,8 +111,8 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
         <div>
           <h3 className="font-medium mb-2">Categories</h3>
           <div className="flex flex-wrap gap-2">
-            {product?.tags && product.tags.map((tag, index) => (
-              <Badge key={index} variant="secondary">{tag}</Badge>
+            {product?.categories && product.categories.map((category, index) => (
+              <Badge key={index} variant="secondary">{category}</Badge>
             ))}
           </div>
         </div>

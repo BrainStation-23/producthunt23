@@ -52,8 +52,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
         </Badge>
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        {product.tags && product.tags.length > 0
-          ? product.tags[0]
+        {product.categories && product.categories.length > 0
+          ? product.categories[0]
           : '-'}
       </TableCell>
       <TableCell className="hidden md:table-cell">{product.upvotes || 0}</TableCell>

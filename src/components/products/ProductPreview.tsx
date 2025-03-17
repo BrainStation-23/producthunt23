@@ -56,8 +56,8 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({ formData }) => {
         )}
         
         <div className="flex flex-wrap gap-2">
-          {formData.tags && formData.tags.map((tag, index) => (
-            <Badge key={index} variant="secondary">{tag}</Badge>
+          {formData.categories && formData.categories.map((category, index) => (
+            <Badge key={index} variant="secondary">{category}</Badge>
           ))}
         </div>
         
