@@ -13,6 +13,9 @@ interface ProfileData {
   username: string | null;
   bio: string | null;
   website: string | null;
+  twitter: string | null;
+  linkedin: string | null;
+  github: string | null;
   avatar_url: string | null;
 }
 
@@ -25,6 +28,9 @@ const UserProfile: React.FC = () => {
     username: '',
     bio: '',
     website: '',
+    twitter: '',
+    linkedin: '',
+    github: '',
     avatar_url: null
   });
   const [directAvatarUrl, setDirectAvatarUrl] = useState('');
@@ -39,7 +45,7 @@ const UserProfile: React.FC = () => {
         setIsLoading(true);
         const { data, error } = await supabase
           .from('profiles')
-          .select('username, bio, website, avatar_url')
+          .select('username, bio, website, twitter, linkedin, github, avatar_url')
           .eq('id', user.id)
           .single();
 
@@ -50,6 +56,9 @@ const UserProfile: React.FC = () => {
             username: data.username || '',
             bio: data.bio || '',
             website: data.website || '',
+            twitter: data.twitter || '',
+            linkedin: data.linkedin || '',
+            github: data.github || '',
             avatar_url: data.avatar_url
           });
           
@@ -84,7 +93,10 @@ const UserProfile: React.FC = () => {
         .update({
           username: formData.username,
           bio: formData.bio,
-          website: formData.website
+          website: formData.website,
+          twitter: formData.twitter,
+          linkedin: formData.linkedin,
+          github: formData.github
         })
         .eq('id', user.id);
 
