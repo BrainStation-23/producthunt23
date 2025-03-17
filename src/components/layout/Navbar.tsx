@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Menu, Bell, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface NavbarProps {
   isLoggedIn?: boolean;
@@ -21,6 +22,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
   const { user, userRole } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   
   // Determine if user is actually logged in from auth context
   const userIsLoggedIn = !!user;
@@ -28,8 +30,34 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
   // Determine dashboard path based on role
   const dashboardPath = userRole === 'admin' ? '/admin' : '/user';
 
-  // Get avatar URL from user metadata if available
-  const avatarUrl = user?.user_metadata?.avatar_url || null;
+  // Fetch avatar URL from profiles table when user changes
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) {
+        setAvatarUrl(null);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return;
+        }
+        
+        setAvatarUrl(data?.avatar_url || null);
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [user]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
