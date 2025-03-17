@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,13 +31,11 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
     
-    // Check file type
     if (!selectedFile.type.startsWith('image/')) {
       setError('Please select an image file');
       return;
     }
     
-    // Check file size (max 5MB)
     if (selectedFile.size > 5 * 1024 * 1024) {
       setError('File size must be less than 5MB');
       return;
@@ -47,7 +44,6 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
     setFile(selectedFile);
     setError(null);
     
-    // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreviewUrl(e.target?.result as string);
@@ -65,26 +61,38 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
       setUploading(true);
       setProgress(0);
       
-      // Generate a unique file name
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
       
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('product_screenshots')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-          onUploadProgress: (progress) => {
-            const percent = Math.round((progress.loaded / progress.total) * 100);
-            setProgress(percent);
-          },
+      const fileSize = file.size;
+      let uploadedSize = 0;
+      
+      const uploadWithProgress = async () => {
+        const { data, error } = await supabase.storage
+          .from('product_screenshots')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (error) throw error;
+        return data;
+      };
+      
+      const progressInterval = setInterval(() => {
+        const increment = Math.random() * 10 + 5;
+        setProgress(prev => {
+          const newProgress = Math.min(prev + increment, 95);
+          return newProgress;
         });
+      }, 500);
       
-      if (error) throw error;
+      const data = await uploadWithProgress();
       
-      // Get the public URL
+      clearInterval(progressInterval);
+      setProgress(100);
+      
       const { data: { publicUrl } } = supabase.storage
         .from('product_screenshots')
         .getPublicUrl(filePath);
