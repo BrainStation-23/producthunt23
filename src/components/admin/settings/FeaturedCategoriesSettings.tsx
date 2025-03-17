@@ -31,8 +31,24 @@ import * as LucideIcons from 'lucide-react';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-// Define a type for Lucide icon names
-type LucideIconName = keyof typeof LucideIcons;
+// Create a type for the icon names from Lucide
+type IconName = keyof typeof LucideIcons;
+
+// Simple component to render a Lucide icon by name
+const DynamicIcon = ({ 
+  name, 
+  className 
+}: { 
+  name: string | null, 
+  className?: string 
+}) => {
+  if (!name || !(name in LucideIcons)) {
+    return <Image className={className || "h-4 w-4"} />;
+  }
+  
+  const IconComponent = LucideIcons[name as IconName];
+  return <IconComponent className={className || "h-4 w-4"} />;
+};
 
 const IconPicker = ({ value, onChange }: { value: string | null, onChange: (value: string) => void }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,21 +57,6 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
   const iconNames = Object.keys(LucideIcons)
     .filter(key => key !== 'default' && key !== 'createLucideIcon')
     .filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()));
-  
-  // Function to render an icon safely
-  const renderIcon = (name: string) => {
-    if (name in LucideIcons) {
-      // Check if it's a valid icon component
-      const IconComponent = LucideIcons[name as LucideIconName];
-      // Make sure it's a valid React component that can be rendered
-      if (typeof IconComponent === 'function' || 
-          (typeof IconComponent === 'object' && IconComponent !== null)) {
-        return React.createElement(IconComponent, { className: "h-4 w-4" });
-      }
-    }
-    // Fallback to Image icon if the name is not found
-    return <Image className="h-4 w-4" />;
-  };
 
   return (
     <Popover>
@@ -63,8 +64,8 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
         <Button variant="outline" className="w-full justify-start">
           {value && value in LucideIcons ? (
             <>
-              {renderIcon(value)}
-              <span className="ml-2">{value}</span>
+              <DynamicIcon name={value} className="h-4 w-4 mr-2" />
+              <span>{value}</span>
             </>
           ) : (
             <>
@@ -94,7 +95,7 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
                   onChange(name);
                 }}
               >
-                {renderIcon(name)}
+                <DynamicIcon name={name} className="h-4 w-4" />
                 <span className="text-xs truncate">{name}</span>
               </Button>
             ))}
@@ -103,6 +104,16 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
       </PopoverContent>
     </Popover>
   );
+};
+
+// Helper function to generate a slug from a string
+const generateSlug = (text: string): string => {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, '-')     // Replace spaces with hyphens
+    .replace(/[^\w-]+/g, '')  // Remove non-word characters except hyphens
+    .replace(/--+/g, '-')     // Replace multiple hyphens with single hyphen
+    .trim();
 };
 
 const FeaturedCategoriesSettings = () => {
@@ -161,11 +172,14 @@ const FeaturedCategoriesSettings = () => {
         ? Math.max(...categories.map(c => c.display_order)) 
         : 0;
       
+      // Generate slug from name
+      const slug = generateSlug(category.name);
+      
       const { data, error } = await supabase
         .from('featured_categories')
         .insert({
           name: category.name,
-          slug: selectedCategory.name.toLowerCase().replace(/\s+/g, '-'),
+          slug: slug,
           icon: category.icon || null,
           display_order: maxOrder + 1
         })
@@ -187,12 +201,21 @@ const FeaturedCategoriesSettings = () => {
   // Update category
   const updateCategory = useMutation({
     mutationFn: async (category: FeaturedCategory) => {
+      // Generate a new slug if name was updated
+      const originalCategory = categories?.find(c => c.id === category.id);
+      const updatedData: Partial<FeaturedCategory> = {
+        name: category.name,
+        icon: category.icon
+      };
+      
+      // Update slug if name changed
+      if (originalCategory && originalCategory.name !== category.name) {
+        updatedData.slug = generateSlug(category.name);
+      }
+      
       const { data, error } = await supabase
         .from('featured_categories')
-        .update({
-          name: category.name,
-          icon: category.icon
-        })
+        .update(updatedData)
         .eq('id', category.id)
         .select();
       
@@ -271,21 +294,6 @@ const FeaturedCategoriesSettings = () => {
       toast.error('Failed to reorder categories: ' + error.message);
     }
   });
-
-  // Function to safely render an icon
-  const renderIcon = (name: string | null) => {
-    if (name && name in LucideIcons) {
-      // Check if it's a valid icon component
-      const IconComponent = LucideIcons[name as LucideIconName];
-      // Make sure it's a valid React component that can be rendered
-      if (typeof IconComponent === 'function' || 
-          (typeof IconComponent === 'object' && IconComponent !== null)) {
-        return React.createElement(IconComponent, { className: "h-4 w-4 mr-2" });
-      }
-    }
-    // Fallback to Image icon if the name is not found
-    return <Image className="h-4 w-4 mr-2" />;
-  };
 
   // Handle category update
   const handleUpdateCategory = (id: string, field: string, value: string) => {
@@ -475,7 +483,7 @@ const FeaturedCategoriesSettings = () => {
                       >
                         {category.icon ? (
                           <>
-                            {renderIcon(category.icon)}
+                            <DynamicIcon name={category.icon} className="h-4 w-4 mr-2" />
                             <span>{category.icon}</span>
                           </>
                         ) : (
