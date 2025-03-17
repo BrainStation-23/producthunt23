@@ -36,6 +36,12 @@ import UserSettings from './pages/user/UserSettings';
 // Create a client
 const queryClient = new QueryClient();
 
+// Add devicon CSS
+const deviconLink = document.createElement('link');
+deviconLink.rel = 'stylesheet';
+deviconLink.href = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css';
+document.head.appendChild(deviconLink);
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>

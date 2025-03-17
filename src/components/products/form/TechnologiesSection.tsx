@@ -10,8 +10,9 @@ import {
   FormDescription,
   FormMessage,
 } from '@/components/ui/form';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import TechnologiesSelector from '@/components/products/TechnologiesSelector';
+import { Code } from 'lucide-react';
 
 interface TechnologiesSectionProps {
   form: UseFormReturn<ProductFormValues>;
@@ -20,13 +21,19 @@ interface TechnologiesSectionProps {
 const TechnologiesSection: React.FC<TechnologiesSectionProps> = ({ form }) => {
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl flex items-center gap-2">
+          <Code className="h-5 w-5" />
+          Technologies
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
         <FormField
           control={form.control}
           name="technologies"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Technologies*</FormLabel>
+              <FormLabel>Technologies<span className="text-destructive">*</span></FormLabel>
               <FormControl>
                 <TechnologiesSelector 
                   selected={field.value} 
