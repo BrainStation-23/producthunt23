@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/popover";
 import { FeaturedCategory } from '@/pages/landing/types';
 import { Category } from '@/types/product';
-import { Plus, Trash, MoveUp, MoveDown, Save, Check, Image } from 'lucide-react';
+import { Plus, Trash, MoveUp, MoveDown, Save, Image } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -46,8 +46,9 @@ const DynamicIcon = ({
     return <Image className={className || "h-4 w-4"} />;
   }
   
+  // Use createElement to properly render the dynamic component
   const IconComponent = LucideIcons[name as IconName];
-  return <IconComponent className={className || "h-4 w-4"} />;
+  return React.createElement(IconComponent, { className: className || "h-4 w-4" });
 };
 
 const IconPicker = ({ value, onChange }: { value: string | null, onChange: (value: string) => void }) => {
