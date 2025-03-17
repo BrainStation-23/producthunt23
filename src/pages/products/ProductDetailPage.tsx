@@ -18,6 +18,26 @@ const ProductDetailPage: React.FC = () => {
   const [screenshots, setScreenshots] = useState<ProductScreenshot[]>([]);
   const [videos, setVideos] = useState<ProductVideo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [commentCount, setCommentCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCommentCount = async () => {
+      if (!productId) return;
+      
+      const { count, error } = await supabase
+        .from('comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('product_id', productId);
+        
+      if (error) {
+        console.error('Error fetching comment count:', error);
+      } else {
+        setCommentCount(count || 0);
+      }
+    };
+    
+    fetchCommentCount();
+  }, [productId]);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -92,6 +112,68 @@ const ProductDetailPage: React.FC = () => {
     fetchProductDetails();
   }, [productId]);
 
+  useEffect(() => {
+    // Set up a subscription to listen for changes to the upvotes count
+    if (!productId) return;
+    
+    const upvotesSubscription = supabase
+      .channel('product-upvotes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'upvotes',
+          filter: `product_id=eq.${productId}`
+        },
+        () => {
+          // Refetch just the product to get the updated upvotes count
+          supabase
+            .from('products')
+            .select('upvotes')
+            .eq('id', productId)
+            .single()
+            .then(({ data, error }) => {
+              if (!error && data && product) {
+                setProduct({ ...product, upvotes: data.upvotes });
+              }
+            });
+        }
+      )
+      .subscribe();
+      
+    // Set up a subscription to listen for changes to comments
+    const commentsSubscription = supabase
+      .channel('product-comments')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comments',
+          filter: `product_id=eq.${productId}`
+        },
+        () => {
+          // Update comment count
+          supabase
+            .from('comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('product_id', productId)
+            .then(({ count, error }) => {
+              if (!error) {
+                setCommentCount(count || 0);
+              }
+            });
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(upvotesSubscription);
+      supabase.removeChannel(commentsSubscription);
+    };
+  }, [productId, product]);
+
   if (isLoading) {
     return <ProductLoadingSkeleton />;
   }
@@ -109,14 +191,13 @@ const ProductDetailPage: React.FC = () => {
           <ProductMainContent product={product} />
           <ProductMediaTabs screenshots={screenshots} videos={videos} />
           
-          {/* Add the comments section */}
           <div className="mt-8">
             <ProductComments productId={product.id} />
           </div>
         </div>
 
         <div className="space-y-6">
-          <ProductInfoCard product={product} />
+          <ProductInfoCard product={product} commentCount={commentCount} />
         </div>
       </div>
     </div>
