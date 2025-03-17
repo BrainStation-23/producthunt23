@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
+import Index from "@/pages/Index";
 import LandingPage from "@/pages/landing/LandingPage";
 import NotFound from "@/pages/NotFound";
 import Login from "@/pages/auth/Login";
@@ -37,7 +38,8 @@ function App() {
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<MainLayout />}>
-              <Route index element={<LandingPage />} />
+              <Route index element={<Index />} />
+              <Route path="landing" element={<LandingPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="products/:id" element={<div className="container py-12">Product detail page (To be implemented)</div>} />
               <Route path="categories" element={<div className="container py-12">Categories page (To be implemented)</div>} />

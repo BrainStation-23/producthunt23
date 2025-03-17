@@ -82,6 +82,62 @@ export type Database = {
           },
         ]
       }
+      featured_categories: {
+        Row: {
+          created_at: string
+          display_order: number
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      featured_products: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_makers: {
         Row: {
           created_at: string
@@ -395,6 +451,22 @@ export type Database = {
           profile_username: string
           profile_avatar_url: string
           total_count: number
+        }[]
+      }
+      get_featured_products: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          description: string
+          tagline: string
+          image_url: string
+          website_url: string
+          tags: string[]
+          upvotes: number
+          created_at: string
+          created_by: string
+          display_order: number
         }[]
       }
       has_role: {
