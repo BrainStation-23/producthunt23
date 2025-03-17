@@ -26,10 +26,13 @@ import {
 } from "@/components/ui/popover";
 import { FeaturedCategory } from '@/pages/landing/types';
 import { Category } from '@/types/product';
-import { Plus, Trash, MoveUp, MoveDown, Save, Check } from 'lucide-react';
+import { Plus, Trash, MoveUp, MoveDown, Save, Check, Image } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+// Define a type for Lucide icon names
+type LucideIconName = keyof typeof LucideIcons;
 
 const IconPicker = ({ value, onChange }: { value: string | null, onChange: (value: string) => void }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,21 +42,27 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
     .filter(key => key !== 'default' && key !== 'createLucideIcon')
     .filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()));
   
+  // Function to safely render an icon
+  const renderIcon = (name: string) => {
+    if (name in LucideIcons && typeof LucideIcons[name as LucideIconName] !== 'undefined') {
+      const IconComponent = LucideIcons[name as LucideIconName];
+      return <IconComponent className="h-4 w-4" />;
+    }
+    return <Image className="h-4 w-4" />;
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
-          {value && LucideIcons[value as keyof typeof LucideIcons] ? (
+          {value && value in LucideIcons ? (
             <>
-              {React.createElement(
-                LucideIcons[value as keyof typeof LucideIcons], 
-                { className: "mr-2 h-4 w-4" }
-              )}
-              {value}
+              {renderIcon(value)}
+              <span className="ml-2">{value}</span>
             </>
           ) : (
             <>
-              <LucideIcons.Image className="mr-2 h-4 w-4" />
+              <Image className="mr-2 h-4 w-4" />
               Select icon
             </>
           )}
@@ -71,9 +80,6 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
         <ScrollArea className="h-[300px]">
           <div className="grid grid-cols-3 gap-2 p-2">
             {iconNames.map((name) => {
-              const IconComponent = LucideIcons[name as keyof typeof LucideIcons];
-              if (!IconComponent || typeof IconComponent !== 'function') return null;
-              
               return (
                 <Button
                   key={name}
@@ -83,7 +89,7 @@ const IconPicker = ({ value, onChange }: { value: string | null, onChange: (valu
                     onChange(name);
                   }}
                 >
-                  <IconComponent className="h-4 w-4" />
+                  {renderIcon(name)}
                   <span className="text-xs truncate">{name}</span>
                 </Button>
               );
@@ -261,6 +267,15 @@ const FeaturedCategoriesSettings = () => {
       toast.error('Failed to reorder categories: ' + error.message);
     }
   });
+
+  // Function to safely render an icon
+  const renderIcon = (name: string | null) => {
+    if (name && name in LucideIcons && typeof LucideIcons[name as LucideIconName] !== 'undefined') {
+      const IconComponent = LucideIcons[name as LucideIconName];
+      return <IconComponent className="h-4 w-4 mr-2" />;
+    }
+    return <Image className="h-4 w-4 mr-2" />;
+  };
 
   // Handle category update
   const handleUpdateCategory = (id: string, field: string, value: string) => {
@@ -448,13 +463,10 @@ const FeaturedCategoriesSettings = () => {
                         className="cursor-pointer hover:underline flex items-center"
                         onClick={() => setEditMode(`${category.id}-icon`)}
                       >
-                        {category.icon && LucideIcons[category.icon as keyof typeof LucideIcons] ? (
+                        {category.icon ? (
                           <>
-                            {React.createElement(
-                              LucideIcons[category.icon as keyof typeof LucideIcons],
-                              { className: "mr-2 h-4 w-4" }
-                            )}
-                            {category.icon}
+                            {renderIcon(category.icon)}
+                            <span>{category.icon}</span>
                           </>
                         ) : (
                           'No icon'
