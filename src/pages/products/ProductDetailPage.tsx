@@ -10,6 +10,7 @@ import ProductInfoCard from '@/components/products/detail/ProductInfoCard';
 import ProductMediaTabs from '@/components/products/detail/ProductMediaTabs';
 import ProductLoadingSkeleton from '@/components/products/detail/ProductLoadingSkeleton';
 import ProductNotFound from '@/components/products/detail/ProductNotFound';
+import ProductComments from '@/components/products/comments/ProductComments';
 
 const ProductDetailPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -107,6 +108,11 @@ const ProductDetailPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <ProductMainContent product={product} />
           <ProductMediaTabs screenshots={screenshots} videos={videos} />
+          
+          {/* Add the comments section */}
+          <div className="mt-8">
+            <ProductComments productId={product.id} />
+          </div>
         </div>
 
         <div className="space-y-6">
