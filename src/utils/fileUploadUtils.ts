@@ -22,11 +22,13 @@ export const validateImageFile = (file: File): FileValidationResult => {
 export const uploadImageToStorage = async (
   file: File, 
   bucketName: string = 'product_screenshots',
-  onProgressUpdate?: (progress: number) => void
+  onProgressUpdate?: (progress: number) => void,
+  customPath?: string
 ): Promise<string> => {
   const fileExt = file.name.split('.').pop();
-  const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-  const filePath = `${fileName}`;
+  const fileName = customPath ? 
+    `${customPath}.${fileExt}` : 
+    `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
   
   // Simulate progress if onProgressUpdate is provided
   let progressInterval: NodeJS.Timeout | null = null;
@@ -34,9 +36,6 @@ export const uploadImageToStorage = async (
   if (onProgressUpdate) {
     onProgressUpdate(0);
     progressInterval = setInterval(() => {
-      const increment = Math.random() * 10 + 5;
-      // Here's the fix: Instead of passing a function to onProgressUpdate,
-      // calculate the new progress value and pass it directly
       const simulatedProgress = Math.min(95, Math.random() * 10 + 5);
       if (onProgressUpdate) {
         onProgressUpdate(simulatedProgress);
@@ -47,9 +46,9 @@ export const uploadImageToStorage = async (
   try {
     const { data, error } = await supabase.storage
       .from(bucketName)
-      .upload(filePath, file, {
+      .upload(fileName, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: true // Changed to true to allow replacing existing avatars
       });
     
     if (error) throw error;
@@ -61,7 +60,7 @@ export const uploadImageToStorage = async (
     
     const { data: { publicUrl } } = supabase.storage
       .from(bucketName)
-      .getPublicUrl(filePath);
+      .getPublicUrl(fileName);
     
     return publicUrl;
   } catch (error) {

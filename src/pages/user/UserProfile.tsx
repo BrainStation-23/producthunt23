@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -122,11 +121,15 @@ const UserProfile: React.FC = () => {
     try {
       setIsUploading(true);
       
-      // Upload the file using the utility function
+      // Create a path that includes the user's ID to ensure uniqueness and proper organization
+      const filePath = `${user.id}/avatar`;
+      
+      // Upload the file using the utility function with the new bucket name
       const publicUrl = await uploadImageToStorage(
         file, 
-        'avatars',
-        (progress) => setUploadProgress(progress)
+        'profile_pictures',
+        (progress) => setUploadProgress(progress),
+        filePath // Pass the custom path
       );
       
       // Update profile with the new avatar URL
@@ -378,7 +381,7 @@ const UserProfile: React.FC = () => {
                       disabled={isUploading}
                     />
                     <p className="text-xs text-muted-foreground">
-                      JPG, PNG or GIF, max 2MB
+                      JPG, PNG or GIF, max 5MB
                     </p>
                   </div>
                 </TabsContent>
