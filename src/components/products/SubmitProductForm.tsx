@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductFormValues } from '@/types/product';
 import { useProductForm } from '@/components/products/form/useProductForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Import form sections
 import BasicInfoSection from '@/components/products/form/BasicInfoSection';
@@ -18,9 +19,20 @@ import AgreementSection from '@/components/products/form/AgreementSection';
 import FormActions from '@/components/products/form/FormActions';
 import ProductPreview from '@/components/products/ProductPreview';
 
-const SubmitProductForm: React.FC = () => {
+interface SubmitProductFormProps {
+  productId?: string;
+  mode?: 'create' | 'edit';
+}
+
+const SubmitProductForm: React.FC<SubmitProductFormProps> = ({ 
+  productId,
+  mode = 'create'
+}) => {
   const { user } = useAuth();
-  const { form, isSubmitting, handleSubmit } = useProductForm(user?.id);
+  const { form, isSubmitting, isLoading, handleSubmit } = useProductForm({
+    userId: user?.id,
+    productId
+  });
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const onSubmit = (data: ProductFormValues) => {
@@ -34,6 +46,28 @@ const SubmitProductForm: React.FC = () => {
   const openPreview = () => {
     setPreviewOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-1/3" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-10 w-1/2" />
+        </div>
+        
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-1/4" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+        
+        <div className="flex justify-end space-x-4">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -71,12 +105,13 @@ const SubmitProductForm: React.FC = () => {
             </TabsContent>
           </Tabs>
 
-          <AgreementSection form={form} />
+          {mode === 'create' && <AgreementSection form={form} />}
 
           <FormActions 
             isSubmitting={isSubmitting}
             onSaveAsDraft={onSaveAsDraft}
             onPreview={openPreview}
+            mode={mode}
           />
         </form>
       </Form>

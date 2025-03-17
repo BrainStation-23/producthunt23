@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -82,6 +83,7 @@ export interface Maker {
 
 // Form values interface
 export interface ProductFormValues {
+  id?: string; // Added for editing existing products
   name: string;
   tagline: string;
   description: string;

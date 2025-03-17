@@ -17,6 +17,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ProductsPage from './pages/products/ProductsPage';
 import SubmitProductPage from './pages/products/SubmitProductPage';
+import EditProductPage from './pages/products/EditProductPage';
 import NotFound from './pages/NotFound';
 
 // Admin Pages
@@ -58,6 +59,7 @@ function App() {
             >
               <Route index element={<AdminDashboard />} />
               <Route path="products" element={<AdminProducts />} />
+              <Route path="products/edit/:productId" element={<EditProductPage />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>

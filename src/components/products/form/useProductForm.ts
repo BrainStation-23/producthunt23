@@ -1,15 +1,16 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ProductFormValues, Maker } from '@/types/product';
+import { ProductFormValues, Maker, ProductScreenshot, ProductVideo, ProductTechnology } from '@/types/product';
 
 // Form validation schema
 export const productSchema = z.object({
+  id: z.string().optional(), // Optional ID for editing
   name: z.string().min(2, { message: 'Product name must be at least 2 characters.' }).max(50),
   tagline: z.string().min(5, { message: 'Tagline must be at least 5 characters.' }).max(150),
   description: z.string().min(20, { message: 'Description must be at least 20 characters.' }),
@@ -36,15 +37,17 @@ export const productSchema = z.object({
   }),
 });
 
-export const useProductForm = (userId: string | undefined) => {
+interface UseProductFormProps {
+  userId: string | undefined;
+  productId?: string; // Optional product ID for editing
+}
+
+export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!productId);
   
-  // Initialize maker with the current user
-  const initialMakers: Maker[] = userId 
-    ? [{ email: '', id: userId, isCreator: true }]
-    : [];
-  
+  // Initialize form with default values
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -57,16 +60,118 @@ export const useProductForm = (userId: string | undefined) => {
       tags: [],
       screenshots: [],
       videos: [],
-      makers: initialMakers,
+      makers: userId ? [{ email: '', id: userId, isCreator: true }] : [],
       agreed_to_policies: false,
     },
   });
 
+  // Fetch existing product data for editing
+  useEffect(() => {
+    if (productId) {
+      const fetchProductData = async () => {
+        try {
+          setIsLoading(true);
+          
+          // Fetch product details
+          const { data: product, error: productError } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', productId)
+            .single();
+          
+          if (productError) throw productError;
+          if (!product) throw new Error('Product not found');
+          
+          // Fetch product screenshots
+          const { data: screenshots, error: screenshotsError } = await supabase
+            .from('product_screenshots')
+            .select('*')
+            .eq('product_id', productId)
+            .order('display_order', { ascending: true });
+          
+          if (screenshotsError) throw screenshotsError;
+          
+          // Fetch product videos
+          const { data: videos, error: videosError } = await supabase
+            .from('product_videos')
+            .select('*')
+            .eq('product_id', productId)
+            .order('display_order', { ascending: true });
+          
+          if (videosError) throw videosError;
+          
+          // Fetch product technologies
+          const { data: technologies, error: technologiesError } = await supabase
+            .from('product_technologies')
+            .select('*')
+            .eq('product_id', productId)
+            .order('display_order', { ascending: true });
+          
+          if (technologiesError) throw technologiesError;
+          
+          // Fetch product makers
+          const { data: makers, error: makersError } = await supabase
+            .from('product_makers')
+            .select('*, profiles:profile_id(id, username, email)')
+            .eq('product_id', productId);
+          
+          if (makersError) throw makersError;
+          
+          // Transform the data for the form
+          const formattedScreenshots = screenshots.map((screenshot: ProductScreenshot) => ({
+            title: screenshot.title || undefined,
+            image_url: screenshot.image_url,
+            description: screenshot.description || undefined,
+          }));
+          
+          const formattedVideos = videos.map((video: ProductVideo) => ({
+            title: video.title || undefined,
+            video_url: video.video_url,
+          }));
+          
+          const formattedTechnologies = technologies.map((tech: ProductTechnology) => tech.technology_name);
+          
+          // Format makers - ensure the creator is marked
+          const formattedMakers = makers.map((maker: any) => ({
+            email: maker.profiles?.email || maker.profiles?.username || 'Unknown',
+            id: maker.profile_id,
+            isCreator: maker.profile_id === product.created_by,
+          }));
+          
+          // Set form values
+          form.reset({
+            id: productId,
+            name: product.name,
+            tagline: product.tagline,
+            description: product.description,
+            website_url: product.website_url || '',
+            image_url: product.image_url || '',
+            technologies: formattedTechnologies,
+            tags: product.tags || [],
+            screenshots: formattedScreenshots,
+            videos: formattedVideos,
+            makers: formattedMakers,
+            agreed_to_policies: true, // Already agreed when first submitted
+          });
+          
+        } catch (error: any) {
+          console.error('Error fetching product data:', error);
+          toast.error(error.message || 'Failed to load product data');
+          navigate('/admin/products');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchProductData();
+    }
+  }, [productId, form, navigate]);
+  
   // Once user data is available, update the creator's email
   const updateCreatorEmail = async (userId: string) => {
     const { data: userData, error } = await supabase
       .from('profiles')
-      .select('id, username')
+      .select('id, username, email')
       .eq('id', userId)
       .single();
     
@@ -74,14 +179,14 @@ export const useProductForm = (userId: string | undefined) => {
       const currentMakers = form.getValues('makers');
       const updatedMakers = currentMakers.map(maker => 
         maker.isCreator 
-          ? { ...maker, email: userData.username || 'Creator' }
+          ? { ...maker, email: userData.email || userData.username || 'Creator' }
           : maker
       );
       form.setValue('makers', updatedMakers);
     }
   };
 
-  if (userId) {
+  if (userId && !productId) {
     updateCreatorEmail(userId);
   }
 
@@ -93,28 +198,78 @@ export const useProductForm = (userId: string | undefined) => {
 
     setIsSubmitting(true);
     try {
-      // Save the product first
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .insert({
-          name: values.name,
-          tagline: values.tagline,
-          description: values.description,
-          website_url: values.website_url,
-          image_url: values.image_url,
-          tags: values.tags,
-          status: saveAsDraft ? 'draft' : 'pending',
-          created_by: userId,
-        })
-        .select('id')
-        .single();
+      const isEditing = !!values.id;
+      
+      // Update or insert the product
+      const productData = {
+        name: values.name,
+        tagline: values.tagline,
+        description: values.description,
+        website_url: values.website_url,
+        image_url: values.image_url,
+        tags: values.tags,
+        status: saveAsDraft ? 'draft' : isEditing ? undefined : 'pending',
+      };
+      
+      let productId: string;
+      
+      if (isEditing) {
+        // Update existing product
+        const { error: updateError } = await supabase
+          .from('products')
+          .update(productData)
+          .eq('id', values.id);
+          
+        if (updateError) throw updateError;
+        productId = values.id;
+        
+        // Delete existing related records to replace them
+        const { error: deleteScreenshotsError } = await supabase
+          .from('product_screenshots')
+          .delete()
+          .eq('product_id', productId);
+          
+        if (deleteScreenshotsError) throw deleteScreenshotsError;
+        
+        const { error: deleteVideosError } = await supabase
+          .from('product_videos')
+          .delete()
+          .eq('product_id', productId);
+          
+        if (deleteVideosError) throw deleteVideosError;
+        
+        const { error: deleteTechError } = await supabase
+          .from('product_technologies')
+          .delete()
+          .eq('product_id', productId);
+          
+        if (deleteTechError) throw deleteTechError;
+        
+        const { error: deleteMakersError } = await supabase
+          .from('product_makers')
+          .delete()
+          .eq('product_id', productId);
+          
+        if (deleteMakersError) throw deleteMakersError;
+      } else {
+        // Insert new product
+        const { data: product, error: productError } = await supabase
+          .from('products')
+          .insert({
+            ...productData,
+            created_by: userId,
+          })
+          .select('id')
+          .single();
 
-      if (productError) throw productError;
+        if (productError) throw productError;
+        productId = product.id;
+      }
 
       // Insert the makers
       if (values.makers.length > 0) {
         const makerData = values.makers.map(maker => ({
-          product_id: product.id,
+          product_id: productId,
           profile_id: maker.id || userId, // Use the creator's ID as a fallback
         }));
 
@@ -128,7 +283,7 @@ export const useProductForm = (userId: string | undefined) => {
       // Insert the technologies
       if (values.technologies.length > 0) {
         const techData = values.technologies.map((tech, index) => ({
-          product_id: product.id,
+          product_id: productId,
           technology_name: tech,
           display_order: index,
         }));
@@ -143,7 +298,7 @@ export const useProductForm = (userId: string | undefined) => {
       // Insert screenshots
       if (values.screenshots.length > 0) {
         const screenshotData = values.screenshots.map((screenshot, index) => ({
-          product_id: product.id,
+          product_id: productId,
           title: screenshot.title || null,
           image_url: screenshot.image_url,
           description: screenshot.description || null,
@@ -160,7 +315,7 @@ export const useProductForm = (userId: string | undefined) => {
       // Insert videos
       if (values.videos.length > 0) {
         const videoData = values.videos.map((video, index) => ({
-          product_id: product.id,
+          product_id: productId,
           title: video.title || null,
           video_url: video.video_url,
           display_order: index,
@@ -173,11 +328,11 @@ export const useProductForm = (userId: string | undefined) => {
         if (videoError) throw videoError;
       }
 
-      toast.success(saveAsDraft 
-        ? 'Product saved as draft' 
-        : 'Product submitted for review');
+      toast.success(isEditing 
+        ? 'Product updated successfully' 
+        : (saveAsDraft ? 'Product saved as draft' : 'Product submitted for review'));
       
-      navigate('/user/dashboard');
+      navigate('/admin/products');
     } catch (error: any) {
       console.error('Error submitting product:', error);
       toast.error(error.message || 'Failed to submit product');
@@ -189,6 +344,7 @@ export const useProductForm = (userId: string | undefined) => {
   return {
     form,
     isSubmitting,
+    isLoading,
     handleSubmit
   };
 };

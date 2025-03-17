@@ -36,8 +36,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { Link, useNavigate } from 'react-router-dom';
 
 const AdminProducts: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -140,6 +142,11 @@ const AdminProducts: React.FC = () => {
     setCurrentPage(1); // Reset to first page when searching
   };
 
+  // Handle product edit
+  const handleEditProduct = (productId: string) => {
+    navigate(`/admin/products/edit/${productId}`);
+  };
+
   // Get badge variant based on status
   const getStatusBadgeVariant = (status: string): "default" | "destructive" | "outline" | "secondary" => {
     switch (status) {
@@ -161,7 +168,7 @@ const AdminProducts: React.FC = () => {
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
           <p className="text-muted-foreground">Manage all products on the platform.</p>
         </div>
-        <Button className="sm:w-auto w-full">
+        <Button className="sm:w-auto w-full" onClick={() => navigate('/products/submit')}>
           <Plus className="mr-2 h-4 w-4" />
           Add Product
         </Button>
@@ -262,7 +269,7 @@ const AdminProducts: React.FC = () => {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Manage Product</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditProduct(product.id)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
