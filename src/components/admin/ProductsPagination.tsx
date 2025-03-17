@@ -22,12 +22,26 @@ const ProductsPagination: React.FC<ProductsPaginationProps> = ({
 }) => {
   if (totalPages <= 1) return null;
   
+  // Handle previous page click
+  const handlePreviousClick = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  // Handle next page click
+  const handleNextClick = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
   return (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious 
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={handlePreviousClick}
             className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
           />
         </PaginationItem>
@@ -45,7 +59,7 @@ const ProductsPagination: React.FC<ProductsPaginationProps> = ({
         
         <PaginationItem>
           <PaginationNext 
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={handleNextClick}
             className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
           />
         </PaginationItem>
