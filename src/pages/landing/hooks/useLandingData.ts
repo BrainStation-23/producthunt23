@@ -14,12 +14,20 @@ export function useLandingData() {
     queryKey: ['featuredCategories'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('featured_categories')
+        .from('featured_categories_view')
         .select('*')
         .order('display_order');
       
       if (error) throw error;
-      return data as FeaturedCategory[];
+      
+      // Map the data to match the expected shape
+      return data.map(category => ({
+        id: category.id,
+        name: category.name,
+        slug: category.name.toLowerCase().replace(/\s+/g, '-'),
+        icon: null,
+        display_order: category.display_order
+      })) as FeaturedCategory[];
     }
   });
 

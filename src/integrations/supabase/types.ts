@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_featured: boolean | null
           name: string
           status: Database["public"]["Enums"]["category_status"]
           updated_at: string
@@ -20,6 +21,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_featured?: boolean | null
           name: string
           status?: Database["public"]["Enums"]["category_status"]
           updated_at?: string
@@ -27,6 +29,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_featured?: boolean | null
           name?: string
           status?: Database["public"]["Enums"]["category_status"]
           updated_at?: string
@@ -81,33 +84,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      featured_categories: {
-        Row: {
-          created_at: string
-          display_order: number
-          icon: string | null
-          id: string
-          name: string
-          slug: string
-        }
-        Insert: {
-          created_at?: string
-          display_order?: number
-          icon?: string | null
-          id?: string
-          name: string
-          slug: string
-        }
-        Update: {
-          created_at?: string
-          display_order?: number
-          icon?: string | null
-          id?: string
-          name?: string
-          slug?: string
-        }
-        Relationships: []
       }
       featured_products: {
         Row: {
@@ -421,7 +397,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      featured_categories_view: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string | null
+          name: string | null
+          status: Database["public"]["Enums"]["category_status"] | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       delete_comment_with_replies: {

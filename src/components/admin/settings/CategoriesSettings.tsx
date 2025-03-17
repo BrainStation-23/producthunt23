@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Table, 
   TableBody, 
@@ -35,6 +36,7 @@ interface Category {
   id: string;
   name: string;
   status: 'active' | 'inactive';
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -46,6 +48,7 @@ const CategoriesSettings: React.FC = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editName, setEditName] = useState('');
+  const [isFeatured, setIsFeatured] = useState(false);
 
   // Fetch categories
   const { 
@@ -110,7 +113,10 @@ const CategoriesSettings: React.FC = () => {
     try {
       const { error } = await supabase
         .from('categories')
-        .update({ name: editName.trim() })
+        .update({ 
+          name: editName.trim(),
+          is_featured: isFeatured
+        })
         .eq('id', editingCategory.id);
 
       if (error) throw error;
@@ -122,6 +128,24 @@ const CategoriesSettings: React.FC = () => {
     } catch (error) {
       console.error('Error updating category:', error);
       toast.error('Failed to update category');
+    }
+  };
+
+  // Toggle category featured status
+  const toggleCategoryFeatured = async (category: Category) => {
+    try {
+      const { error } = await supabase
+        .from('categories')
+        .update({ is_featured: !category.is_featured })
+        .eq('id', category.id);
+
+      if (error) throw error;
+      
+      toast.success(`Category ${!category.is_featured ? 'added to' : 'removed from'} featured`);
+      refetch();
+    } catch (error) {
+      console.error('Error toggling category featured status:', error);
+      toast.error('Failed to update featured status');
     }
   };
 
@@ -149,6 +173,7 @@ const CategoriesSettings: React.FC = () => {
   const openEditSheet = (category: Category) => {
     setEditingCategory(category);
     setEditName(category.name);
+    setIsFeatured(category.is_featured);
     setIsEditSheetOpen(true);
   };
 
@@ -181,6 +206,7 @@ const CategoriesSettings: React.FC = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Featured</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -188,13 +214,13 @@ const CategoriesSettings: React.FC = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-6">
+                <TableCell colSpan={5} className="text-center py-6">
                   Loading categories...
                 </TableCell>
               </TableRow>
             ) : filteredCategories.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-6">
+                <TableCell colSpan={5} className="text-center py-6">
                   {searchTerm ? 'No categories found for your search' : 'No categories found'}
                 </TableCell>
               </TableRow>
@@ -219,6 +245,25 @@ const CategoriesSettings: React.FC = () => {
                         <X className="h-4 w-4 mr-1" />
                       )}
                       {category.status === 'active' ? 'Active' : 'Inactive'}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant={category.is_featured ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => toggleCategoryFeatured(category)}
+                      className={
+                        category.is_featured 
+                          ? 'bg-blue-500 hover:bg-blue-600'
+                          : 'text-muted-foreground'
+                      }
+                    >
+                      {category.is_featured ? (
+                        <Check className="h-4 w-4 mr-1" />
+                      ) : (
+                        <X className="h-4 w-4 mr-1" />
+                      )}
+                      {category.is_featured ? 'Featured' : 'Not Featured'}
                     </Button>
                   </TableCell>
                   <TableCell>
@@ -280,6 +325,19 @@ const CategoriesSettings: React.FC = () => {
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
               />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="isFeatured" 
+                  checked={isFeatured}
+                  onCheckedChange={(checked) => setIsFeatured(!!checked)}
+                />
+                <Label htmlFor="isFeatured">Featured Category</Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Featured categories will appear on the landing page.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Status</Label>
