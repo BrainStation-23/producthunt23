@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -14,6 +14,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, userRole, isLoading } = useAuth();
   const location = useLocation();
+
+  // For debugging
+  useEffect(() => {
+    console.log('ProtectedRoute:', { 
+      path: location.pathname,
+      isLoading, 
+      userRole, 
+      allowedRoles,
+      isAllowed: userRole ? allowedRoles.includes(userRole) : false
+    });
+  }, [isLoading, userRole, allowedRoles, location]);
 
   // Show loading state
   if (isLoading) {

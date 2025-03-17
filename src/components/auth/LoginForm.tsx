@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,35 +15,50 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn, signInWithGithub } = useAuth();
+  const location = useLocation();
+  const { signIn, signInWithGithub, user, userRole, isLoading } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const userRole = await signIn(email, password);
-      toast.success('Successfully logged in');
-      
-      if (userRole === 'admin') {
+  // Check if user is already logged in and redirect accordingly
+  useEffect(() => {
+    if (user && userRole && !isLoading) {
+      const from = location.state?.from?.pathname;
+      if (from) {
+        navigate(from);
+      } else if (userRole === 'admin') {
         navigate('/admin');
       } else {
         navigate('/user');
       }
+    }
+  }, [user, userRole, isLoading, navigate, location]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return; // Prevent multiple submissions
+    
+    setLoading(true);
+    
+    try {
+      const role = await signIn(email, password);
+      toast.success('Successfully logged in');
+      
+      // Redirection will happen in the useEffect above
+      console.log('Login successful, user role:', role);
     } catch (error: any) {
       console.error('Login error:', error);
-      // Error is already handled in the useAuth hook
-    } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state on error
     }
   };
 
   const handleGithubLogin = async () => {
+    if (loading) return; // Prevent multiple clicks
+    
+    setLoading(true);
     try {
       await signInWithGithub();
     } catch (error: any) {
       console.error('GitHub login error:', error);
-      // Error is already handled in the useAuth hook
+      setLoading(false);
     }
   };
 
@@ -67,6 +83,7 @@ const LoginForm: React.FC = () => {
             required
             autoComplete="email"
             className="rounded-md"
+            disabled={loading || isLoading}
           />
         </div>
         
@@ -87,6 +104,7 @@ const LoginForm: React.FC = () => {
               required
               autoComplete="current-password"
               className="rounded-md pr-10"
+              disabled={loading || isLoading}
             />
             <Button
               type="button"
@@ -94,6 +112,7 @@ const LoginForm: React.FC = () => {
               size="icon"
               className="absolute right-0 top-0 h-full px-3"
               onClick={() => setShowPassword(!showPassword)}
+              disabled={loading || isLoading}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -104,8 +123,8 @@ const LoginForm: React.FC = () => {
           </div>
         </div>
         
-        <Button type="submit" className="w-full rounded-md" disabled={loading}>
-          {loading ? "Logging in..." : "Log in"}
+        <Button type="submit" className="w-full rounded-md" disabled={loading || isLoading}>
+          {loading || isLoading ? "Logging in..." : "Log in"}
         </Button>
       </form>
       
@@ -115,7 +134,13 @@ const LoginForm: React.FC = () => {
         <Separator className="flex-1" />
       </div>
       
-      <Button variant="outline" className="w-full rounded-md" type="button" onClick={handleGithubLogin}>
+      <Button 
+        variant="outline" 
+        className="w-full rounded-md" 
+        type="button" 
+        onClick={handleGithubLogin}
+        disabled={loading || isLoading}
+      >
         <Github className="mr-2 h-4 w-4" />
         Continue with GitHub
       </Button>

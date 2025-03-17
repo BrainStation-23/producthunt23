@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up the initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Getting initial session:', session?.user?.email || 'No session');
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -86,31 +87,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string): Promise<UserRole> => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) throw error;
       
-      // Wait for the user to be set
-      if (!user) {
-        await new Promise<void>((resolve) => {
-          const checkUser = setInterval(() => {
-            if (user) {
-              clearInterval(checkUser);
-              resolve();
-            }
-          }, 100);
-        });
+      // Set user immediately from the response
+      const signInUser = data.user;
+      setUser(signInUser);
+      
+      if (signInUser) {
+        // Fetch the role directly and wait for it
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', signInUser.id)
+          .single();
+          
+        if (roleError) {
+          console.error('Error fetching user role:', roleError);
+          setUserRole('user');
+          return 'user';
+        } else {
+          const role = roleData?.role as UserRole || 'user';
+          setUserRole(role);
+          return role;
+        }
       }
       
-      // Make sure we have the user's role before proceeding
-      if (user && userRole === null) {
-        await fetchUserRole(user.id);
-      }
-      
-      return userRole || 'user';
+      return 'user'; // Default
     } catch (error: any) {
       console.error('Error signing in:', error);
       toast.error(error.message || 'Error signing in');
