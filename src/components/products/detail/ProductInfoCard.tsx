@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { ExternalLink, ArrowUp, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { getDevIconClass } from '@/utils/devIconUtils';
 
 interface ProductInfoCardProps {
   product: Product;
@@ -20,7 +20,6 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
   const [hasUpvoted, setHasUpvoted] = useState(false);
   const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
   
-  // Check if the user has already upvoted this product
   useEffect(() => {
     const checkUserUpvote = async () => {
       if (!user) return;
@@ -40,7 +39,6 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
     checkUserUpvote();
   }, [user, product.id]);
 
-  // Fetch category names based on category IDs
   useEffect(() => {
     const fetchCategoryNames = async () => {
       if (!product.categories || product.categories.length === 0) return;
@@ -74,7 +72,6 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
     }
     
     if (hasUpvoted) {
-      // Remove upvote
       const { error } = await supabase
         .from('upvotes')
         .delete()
@@ -91,7 +88,6 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
       setHasUpvoted(false);
       toast.success('Upvote removed');
     } else {
-      // Add upvote
       const { error } = await supabase
         .from('upvotes')
         .insert({ product_id: product.id, user_id: user.id });
@@ -153,7 +149,7 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
             <div className="flex flex-wrap gap-2">
               {product.technologies.map((tech, index) => (
                 <Badge key={index} variant="outline" className="flex items-center gap-1">
-                  <i className={`devicon-${tech.toLowerCase()}-plain colored text-sm`}></i>
+                  <i className={`${getDevIconClass(tech)} text-sm`}></i>
                   {tech}
                 </Badge>
               ))}

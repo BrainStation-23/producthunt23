@@ -6,44 +6,45 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, X, Code, Search } from 'lucide-react';
+import { getDevIconClass } from '@/utils/devIconUtils';
 
-// List of popular technologies with their devicon identifiers
+// List of popular technologies
 const popularTechnologies = [
-  { id: 'react', name: 'React', icon: 'devicon-react-original colored' },
-  { id: 'angular', name: 'Angular', icon: 'devicon-angularjs-plain colored' },
-  { id: 'vue', name: 'Vue.js', icon: 'devicon-vuejs-plain colored' },
-  { id: 'nextjs', name: 'Next.js', icon: 'devicon-nextjs-original colored' },
-  { id: 'nodejs', name: 'Node.js', icon: 'devicon-nodejs-plain colored' },
-  { id: 'typescript', name: 'TypeScript', icon: 'devicon-typescript-plain colored' },
-  { id: 'javascript', name: 'JavaScript', icon: 'devicon-javascript-plain colored' },
-  { id: 'python', name: 'Python', icon: 'devicon-python-plain colored' },
-  { id: 'django', name: 'Django', icon: 'devicon-django-plain colored' },
-  { id: 'flask', name: 'Flask', icon: 'devicon-flask-original colored' },
-  { id: 'ruby', name: 'Ruby', icon: 'devicon-ruby-plain colored' },
-  { id: 'rails', name: 'Rails', icon: 'devicon-rails-plain colored' },
-  { id: 'php', name: 'PHP', icon: 'devicon-php-plain colored' },
-  { id: 'laravel', name: 'Laravel', icon: 'devicon-laravel-plain colored' },
-  { id: 'csharp', name: 'C#', icon: 'devicon-csharp-plain colored' },
-  { id: 'dotnetcore', name: '.NET Core', icon: 'devicon-dotnetcore-plain colored' },
-  { id: 'java', name: 'Java', icon: 'devicon-java-plain colored' },
-  { id: 'spring', name: 'Spring', icon: 'devicon-spring-plain colored' },
-  { id: 'go', name: 'Go', icon: 'devicon-go-plain colored' },
-  { id: 'rust', name: 'Rust', icon: 'devicon-rust-plain colored' },
-  { id: 'mongodb', name: 'MongoDB', icon: 'devicon-mongodb-plain colored' },
-  { id: 'mysql', name: 'MySQL', icon: 'devicon-mysql-plain colored' },
-  { id: 'postgresql', name: 'PostgreSQL', icon: 'devicon-postgresql-plain colored' },
-  { id: 'redis', name: 'Redis', icon: 'devicon-redis-plain colored' },
-  { id: 'docker', name: 'Docker', icon: 'devicon-docker-plain colored' },
-  { id: 'kubernetes', name: 'Kubernetes', icon: 'devicon-kubernetes-plain colored' },
-  { id: 'aws', name: 'AWS', icon: 'devicon-amazonwebservices-original colored' },
-  { id: 'azure', name: 'Azure', icon: 'devicon-azure-plain colored' },
-  { id: 'gcp', name: 'Google Cloud', icon: 'devicon-googlecloud-plain colored' },
-  { id: 'firebase', name: 'Firebase', icon: 'devicon-firebase-plain colored' },
-  { id: 'tailwindcss', name: 'Tailwind CSS', icon: 'devicon-tailwindcss-plain colored' },
-  { id: 'bootstrap', name: 'Bootstrap', icon: 'devicon-bootstrap-plain colored' },
-  { id: 'sass', name: 'Sass', icon: 'devicon-sass-original colored' },
-  { id: 'supabase', name: 'Supabase', icon: 'devicon-supabase-plain colored' },
-  { id: 'graphql', name: 'GraphQL', icon: 'devicon-graphql-plain colored' },
+  { id: 'react', name: 'React' },
+  { id: 'angular', name: 'Angular' },
+  { id: 'vue', name: 'Vue.js' },
+  { id: 'nextjs', name: 'Next.js' },
+  { id: 'nodejs', name: 'Node.js' },
+  { id: 'typescript', name: 'TypeScript' },
+  { id: 'javascript', name: 'JavaScript' },
+  { id: 'python', name: 'Python' },
+  { id: 'django', name: 'Django' },
+  { id: 'flask', name: 'Flask' },
+  { id: 'ruby', name: 'Ruby' },
+  { id: 'rails', name: 'Rails' },
+  { id: 'php', name: 'PHP' },
+  { id: 'laravel', name: 'Laravel' },
+  { id: 'csharp', name: 'C#' },
+  { id: 'dotnetcore', name: '.NET Core' },
+  { id: 'java', name: 'Java' },
+  { id: 'spring', name: 'Spring' },
+  { id: 'go', name: 'Go' },
+  { id: 'rust', name: 'Rust' },
+  { id: 'mongodb', name: 'MongoDB' },
+  { id: 'mysql', name: 'MySQL' },
+  { id: 'postgresql', name: 'PostgreSQL' },
+  { id: 'redis', name: 'Redis' },
+  { id: 'docker', name: 'Docker' },
+  { id: 'kubernetes', name: 'Kubernetes' },
+  { id: 'aws', name: 'AWS' },
+  { id: 'azure', name: 'Azure' },
+  { id: 'gcp', name: 'Google Cloud' },
+  { id: 'firebase', name: 'Firebase' },
+  { id: 'tailwindcss', name: 'Tailwind CSS' },
+  { id: 'bootstrap', name: 'Bootstrap' },
+  { id: 'sass', name: 'Sass' },
+  { id: 'supabase', name: 'Supabase' },
+  { id: 'graphql', name: 'GraphQL' },
 ];
 
 interface TechnologiesSelectorProps {
@@ -81,7 +82,7 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
             const tech = popularTechnologies.find(t => t.id === techId);
             return (
               <Badge key={techId} variant="secondary" className="flex items-center gap-2 pl-2 pr-1 py-1">
-                {tech && <i className={`${tech.icon} text-lg`}></i>}
+                {tech && <i className={`${getDevIconClass(tech.name)} text-lg`}></i>}
                 {tech ? tech.name : techId}
                 <Button 
                   variant="ghost" 
@@ -130,7 +131,7 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
                     onClick={() => toggleTechnology(tech.id)}
                   >
                     <div className="flex items-center gap-3">
-                      <i className={`${tech.icon} text-xl`}></i>
+                      <i className={`${getDevIconClass(tech.name)} text-xl`}></i>
                       <span>{tech.name}</span>
                     </div>
                     {selected.includes(tech.id) && (
