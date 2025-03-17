@@ -79,20 +79,33 @@ const AdminUsers: React.FC = () => {
 
       if (rolesError) throw rolesError;
 
-      // Count products by user - use count aggregation differently
-      const { data: productCounts, error: productsError } = await supabase
+      // Count products by user - use a different approach for counting
+      // Some Supabase clients may not have groupBy method
+      const productCountsMap = new Map();
+      
+      // First, get all products created by these users
+      const { data: products, error: productsError } = await supabase
         .from('products')
-        .select('created_by, count(*)')
-        .in('created_by', userIds)
-        .groupBy('created_by');
-
+        .select('created_by')
+        .in('created_by', userIds);
+        
       if (productsError) throw productsError;
+      
+      // Count products manually
+      if (products) {
+        products.forEach(product => {
+          const userId = product.created_by;
+          if (userId) {
+            productCountsMap.set(userId, (productCountsMap.get(userId) || 0) + 1);
+          }
+        });
+      }
 
       // Combine data
       const users: User[] = authUsers.users.map(authUser => {
         const profile = profiles?.find(p => p.id === authUser.id);
         const role = userRoles?.find(r => r.user_id === authUser.id)?.role || 'user';
-        const productCount = productCounts?.find(p => p.created_by === authUser.id)?.count || 0;
+        const productCount = productCountsMap.get(authUser.id) || 0;
         
         return {
           id: authUser.id,
@@ -101,7 +114,7 @@ const AdminUsers: React.FC = () => {
           avatar_url: profile?.avatar_url,
           role: role,
           created_at: authUser.created_at,
-          product_count: parseInt(productCount as any, 10)
+          product_count: productCount
         };
       });
 
