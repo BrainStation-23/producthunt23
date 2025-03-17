@@ -1,95 +1,87 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
+
 import { AuthProvider } from "@/contexts/AuthContext";
-import MainLayout from "@/components/layout/MainLayout";
-import AdminLayout from "@/components/layout/AdminLayout";
-import UserLayout from "@/components/layout/UserLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
-// Landing pages
-import LandingPage from "@/pages/landing/LandingPage";
-
-// Auth pages
+import Index from "@/pages/Index";
+import NotFound from "@/pages/NotFound";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
+import LandingPage from "@/pages/landing/LandingPage";
 
-// Admin pages
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminProducts from "@/pages/admin/AdminProducts";
-import AdminUsers from "@/pages/admin/AdminUsers";
-
-// User pages
+import MainLayout from "@/components/layout/MainLayout";
+import UserLayout from "@/components/layout/UserLayout";
 import UserDashboard from "@/pages/user/UserDashboard";
 import UserProfile from "@/pages/user/UserProfile";
 
-// Products page
+import AdminLayout from "@/components/layout/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminUsers from "@/pages/admin/AdminUsers";
+import AdminProducts from "@/pages/admin/AdminProducts";
+
 import ProductsPage from "@/pages/products/ProductsPage";
+import SubmitProductPage from "@/pages/products/SubmitProductPage";
 
-// Error pages
-import NotFound from "@/pages/NotFound";
+import './App.css';
 
+// Create a client
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
           <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<LandingPage />} />
-              <Route path="products" element={<ProductsPage />} />
-              <Route path="products/:id" element={<div className="container py-12">Product detail page (To be implemented)</div>} />
-              <Route path="categories" element={<div className="container py-12">Categories page (To be implemented)</div>} />
-              <Route path="categories/:category" element={<div className="container py-12">Category listing page (To be implemented)</div>} />
-              <Route path="submit" element={<div className="container py-12">Submit product page (To be implemented)</div>} />
-              <Route path="about" element={<div className="container py-12">About page (To be implemented)</div>} />
-              <Route path="terms" element={<div className="container py-12">Terms page (To be implemented)</div>} />
-              <Route path="privacy" element={<div className="container py-12">Privacy page (To be implemented)</div>} />
-            </Route>
-            
-            {/* Auth routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/landing" element={<LandingPage />} />
+
+            {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<div>Forgot password page (To be implemented)</div>} />
-            <Route path="/reset-password" element={<div>Reset password page (To be implemented)</div>} />
-            
-            {/* Admin routes - protected for admin role only */}
-            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="products" element={<AdminProducts />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="settings" element={<div>Admin settings (To be implemented)</div>} />
-              </Route>
+
+            {/* Main Layout Routes */}
+            <Route element={<MainLayout />}>
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/submit" element={<SubmitProductPage />} />
             </Route>
-            
-            {/* User routes - protected for any authenticated user */}
-            <Route element={<ProtectedRoute allowedRoles={['admin', 'user']} />}>
-              <Route path="/user" element={<UserLayout />}>
-                <Route index element={<UserDashboard />} />
-                <Route path="profile" element={<UserProfile />} />
-                <Route path="products" element={<div>User products (To be implemented)</div>} />
-                <Route path="saved" element={<div>Saved products (To be implemented)</div>} />
-                <Route path="messages" element={<div>User messages (To be implemented)</div>} />
-                <Route path="settings" element={<div>User settings (To be implemented)</div>} />
-              </Route>
+
+            {/* User Routes */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <UserLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/user/dashboard" element={<UserDashboard />} />
+              <Route path="/user/profile" element={<UserProfile />} />
             </Route>
-            
-            {/* Catch-all route for 404 */}
+
+            {/* Admin Routes */}
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+            </Route>
+
+            {/* Not Found Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </TooltipProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+        </AuthProvider>
+      </BrowserRouter>
+      <Toaster richColors />
+    </QueryClientProvider>
+  );
+}
 
 export default App;

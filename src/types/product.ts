@@ -13,9 +13,45 @@ export interface Product {
   profile_id: string;
   profile_username: string | null;
   profile_avatar_url: string | null;
+  status?: string;
 }
 
 export interface ProductsResponse {
   data: Product[];
   totalCount: number;
+}
+
+export interface ProductScreenshot {
+  id: string;
+  product_id: string;
+  title: string | null;
+  image_url: string;
+  description: string | null;
+  display_order: number;
+  created_at: string;
+}
+
+export interface ProductVideo {
+  id: string;
+  product_id: string;
+  title: string | null;
+  video_url: string;
+  display_order: number;
+  created_at: string;
+}
+
+export interface ProductTechnology {
+  id: string;
+  product_id: string;
+  technology_name: string;
+  display_order: number;
+  created_at: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
