@@ -371,7 +371,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      fetch_products: {
+      filter_products: {
         Args: {
           search_query?: string
           selected_category?: string
@@ -394,30 +394,6 @@ export type Database = {
           profile_id: string
           profile_username: string
           profile_avatar_url: string
-          total_count: number
-        }[]
-      }
-      filter_products: {
-        Args: {
-          search_term?: string
-          status_filters?: string[]
-          page_number?: number
-          page_size?: number
-        }
-        Returns: {
-          id: string
-          name: string
-          description: string
-          tagline: string
-          image_url: string
-          website_url: string
-          tags: string[]
-          status: string
-          upvotes: number
-          created_at: string
-          created_by: string
-          creator_username: string
-          creator_avatar_url: string
           total_count: number
         }[]
       }

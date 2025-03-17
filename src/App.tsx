@@ -26,6 +26,9 @@ import AdminUsers from "@/pages/admin/AdminUsers";
 import UserDashboard from "@/pages/user/UserDashboard";
 import UserProfile from "@/pages/user/UserProfile";
 
+// Products page
+import ProductsPage from "@/pages/products/ProductsPage";
+
 // Error pages
 import NotFound from "@/pages/NotFound";
 
@@ -42,7 +45,7 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<LandingPage />} />
-              <Route path="products" element={<div className="container py-12">Products page (To be implemented)</div>} />
+              <Route path="products" element={<ProductsPage />} />
               <Route path="products/:id" element={<div className="container py-12">Product detail page (To be implemented)</div>} />
               <Route path="categories" element={<div className="container py-12">Categories page (To be implemented)</div>} />
               <Route path="categories/:category" element={<div className="container py-12">Category listing page (To be implemented)</div>} />
