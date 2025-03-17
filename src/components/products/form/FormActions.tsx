@@ -7,7 +7,7 @@ import { Save, Send, Eye } from 'lucide-react';
 interface FormActionsProps {
   isSubmitting: boolean;
   onSaveAsDraft: () => void;
-  onPreview?: () => void;
+  onPreview: () => void;
 }
 
 const FormActions: React.FC<FormActionsProps> = ({ 
@@ -17,17 +17,15 @@ const FormActions: React.FC<FormActionsProps> = ({
 }) => {
   return (
     <div className="flex gap-4 justify-end">
-      {onPreview && (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onPreview}
-          disabled={isSubmitting}
-        >
-          <Eye className="mr-2 h-4 w-4" />
-          Preview
-        </Button>
-      )}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onPreview}
+        disabled={isSubmitting}
+      >
+        <Eye className="mr-2 h-4 w-4" />
+        Preview
+      </Button>
       <Button 
         type="button" 
         variant="outline" 
