@@ -141,12 +141,12 @@ const AdminProducts: React.FC = () => {
   };
 
   // Get badge variant based on status
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: string): "default" | "destructive" | "outline" | "secondary" => {
     switch (status) {
       case 'approved':
-        return 'success';
+        return 'default'; // Using 'default' instead of 'success'
       case 'pending':
-        return 'warning';
+        return 'secondary'; // Using 'secondary' instead of 'warning'
       case 'rejected':
         return 'destructive';
       default:
@@ -318,7 +318,7 @@ const AdminProducts: React.FC = () => {
             <PaginationItem>
               <PaginationPrevious 
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
             
@@ -336,7 +336,7 @@ const AdminProducts: React.FC = () => {
             <PaginationItem>
               <PaginationNext 
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
           </PaginationContent>

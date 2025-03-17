@@ -79,12 +79,12 @@ const AdminUsers: React.FC = () => {
 
       if (rolesError) throw rolesError;
 
-      // Count products by user
+      // Count products by user - use count aggregation differently
       const { data: productCounts, error: productsError } = await supabase
         .from('products')
-        .select('created_by, count')
+        .select('created_by, count(*)')
         .in('created_by', userIds)
-        .group('created_by');
+        .groupBy('created_by');
 
       if (productsError) throw productsError;
 
@@ -285,7 +285,9 @@ const AdminUsers: React.FC = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <Badge variant="success">Active</Badge>
+                    <Badge variant="outline" className="text-green-500 bg-green-50">
+                      Active
+                    </Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">{user.product_count}</TableCell>
                   <TableCell className="hidden md:table-cell">
@@ -348,7 +350,7 @@ const AdminUsers: React.FC = () => {
             <PaginationItem>
               <PaginationPrevious 
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
             
@@ -366,7 +368,7 @@ const AdminUsers: React.FC = () => {
             <PaginationItem>
               <PaginationNext 
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
           </PaginationContent>
