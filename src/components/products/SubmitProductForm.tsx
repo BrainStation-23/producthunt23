@@ -12,6 +12,7 @@ import CategoriesSection from '@/components/products/form/CategoriesSection';
 import TechnologiesSection from '@/components/products/form/TechnologiesSection';
 import ScreenshotsSection from '@/components/products/form/ScreenshotsSection';
 import VideosSection from '@/components/products/form/VideosSection';
+import MakersSection from '@/components/products/form/MakersSection';
 import AgreementSection from '@/components/products/form/AgreementSection';
 import FormActions from '@/components/products/form/FormActions';
 
@@ -33,11 +34,12 @@ const SubmitProductForm: React.FC = () => {
         <BasicInfoSection form={form} />
 
         <Tabs defaultValue="categories">
-          <TabsList className="grid grid-cols-4 w-full mb-4">
+          <TabsList className="grid grid-cols-5 w-full mb-4">
             <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="technologies">Technologies</TabsTrigger>
             <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
+            <TabsTrigger value="makers">Makers</TabsTrigger>
           </TabsList>
           
           <TabsContent value="categories" className="space-y-4">
@@ -54,6 +56,10 @@ const SubmitProductForm: React.FC = () => {
 
           <TabsContent value="videos" className="space-y-4">
             <VideosSection form={form} />
+          </TabsContent>
+          
+          <TabsContent value="makers" className="space-y-4">
+            <MakersSection form={form} />
           </TabsContent>
         </Tabs>
 

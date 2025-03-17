@@ -48,6 +48,13 @@ export interface ProductTechnology {
   created_at: string;
 }
 
+export interface ProductMaker {
+  id: string;
+  product_id: string;
+  profile_id: string;
+  created_at: string;
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -68,6 +75,12 @@ export interface Video {
   video_url: string;
 }
 
+export interface Maker {
+  email: string;
+  id: string | null;
+  isCreator: boolean;
+}
+
 // Form values interface
 export interface ProductFormValues {
   name: string;
@@ -79,5 +92,6 @@ export interface ProductFormValues {
   tags: string[];
   screenshots: Screenshot[];
   videos: Video[];
+  makers: Maker[];
   agreed_to_policies: boolean;
 }
