@@ -32,6 +32,7 @@ import UserDashboard from './pages/user/UserDashboard';
 import UserProfile from './pages/user/UserProfile';
 import UserProducts from './pages/user/UserProducts';
 import UserSettings from './pages/user/UserSettings';
+import SavedProductsPage from './pages/user/SavedProductsPage';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -88,7 +89,7 @@ function App() {
               <Route path="profile" element={<UserProfile />} />
               <Route path="products" element={<UserProducts />} />
               <Route path="settings" element={<UserSettings />} />
-              <Route path="saved" element={<UserDashboard />} />
+              <Route path="saved" element={<SavedProductsPage />} />
               <Route path="messages" element={<UserDashboard />} />
             </Route>
 
