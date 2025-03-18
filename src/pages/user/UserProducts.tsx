@@ -34,11 +34,12 @@ const UserProducts: React.FC = () => {
         if (createdError) throw createdError;
         
         // Then, fetch products where the user is a maker but not the creator
+        // Note: Fixed the order syntax here
         const { data: makerProducts, error: makerError } = await supabase
           .from('product_makers')
           .select('products:product_id(*)')
           .eq('profile_id', user.id)
-          .order('products.created_at', { ascending: false });
+          .order('product_id', { ascending: false });
           
         if (makerError) throw makerError;
 
