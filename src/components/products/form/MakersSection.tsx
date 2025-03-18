@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Card, CardContent } from '@/components/ui/card';
@@ -51,7 +50,6 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
   
   const makers = form.watch('makers') || [];
 
-  // Search for profiles
   useEffect(() => {
     const searchProfiles = async () => {
       if (!searchQuery || searchQuery.length < 2) {
@@ -70,7 +68,6 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
           
         if (error) throw error;
         
-        // Filter out profiles that are already makers
         const filteredData = data?.filter(profile => 
           !makers.some(maker => maker.id === profile.id)
         ) || [];
@@ -88,7 +85,6 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
   }, [searchQuery, makers]);
 
   const handleAddMaker = (profile: ProfileSearchResult) => {
-    // Check if profile already exists in makers
     if (makers.some(maker => maker.id === profile.id)) return;
     
     form.setValue('makers', [
@@ -108,7 +104,6 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
   };
 
   const handleRemoveMaker = (index: number) => {
-    // Don't allow removing the creator
     const makerToRemove = makers[index];
     if (makerToRemove.isCreator) return;
     
@@ -117,7 +112,6 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
     form.setValue('makers', updatedMakers);
   };
 
-  // Generate initials from email or username
   const getInitials = (maker: Maker) => {
     const displayName = maker.username || maker.email;
     if (!displayName) return '?';
@@ -184,7 +178,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
                       <span>Add Maker</span>
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="p-0" align="start" side="bottom" sideOffset={8} width="300px">
+                  <PopoverContent className="p-0 w-[300px]" align="start" side="bottom" sideOffset={8}>
                     <Command>
                       <CommandInput 
                         placeholder="Search by name or email..." 
@@ -233,4 +227,3 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
 };
 
 export default MakersSection;
-
