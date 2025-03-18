@@ -17,6 +17,15 @@ interface MakerSearchItemProps {
 }
 
 export const MakerSearchItem: React.FC<MakerSearchItemProps> = ({ profile, onSelect }) => {
+  // Get a displayable name for the profile
+  const displayName = profile.username || profile.email || 'Unknown User';
+  
+  // Get initials for the avatar fallback
+  const getInitials = () => {
+    if (!displayName || displayName === 'Unknown User') return 'UN';
+    return displayName.substring(0, 2).toUpperCase();
+  };
+
   return (
     <CommandItem
       key={profile.id}
@@ -25,13 +34,11 @@ export const MakerSearchItem: React.FC<MakerSearchItemProps> = ({ profile, onSel
     >
       <div className="flex items-center gap-2">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={profile.avatar_url || ''} alt={profile.username || profile.email || ''} />
-          <AvatarFallback>
-            {(profile.username || profile.email || '').substring(0, 2).toUpperCase()}
-          </AvatarFallback>
+          <AvatarImage src={profile.avatar_url || ''} alt={displayName} />
+          <AvatarFallback>{getInitials()}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <span className="font-medium">{profile.username || profile.email}</span>
+          <span className="font-medium">{displayName}</span>
           {profile.username && profile.email && (
             <span className="text-xs text-muted-foreground">{profile.email}</span>
           )}

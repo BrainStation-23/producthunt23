@@ -31,16 +31,19 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
   const handleAddMaker = (profile: ProfileSearchResult) => {
     if (makers.some(maker => maker.id === profile.id)) return;
     
+    // Ensure we have a valid email for the maker (required by form validation)
+    const email = profile.email || `${profile.username || 'user'}@example.com`;
+    
     form.setValue('makers', [
       ...makers, 
       { 
         id: profile.id, 
-        email: profile.email || profile.username || '', 
+        email: email, 
         isCreator: false,
         username: profile.username,
         avatar_url: profile.avatar_url
       }
-    ]);
+    ], { shouldValidate: true });
     
     setSearchQuery('');
   };
@@ -51,7 +54,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
     
     const updatedMakers = [...makers];
     updatedMakers.splice(index, 1);
-    form.setValue('makers', updatedMakers);
+    form.setValue('makers', updatedMakers, { shouldValidate: true });
   };
 
   return (

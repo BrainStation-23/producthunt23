@@ -28,10 +28,12 @@ export const productSchema = z.object({
     video_url: z.string().url({ message: 'Please enter a valid URL.' }),
   })),
   makers: z.array(z.object({
-    email: z.string().email({ message: 'Please enter a valid email.' }),
     id: z.string().nullable(),
+    email: z.string().email({ message: 'Please enter a valid email.' }).or(z.string().min(1, { message: 'Email is required' })),
     isCreator: z.boolean(),
-  })),
+    username: z.string().nullable().optional(),
+    avatar_url: z.string().nullable().optional()
+  })).min(1, { message: 'At least one maker is required.' }),
   agreed_to_policies: z.boolean().refine(val => val === true, {
     message: 'You must agree to the policies before submitting.',
   }),

@@ -26,7 +26,6 @@ export const useMakerSearch = (makers: Maker[]) => {
       
       try {
         // Use ILIKE for case-insensitive partial matching
-        // Changed from using .or() to simpler pattern to prevent query issues
         const { data, error } = await supabase
           .from('profiles')
           .select('id, username, email, avatar_url')
