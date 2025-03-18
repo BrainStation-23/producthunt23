@@ -1,12 +1,12 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Heart, Package, MessageSquare } from 'lucide-react';
+import { Activity, Bookmark, Package, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserDashboard } from '@/hooks/useUserDashboard';
 import UserProductsEmptyState from '@/components/user/UserProductsEmptyState';
+import ProductSaveButton from '@/components/products/card/ProductSaveButton';
 
 const UserDashboard: React.FC = () => {
   const { isLoading, data } = useUserDashboard();
@@ -41,7 +41,7 @@ const UserDashboard: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Saved Products</CardTitle>
-            <Heart className="h-4 w-4 text-muted-foreground" />
+            <Bookmark className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -179,6 +179,7 @@ const UserDashboard: React.FC = () => {
                       </Link>
                       <p className="text-sm text-muted-foreground truncate">{product.tagline}</p>
                     </div>
+                    <ProductSaveButton productId={product.id} variant="outline" iconOnly />
                   </div>
                 ))}
               </div>

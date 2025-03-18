@@ -9,6 +9,7 @@ import DeleteProductDialog from '@/components/user/DeleteProductDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import ProductStatusBadge from '@/components/admin/ProductStatusBadge';
+import ProductSaveButton from '@/components/products/card/ProductSaveButton';
 
 interface UserProductCardProps {
   product: {
@@ -101,6 +102,7 @@ const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
                 Delete
               </Button>
             )}
+            <ProductSaveButton productId={product.id} variant="outline" iconOnly />
           </div>
           <div className="flex gap-2">
             {product.status === 'approved' && (

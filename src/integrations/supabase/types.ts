@@ -347,6 +347,35 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_products: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       upvotes: {
         Row: {
           created_at: string | null
@@ -492,6 +521,12 @@ export type Database = {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: {
+          uid: string
         }
         Returns: boolean
       }

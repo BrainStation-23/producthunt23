@@ -49,9 +49,9 @@ export const useUserDashboard = () => {
           
         if (productsError) throw productsError;
         
-        // Fetch user's saved products (from upvotes as a simple way to track "saved" items)
-        const { data: savedProducts, error: savedError } = await supabase
-          .from('upvotes')
+        // Fetch user's saved products
+        const { data: savedProductsData, error: savedError } = await supabase
+          .from('saved_products')
           .select('*, products(*)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
@@ -76,8 +76,8 @@ export const useUserDashboard = () => {
             items: userProducts 
           },
           savedProducts: { 
-            count: savedProducts.length,
-            items: savedProducts.map(upvote => upvote.products) 
+            count: savedProductsData.length,
+            items: savedProductsData.map(saved => saved.products) 
           },
           activity: { 
             count: userComments[0]?.count || 0,

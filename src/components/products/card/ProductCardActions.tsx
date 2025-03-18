@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ProductSaveButton from './ProductSaveButton';
 
 interface ProductCardActionsProps {
   productId: string;
@@ -40,6 +41,8 @@ const ProductCardActions: React.FC<ProductCardActionsProps> = ({
             {commentCount}
           </Button>
         </Link>
+
+        <ProductSaveButton productId={productId} iconOnly />
       </div>
       
       {websiteUrl && (
