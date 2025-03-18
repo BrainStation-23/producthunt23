@@ -46,7 +46,9 @@ const UserProducts: React.FC = () => {
         // Process maker products to flatten the structure
         const makerProductsFlattened = makerProducts
           .map(item => item.products)
-          .filter(product => product.created_by !== user.id); // Filter out products already in createdProducts
+          // Fix: Safely check if the product exists and has created_by property
+          // before trying to filter based on it
+          .filter(product => product && product.created_by !== user.id);
 
         // Combine both lists
         const combinedProducts = [
