@@ -22,16 +22,9 @@ import {
   MessageSquare 
 } from 'lucide-react';
 import { Product } from '@/types/product';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 interface ProductTableRowProps {
   product: Product;
@@ -46,9 +39,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
   handleEditProduct,
   handleDeleteClick
 }) => {
-  const [isRejectDrawerOpen, setIsRejectDrawerOpen] = useState(false);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectionFeedback, setRejectionFeedback] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Get badge variant based on status
   const getStatusBadgeVariant = (status: string): "default" | "destructive" | "outline" | "secondary" => {
@@ -80,25 +72,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
   };
 
   const handleReject = async () => {
-    try {
-      setIsSubmitting(true);
-      await handleStatusChange(product.id, 'rejected', rejectionFeedback);
-      setIsRejectDrawerOpen(false);
-      setRejectionFeedback('');
-    } catch (error) {
-      console.error('Error rejecting product:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleOpenRejectDrawer = () => {
-    setRejectionFeedback(''); // Clear previous feedback
-    setIsRejectDrawerOpen(true);
-  };
-
-  const handleCloseRejectDrawer = () => {
-    setIsRejectDrawerOpen(false);
+    await handleStatusChange(product.id, 'rejected', rejectionFeedback);
+    setIsRejectDialogOpen(false);
     setRejectionFeedback('');
   };
 
@@ -146,7 +121,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
                     <Check className="mr-2 h-4 w-4 text-green-500" />
                     Approve
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleOpenRejectDrawer}>
+                  <DropdownMenuItem onClick={() => setIsRejectDialogOpen(true)}>
                     <X className="mr-2 h-4 w-4 text-red-500" />
                     Reject
                   </DropdownMenuItem>
@@ -191,41 +166,37 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
         </TableCell>
       </TableRow>
 
-      {/* Rejection Feedback Drawer */}
-      <Drawer open={isRejectDrawerOpen} onOpenChange={setIsRejectDrawerOpen}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Reject Product</DrawerTitle>
-            <DrawerDescription>
+      {/* Rejection Feedback Dialog */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Product</DialogTitle>
+            <DialogDescription>
               Please provide feedback on why this product is being rejected. This will be visible to the product creator.
-            </DrawerDescription>
-          </DrawerHeader>
+            </DialogDescription>
+          </DialogHeader>
           
-          <div className="px-4">
-            <Textarea
-              value={rejectionFeedback}
-              onChange={(e) => setRejectionFeedback(e.target.value)}
-              placeholder="Enter rejection feedback..."
-              className="min-h-[120px]"
-            />
-          </div>
+          <Textarea
+            value={rejectionFeedback}
+            onChange={(e) => setRejectionFeedback(e.target.value)}
+            placeholder="Enter rejection feedback..."
+            className="min-h-[120px]"
+          />
           
-          <DrawerFooter>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
+              Cancel
+            </Button>
             <Button 
               variant="destructive" 
               onClick={handleReject}
-              disabled={!rejectionFeedback.trim() || isSubmitting}
+              disabled={!rejectionFeedback.trim()}
             >
-              {isSubmitting ? 'Rejecting...' : 'Reject Product'}
+              Reject Product
             </Button>
-            <DrawerClose asChild>
-              <Button variant="outline" onClick={handleCloseRejectDrawer}>
-                Cancel
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
