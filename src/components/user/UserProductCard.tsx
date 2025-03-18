@@ -2,13 +2,13 @@
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Edit, Trash, ExternalLink, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import DeleteProductDialog from '@/components/user/DeleteProductDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import ProductStatusBadge from '@/components/admin/ProductStatusBadge';
 
 interface UserProductCardProps {
   product: {
@@ -18,24 +18,12 @@ interface UserProductCardProps {
     image_url: string | null;
     status: string;
     created_at: string;
+    rejection_feedback?: string | null;
   };
 }
 
 const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-500';
-      case 'rejected':
-        return 'bg-red-500';
-      case 'pending':
-        return 'bg-yellow-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
 
   const handleDelete = async () => {
     try {
@@ -62,9 +50,9 @@ const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
             <CardTitle className="truncate">{product.name}</CardTitle>
-            <div 
-              className={`w-3 h-3 rounded-full ${getStatusColor(product.status)}`} 
-              title={`Status: ${product.status}`}
+            <ProductStatusBadge 
+              status={product.status || 'pending'} 
+              rejectionFeedback={product.rejection_feedback}
             />
           </div>
           <p className="text-sm text-muted-foreground truncate">{product.tagline}</p>
@@ -85,9 +73,6 @@ const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Badge variant={product.status === 'approved' ? "default" : "outline"}>
-              {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
-            </Badge>
             <span className="text-xs text-muted-foreground">
               Created {new Date(product.created_at).toLocaleDateString()}
             </span>
