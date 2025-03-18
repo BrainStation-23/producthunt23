@@ -29,7 +29,14 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
   mode = 'create'
 }) => {
   const { user } = useAuth();
-  const { form, isSubmitting, isLoading, handleSubmit } = useProductForm({
+  const { 
+    form, 
+    isSubmitting, 
+    isLoading, 
+    productStatus,
+    handleSubmit,
+    handleSubmitForReview
+  } = useProductForm({
     userId: user?.id,
     productId
   });
@@ -41,6 +48,10 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
 
   const onSaveAsDraft = () => {
     handleSubmit(form.getValues(), true);
+  };
+
+  const onSubmitForReview = () => {
+    handleSubmitForReview();
   };
 
   const openPreview = () => {
@@ -111,7 +122,9 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
             isSubmitting={isSubmitting}
             onSaveAsDraft={onSaveAsDraft}
             onPreview={openPreview}
+            onSubmitForReview={onSubmitForReview}
             mode={mode}
+            status={productStatus}
           />
         </form>
       </Form>

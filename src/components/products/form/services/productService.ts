@@ -173,6 +173,25 @@ export async function saveProduct(values: ProductFormValues, userId: string, sav
   }
 }
 
+export async function submitProductForReview(productId: string) {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .update({ status: 'pending' })
+      .eq('id', productId);
+      
+    if (error) throw error;
+    
+    return {
+      success: true,
+      message: 'Product submitted for review'
+    };
+  } catch (error: any) {
+    console.error('Error submitting product for review:', error);
+    throw error;
+  }
+}
+
 async function deleteProductRelations(productId: string) {
   try {
     const { error: deleteScreenshotsError } = await supabase

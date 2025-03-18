@@ -2,25 +2,30 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ProductFormValues } from '@/types/product';
-import { Save, Send, Eye, Edit } from 'lucide-react';
+import { Save, Send, Eye, Edit, CheckCircle } from 'lucide-react';
 
 interface FormActionsProps {
   isSubmitting: boolean;
   onSaveAsDraft: () => void;
   onPreview: () => void;
+  onSubmitForReview?: () => void;
   mode?: 'create' | 'edit';
+  status?: string;
 }
 
 const FormActions: React.FC<FormActionsProps> = ({ 
   isSubmitting, 
   onSaveAsDraft,
   onPreview,
-  mode = 'create'
+  onSubmitForReview,
+  mode = 'create',
+  status
 }) => {
   const isEditing = mode === 'edit';
+  const isDraft = status === 'draft';
 
   return (
-    <div className="flex gap-4 justify-end">
+    <div className="flex flex-wrap gap-4 justify-end">
       <Button
         type="button"
         variant="outline"
@@ -40,6 +45,18 @@ const FormActions: React.FC<FormActionsProps> = ({
         >
           <Save className="mr-2 h-4 w-4" />
           Save as Draft
+        </Button>
+      )}
+      
+      {isEditing && isDraft && onSubmitForReview && (
+        <Button 
+          type="button" 
+          variant="secondary" 
+          onClick={onSubmitForReview}
+          disabled={isSubmitting}
+        >
+          <CheckCircle className="mr-2 h-4 w-4" />
+          Submit for Review
         </Button>
       )}
       

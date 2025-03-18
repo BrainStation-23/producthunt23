@@ -14,6 +14,7 @@ import {
   fetchProductMakers,
   fetchUserProfile,
   saveProduct,
+  submitProductForReview,
   formatMakersData
 } from './services/productService';
 import {
@@ -31,6 +32,7 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(!!productId);
+  const [productStatus, setProductStatus] = useState<string | undefined>();
   
   // Initialize form with default values
   const form = useForm<ProductFormValues>({
@@ -63,6 +65,9 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
           const videos = await fetchProductVideos(productId);
           const technologies = await fetchProductTechnologies(productId);
           const makers = await fetchProductMakers(productId);
+          
+          // Store product status
+          setProductStatus(product.status);
           
           // Format data for the form
           const formattedScreenshots = formatScreenshots(screenshots);
@@ -149,10 +154,31 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
     }
   };
 
+  const handleSubmitForReview = async () => {
+    if (!productId) {
+      toast.error('Product ID is required');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const result = await submitProductForReview(productId);
+      toast.success(result.message);
+      navigate('/admin/products');
+    } catch (error: any) {
+      console.error('Error submitting product for review:', error);
+      toast.error(error.message || 'Failed to submit product for review');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
     form,
     isSubmitting,
     isLoading,
-    handleSubmit
+    productStatus,
+    handleSubmit,
+    handleSubmitForReview
   };
 };
