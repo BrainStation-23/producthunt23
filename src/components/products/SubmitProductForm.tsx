@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Form } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductFormValues } from '@/types/product';
-import { useProductForm } from '@/components/products/form/useProductForm';
+import { useProductForm } from '@/hooks/useProductForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 
