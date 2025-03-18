@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -55,6 +54,11 @@ export interface ProductMaker {
   product_id: string;
   profile_id: string;
   created_at: string;
+  profile?: {
+    username: string | null;
+    avatar_url: string | null;
+    email: string | null;
+  };
 }
 
 export interface Category {
@@ -65,7 +69,6 @@ export interface Category {
   updated_at: string;
 }
 
-// Form-specific interfaces
 export interface Screenshot {
   title?: string;
   image_url: string;
@@ -81,11 +84,12 @@ export interface Maker {
   email: string;
   id: string | null;
   isCreator: boolean;
+  username?: string | null;
+  avatar_url?: string | null;
 }
 
-// Form values interface
 export interface ProductFormValues {
-  id?: string; // Added for editing existing products
+  id?: string;
   name: string;
   tagline: string;
   description: string;
