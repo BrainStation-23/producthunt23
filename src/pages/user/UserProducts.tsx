@@ -10,10 +10,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import UserProductCard from '@/components/user/UserProductCard';
 import UserProductsEmptyState from '@/components/user/UserProductsEmptyState';
+import { Product } from '@/types/product';
+
+interface UserProduct extends Product {
+  isCreator?: boolean;
+  makers?: any[];
+}
 
 const UserProducts: React.FC = () => {
   const { user } = useAuth();
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<UserProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch user's products
@@ -34,7 +40,6 @@ const UserProducts: React.FC = () => {
         if (createdError) throw createdError;
         
         // Then, fetch products where the user is a maker but not the creator
-        // Note: Fixed the order syntax here
         const { data: makerProducts, error: makerError } = await supabase
           .from('product_makers')
           .select('products:product_id(*)')
@@ -46,10 +51,13 @@ const UserProducts: React.FC = () => {
         // Process maker products to flatten the structure
         const makerProductsFlattened = makerProducts
           .map(item => item.products)
-          // Fix: Safely check if the product exists and has created_by property
-          // before trying to filter based on it
+          // Filter out null products and products where user is already the creator
           .filter(product => product && product.created_by !== user.id);
 
+        // Add debugging to check what products we're getting
+        console.log('Created products:', createdProducts);
+        console.log('Maker products:', makerProductsFlattened);
+        
         // Combine both lists
         const combinedProducts = [
           ...(createdProducts || []),
