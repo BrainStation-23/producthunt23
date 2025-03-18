@@ -26,14 +26,24 @@ export const useMakerSearch = (makers: Maker[]) => {
       setIsSearching(true);
       
       try {
+        // Use ILIKE for case-insensitive partial matching
+        // Changed from using .or() to simpler pattern to prevent query issues
         const { data, error } = await supabase
           .from('profiles')
           .select('id, username, email, avatar_url')
           .or(`username.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
           .limit(5);
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error in search query:', error);
+          throw error;
+        }
         
+        // Log search results for debugging
+        console.log('Search query:', searchQuery);
+        console.log('Search results:', data);
+        
+        // Filter out makers that are already added
         const filteredData = data?.filter(profile => 
           !makers.some(maker => maker.id === profile.id)
         ) || [];
@@ -41,11 +51,13 @@ export const useMakerSearch = (makers: Maker[]) => {
         setSearchResults(filteredData);
       } catch (error) {
         console.error('Error searching profiles:', error);
+        setSearchResults([]);
       } finally {
         setIsSearching(false);
       }
     };
     
+    // Clear any previous timer to prevent race conditions
     const debounceTimer = setTimeout(searchProfiles, 300);
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, makers]);

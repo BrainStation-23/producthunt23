@@ -42,6 +42,11 @@ export const MakerSearch: React.FC<MakerSearchProps> = ({
   setIsPopoverOpen,
   onAddMaker
 }) => {
+  // Log current state for debugging
+  console.log('Current search query:', searchQuery);
+  console.log('Current search results:', searchResults);
+  console.log('Is searching:', isSearching);
+
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
