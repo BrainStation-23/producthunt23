@@ -41,6 +41,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
 }) => {
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectionFeedback, setRejectionFeedback] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Get badge variant based on status
   const getStatusBadgeVariant = (status: string): "default" | "destructive" | "outline" | "secondary" => {
@@ -72,9 +74,31 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
   };
 
   const handleReject = async () => {
-    await handleStatusChange(product.id, 'rejected', rejectionFeedback);
-    setIsRejectDialogOpen(false);
-    setRejectionFeedback('');
+    setIsLoading(true);
+    try {
+      await handleStatusChange(product.id, 'rejected', rejectionFeedback);
+      setIsRejectDialogOpen(false);
+      setRejectionFeedback('');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // This function ensures dropdown is closed before opening dialog
+  const openRejectDialog = () => {
+    setIsDropdownOpen(false);
+    // Small timeout to ensure dropdown is fully closed before opening dialog
+    setTimeout(() => {
+      setIsRejectDialogOpen(true);
+    }, 100);
+  };
+
+  // Reset feedback when dialog is closed
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setRejectionFeedback('');
+    }
+    setIsRejectDialogOpen(open);
   };
 
   return (
@@ -94,7 +118,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
           {new Date(product.created_at).toLocaleDateString()}
         </TableCell>
         <TableCell>
-          <DropdownMenu>
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
                 <MoreVertical className="h-4 w-4" />
@@ -121,7 +145,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
                     <Check className="mr-2 h-4 w-4 text-green-500" />
                     Approve
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setIsRejectDialogOpen(true)}>
+                  <DropdownMenuItem onClick={openRejectDialog}>
                     <X className="mr-2 h-4 w-4 text-red-500" />
                     Reject
                   </DropdownMenuItem>
@@ -167,8 +191,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
       </TableRow>
 
       {/* Rejection Feedback Dialog */}
-      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-        <DialogContent>
+      <Dialog open={isRejectDialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="z-50">
           <DialogHeader>
             <DialogTitle>Reject Product</DialogTitle>
             <DialogDescription>
@@ -184,15 +208,19 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
           />
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => handleDialogClose(false)}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button 
               variant="destructive" 
               onClick={handleReject}
-              disabled={!rejectionFeedback.trim()}
+              disabled={!rejectionFeedback.trim() || isLoading}
             >
-              Reject Product
+              {isLoading ? 'Rejecting...' : 'Reject Product'}
             </Button>
           </DialogFooter>
         </DialogContent>
