@@ -14,7 +14,7 @@ import CategoriesSection from '@/components/products/form/CategoriesSection';
 import TechnologiesSection from '@/components/products/form/TechnologiesSection';
 import ScreenshotsSection from '@/components/products/form/ScreenshotsSection';
 import VideosSection from '@/components/products/form/VideosSection';
-import MakersSection from '@/components/products/form/MakersSection';
+import MakersSection from '@/components/products/form/makers/MakersSection';
 import AgreementSection from '@/components/products/form/AgreementSection';
 import FormActions from '@/components/products/form/FormActions';
 import ProductPreview from '@/components/products/ProductPreview';
