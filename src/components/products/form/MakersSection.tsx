@@ -184,7 +184,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
                       <span>Add Maker</span>
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="p-0" align="start" side="bottom" sideOffset={8} className="w-[300px]">
+                  <PopoverContent className="p-0" align="start" side="bottom" sideOffset={8} width="300px">
                     <Command>
                       <CommandInput 
                         placeholder="Search by name or email..." 
@@ -233,3 +233,4 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
 };
 
 export default MakersSection;
+
