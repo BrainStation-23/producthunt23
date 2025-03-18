@@ -18,7 +18,9 @@ interface UserProductCardProps {
     image_url: string | null;
     status: string;
     created_at: string;
+    created_by: string;
     rejection_feedback?: string | null;
+    isCreator?: boolean;
   };
 }
 
@@ -43,6 +45,8 @@ const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
       toast.error('Failed to delete product');
     }
   };
+
+  const isCreator = product.isCreator !== false; // Default to true if property is missing
 
   return (
     <>
@@ -72,10 +76,15 @@ const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
             )}
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-between">
             <span className="text-xs text-muted-foreground">
               Created {new Date(product.created_at).toLocaleDateString()}
             </span>
+            {!isCreator && (
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                Maker
+              </span>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex justify-between pt-2">
@@ -86,10 +95,12 @@ const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
                 Edit
               </Link>
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setIsDeleteDialogOpen(true)}>
-              <Trash className="h-3.5 w-3.5 mr-1" />
-              Delete
-            </Button>
+            {isCreator && (
+              <Button variant="outline" size="sm" onClick={() => setIsDeleteDialogOpen(true)}>
+                <Trash className="h-3.5 w-3.5 mr-1" />
+                Delete
+              </Button>
+            )}
           </div>
           <div className="flex gap-2">
             {product.status === 'approved' && (

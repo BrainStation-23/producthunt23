@@ -23,14 +23,43 @@ const UserProducts: React.FC = () => {
       
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
+        
+        // First, fetch products created by the user
+        const { data: createdProducts, error: createdError } = await supabase
           .from('products')
-          .select('*')
+          .select('*, makers:product_makers(profile_id)')
           .eq('created_by', user.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setProducts(data || []);
+        if (createdError) throw createdError;
+        
+        // Then, fetch products where the user is a maker but not the creator
+        const { data: makerProducts, error: makerError } = await supabase
+          .from('product_makers')
+          .select('products:product_id(*)')
+          .eq('profile_id', user.id)
+          .order('products.created_at', { ascending: false });
+          
+        if (makerError) throw makerError;
+
+        // Process maker products to flatten the structure
+        const makerProductsFlattened = makerProducts
+          .map(item => item.products)
+          .filter(product => product.created_by !== user.id); // Filter out products already in createdProducts
+
+        // Combine both lists
+        const combinedProducts = [
+          ...(createdProducts || []),
+          ...(makerProductsFlattened || [])
+        ];
+        
+        // Adding a flag to identify if the user is the creator or just a maker
+        const productsWithRole = combinedProducts.map(product => ({
+          ...product,
+          isCreator: product.created_by === user.id
+        }));
+        
+        setProducts(productsWithRole);
       } catch (error: any) {
         console.error('Error fetching products:', error);
         toast.error('Failed to load your products');
@@ -76,7 +105,7 @@ const UserProducts: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Products</h1>
-          <p className="text-muted-foreground">Manage your submitted products.</p>
+          <p className="text-muted-foreground">Manage your submitted products and products you're a maker on.</p>
         </div>
         <Button asChild>
           <Link to="/products/submit">
