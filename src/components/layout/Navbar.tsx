@@ -21,7 +21,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
-  const { user, userRole } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   
   // Determine if user is actually logged in from auth context
@@ -58,6 +58,11 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
     
     fetchUserProfile();
   }, [user]);
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await signOut();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -133,8 +138,8 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
                     <Link to="/user/settings">Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/logout">Log out</Link>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
