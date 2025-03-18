@@ -12,7 +12,10 @@ import UserProductCard from '@/components/user/UserProductCard';
 import UserProductsEmptyState from '@/components/user/UserProductsEmptyState';
 import { Product } from '@/types/product';
 
-interface UserProduct extends Product {
+// Extend the Product type to include the isCreator flag and makers array
+// but make 'technologies' optional since it's not part of the query result
+interface UserProduct extends Omit<Product, 'technologies'> {
+  technologies?: string[] | null;
   isCreator?: boolean;
   makers?: any[];
 }
@@ -68,7 +71,7 @@ const UserProducts: React.FC = () => {
         const productsWithRole = combinedProducts.map(product => ({
           ...product,
           isCreator: product.created_by === user.id
-        }));
+        })) as UserProduct[];
         
         setProducts(productsWithRole);
       } catch (error: any) {
@@ -133,7 +136,17 @@ const UserProducts: React.FC = () => {
           {products.map((product) => (
             <UserProductCard 
               key={product.id} 
-              product={product}
+              product={{
+                id: product.id,
+                name: product.name,
+                tagline: product.tagline,
+                image_url: product.image_url || null,
+                status: product.status || 'pending',
+                created_at: product.created_at || '',
+                created_by: product.created_by || '',
+                rejection_feedback: product.rejection_feedback || null,
+                isCreator: product.isCreator
+              }}
             />
           ))}
         </div>
