@@ -1,19 +1,8 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { UserPlus } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandList
-} from '@/components/ui/command';
+import { Search, UserPlus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Command, CommandEmpty, CommandGroup, CommandList } from '@/components/ui/command';
 import MakerSearchItem from './MakerSearchItem';
 
 interface ProfileSearchResult {
@@ -28,8 +17,6 @@ interface MakerSearchProps {
   setSearchQuery: (query: string) => void;
   searchResults: ProfileSearchResult[];
   isSearching: boolean;
-  isPopoverOpen: boolean;
-  setIsPopoverOpen: (isOpen: boolean) => void;
   onAddMaker: (profile: ProfileSearchResult) => void;
 }
 
@@ -38,8 +25,6 @@ export const MakerSearch: React.FC<MakerSearchProps> = ({
   setSearchQuery,
   searchResults,
   isSearching,
-  isPopoverOpen,
-  setIsPopoverOpen,
   onAddMaker
 }) => {
   // Log current state for debugging
@@ -48,43 +33,38 @@ export const MakerSearch: React.FC<MakerSearchProps> = ({
   console.log('Is searching:', isSearching);
 
   return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger asChild>
-        <Button 
-          type="button" 
-          variant="outline" 
-          className="w-full justify-start"
-          onClick={() => setIsPopoverOpen(true)}
-        >
-          <UserPlus className="h-4 w-4 mr-2" />
-          <span>Add Maker</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0 w-[300px]" align="start" side="bottom" sideOffset={8}>
-        <Command>
-          <CommandInput 
-            placeholder="Search by name or email..." 
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-            className="h-9"
-          />
-          <CommandList>
-            <CommandEmpty>
-              {isSearching ? 'Searching...' : 'No users found.'}
-            </CommandEmpty>
-            <CommandGroup>
-              {searchResults.map((profile) => (
-                <MakerSearchItem 
-                  key={profile.id} 
-                  profile={profile} 
-                  onSelect={onAddMaker} 
-                />
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div className="space-y-2 w-full">
+      <div className="relative">
+        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search makers by name or email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-8 pr-4"
+        />
+      </div>
+      
+      {(searchQuery.length > 1) && (
+        <div className="border rounded-md overflow-hidden bg-background">
+          <Command>
+            <CommandList className="max-h-[200px] overflow-y-auto">
+              <CommandEmpty>
+                {isSearching ? 'Searching...' : 'No users found.'}
+              </CommandEmpty>
+              <CommandGroup>
+                {searchResults.map((profile) => (
+                  <MakerSearchItem 
+                    key={profile.id} 
+                    profile={profile} 
+                    onSelect={onAddMaker} 
+                  />
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </div>
+      )}
+    </div>
   );
 };
 

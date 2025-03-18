@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { Maker } from '@/types/product';
 
@@ -24,25 +23,23 @@ export const MakerItem: React.FC<MakerItemProps> = ({ maker, index, onRemove }) 
   };
 
   return (
-    <div className="flex items-center gap-2 bg-secondary p-2 rounded-md">
+    <div className="flex items-center gap-2 bg-secondary rounded-full py-1 pl-1 pr-3">
       <Avatar className="h-8 w-8">
         <AvatarImage src={maker.avatar_url || ''} alt={maker.username || maker.email} />
         <AvatarFallback>{getInitials(maker)}</AvatarFallback>
       </Avatar>
       <span className="text-sm font-medium">{maker.username || maker.email}</span>
+      {maker.isCreator && (
+        <span className="text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">Creator</span>
+      )}
       {!maker.isCreator && (
-        <Button 
+        <button 
           type="button" 
-          variant="ghost" 
-          size="sm" 
-          className="h-6 w-6 p-0 rounded-full" 
+          className="ml-1 text-muted-foreground hover:text-destructive transition-colors" 
           onClick={() => onRemove(index)}
         >
-          <X className="h-3 w-3" />
-        </Button>
-      )}
-      {maker.isCreator && (
-        <span className="text-xs bg-primary text-primary-foreground px-1 py-0.5 rounded">Creator</span>
+          <X className="h-4 w-4" />
+        </button>
       )}
     </div>
   );

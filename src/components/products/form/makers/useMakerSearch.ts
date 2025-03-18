@@ -14,7 +14,6 @@ export const useMakerSearch = (makers: Maker[]) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ProfileSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
     const searchProfiles = async () => {
@@ -66,9 +65,7 @@ export const useMakerSearch = (makers: Maker[]) => {
     searchQuery,
     setSearchQuery,
     searchResults,
-    isSearching,
-    isPopoverOpen,
-    setIsPopoverOpen
+    isSearching
   };
 };
 

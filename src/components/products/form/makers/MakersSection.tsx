@@ -25,9 +25,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
     searchQuery,
     setSearchQuery,
     searchResults,
-    isSearching,
-    isPopoverOpen,
-    setIsPopoverOpen
+    isSearching
   } = useMakerSearch(makers);
 
   const handleAddMaker = (profile: ProfileSearchResult) => {
@@ -45,7 +43,6 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
     ]);
     
     setSearchQuery('');
-    setIsPopoverOpen(false);
   };
 
   const handleRemoveMaker = (index: number) => {
@@ -70,28 +67,27 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
                 Add all the people involved in making this product. You cannot remove yourself as the creator.
               </FormDescription>
               
-              <div className="flex flex-wrap gap-3 mt-4 mb-4">
-                {makers.map((maker, index) => (
-                  <MakerItem 
-                    key={index}
-                    maker={maker}
-                    index={index}
-                    onRemove={handleRemoveMaker}
-                  />
-                ))}
-              </div>
-              
-              <div className="flex gap-2">
+              <div className="space-y-4 mt-4">
                 <MakerSearch
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   searchResults={searchResults}
                   isSearching={isSearching}
-                  isPopoverOpen={isPopoverOpen}
-                  setIsPopoverOpen={setIsPopoverOpen}
                   onAddMaker={handleAddMaker}
                 />
+                
+                <div className="flex flex-wrap gap-3">
+                  {makers.map((maker, index) => (
+                    <MakerItem 
+                      key={index}
+                      maker={maker}
+                      index={index}
+                      onRemove={handleRemoveMaker}
+                    />
+                  ))}
+                </div>
               </div>
+              
               <FormMessage />
             </FormItem>
           )}
