@@ -22,7 +22,7 @@ const FormActions: React.FC<FormActionsProps> = ({
   status
 }) => {
   const isEditing = mode === 'edit';
-  const isDraft = status === 'draft';
+  const canSubmitForReview = status === 'draft' || status === 'rejected';
 
   return (
     <div className="flex flex-wrap gap-4 justify-end">
@@ -48,7 +48,7 @@ const FormActions: React.FC<FormActionsProps> = ({
         </Button>
       )}
       
-      {isEditing && isDraft && onSubmitForReview && (
+      {isEditing && canSubmitForReview && onSubmitForReview && (
         <Button 
           type="button" 
           variant="secondary" 
