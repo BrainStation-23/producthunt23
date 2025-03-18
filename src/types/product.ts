@@ -7,6 +7,7 @@ export interface Product {
   image_url: string | null;
   website_url: string | null;
   categories: string[] | null;
+  categoryNames?: string[] | null;
   technologies: string[] | null;
   upvotes: number;
   created_at: string;

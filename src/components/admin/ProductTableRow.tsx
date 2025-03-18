@@ -43,6 +43,19 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
     }
   };
 
+  // Display category name instead of ID
+  const displayCategory = () => {
+    if (product.categoryNames && product.categoryNames.length > 0) {
+      return product.categoryNames[0];
+    }
+    
+    if (product.categories && product.categories.length > 0) {
+      return product.categories[0];
+    }
+    
+    return '-';
+  };
+
   return (
     <TableRow key={product.id}>
       <TableCell className="font-medium">{product.name}</TableCell>
@@ -52,9 +65,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
         </Badge>
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        {product.categories && product.categories.length > 0
-          ? product.categories[0]
-          : '-'}
+        {displayCategory()}
       </TableCell>
       <TableCell className="hidden md:table-cell">{product.upvotes || 0}</TableCell>
       <TableCell className="hidden md:table-cell">

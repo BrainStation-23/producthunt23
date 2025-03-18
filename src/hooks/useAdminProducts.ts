@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -11,7 +12,28 @@ export function useAdminProducts() {
   const [totalPages, setTotalPages] = useState(1);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
   const pageSize = 10;
+
+  // Fetch categories to map IDs to names
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name')
+        .eq('status', 'active');
+        
+      if (!error && data) {
+        const catMap: Record<string, string> = {};
+        data.forEach((cat: { id: string, name: string }) => {
+          catMap[cat.id] = cat.name;
+        });
+        setCategoryMap(catMap);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   // Toggle status filter
   const toggleStatusFilter = (status: string) => {
@@ -66,7 +88,8 @@ export function useAdminProducts() {
         ...product,
         technologies: null,
         profile_username: product.profiles?.username,
-        profile_avatar_url: product.profiles?.avatar_url
+        profile_avatar_url: product.profiles?.avatar_url,
+        categoryNames: product.categories?.map((catId: string) => categoryMap[catId] || catId) || []
       })) || [];
 
       return productsWithTechnologies;
@@ -77,7 +100,7 @@ export function useAdminProducts() {
   };
 
   const { data: products, isLoading, refetch } = useQuery({
-    queryKey: ['adminProducts', searchQuery, statusFilters, currentPage],
+    queryKey: ['adminProducts', searchQuery, statusFilters, currentPage, categoryMap],
     queryFn: fetchProducts
   });
 
