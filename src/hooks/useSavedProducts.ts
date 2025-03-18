@@ -47,6 +47,7 @@ export const useSavedProducts = () => {
         // Transform the data to match the Product type
         const transformedProducts = data.map(item => ({
           ...item.products,
+          technologies: null // Add the missing technologies property
         }));
         
         setProducts(transformedProducts);
