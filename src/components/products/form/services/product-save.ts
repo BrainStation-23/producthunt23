@@ -67,7 +67,10 @@ export async function submitProductForReview(productId: string) {
   try {
     const { error } = await supabase
       .from('products')
-      .update({ status: 'pending' })
+      .update({ 
+        status: 'pending',
+        rejection_feedback: null // Clear any previous rejection feedback
+      })
       .eq('id', productId);
       
     if (error) throw error;

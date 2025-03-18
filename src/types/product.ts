@@ -15,6 +15,7 @@ export interface Product {
   profile_username?: string | null;
   profile_avatar_url?: string | null;
   status?: string;
+  rejection_feedback?: string | null;
 }
 
 export interface ProductsResponse {

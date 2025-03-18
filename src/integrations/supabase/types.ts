@@ -264,6 +264,7 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
+          rejection_feedback: string | null
           status: string
           tagline: string
           upvotes: number | null
@@ -277,6 +278,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
+          rejection_feedback?: string | null
           status?: string
           tagline: string
           upvotes?: number | null
@@ -290,6 +292,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
+          rejection_feedback?: string | null
           status?: string
           tagline?: string
           upvotes?: number | null

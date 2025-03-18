@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search } from 'lucide-react';
 import ProductTableRow from './ProductTableRow';
@@ -11,7 +10,7 @@ interface ProductsTableProps {
   products: Product[] | undefined;
   isLoading: boolean;
   searchQuery: string;
-  handleStatusChange: (productId: string, newStatus: string) => Promise<void>;
+  handleStatusChange: (productId: string, newStatus: string, feedback?: string) => Promise<void>;
   handleEditProduct: (productId: string) => void;
   handleDeleteClick: (productId: string) => void;
 }
@@ -34,7 +33,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
             <TableHead className="hidden md:table-cell">Category</TableHead>
             <TableHead className="hidden md:table-cell">Votes</TableHead>
             <TableHead className="hidden md:table-cell">Date</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="sr-only">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -46,7 +45,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
                 <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-20" /></TableCell>
                 <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-10" /></TableCell>
                 <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                <TableCell><Skeleton className="h-9 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-9 w-9" /></TableCell>
               </TableRow>
             ))
           ) : products && products.length > 0 ? (

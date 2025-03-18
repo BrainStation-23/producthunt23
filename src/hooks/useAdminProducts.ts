@@ -105,16 +105,25 @@ export function useAdminProducts() {
   });
 
   // Handle status change
-  const handleStatusChange = async (productId: string, newStatus: string) => {
+  const handleStatusChange = async (productId: string, newStatus: string, feedback?: string) => {
     try {
+      const updateData = { 
+        status: newStatus,
+        ...(newStatus === 'rejected' && feedback ? { rejection_feedback: feedback } : {})
+      };
+
       const { error } = await supabase
         .from('products')
-        .update({ status: newStatus })
+        .update(updateData)
         .eq('id', productId);
 
       if (error) throw error;
       
-      toast.success(`Product ${newStatus} successfully`);
+      const statusMessage = newStatus === 'rejected' 
+        ? `Product rejected with feedback` 
+        : `Product ${newStatus} successfully`;
+      
+      toast.success(statusMessage);
       refetch();
     } catch (error) {
       console.error('Error updating product status:', error);
