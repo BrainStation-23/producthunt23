@@ -26,6 +26,8 @@ export const MakerSearchItem: React.FC<MakerSearchItemProps> = ({ profile, onSel
     return displayName.substring(0, 2).toUpperCase();
   };
 
+  console.log('MakerSearchItem rendering profile:', profile);
+
   return (
     <CommandItem
       key={profile.id}

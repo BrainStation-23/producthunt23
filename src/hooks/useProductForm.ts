@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -111,6 +112,7 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
           if (technologiesError) throw technologiesError;
           
           // Fetch product makers with their profile data
+          console.log('Fetching product makers for product ID:', productId);
           const { data: makers, error: makersError } = await supabase
             .from('product_makers')
             .select(`
@@ -128,6 +130,8 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
           
           if (makersError) throw makersError;
           
+          console.log('Raw makers data from Supabase:', makers);
+          
           // Transform the data for the form
           const formattedScreenshots = screenshots.map((screenshot: ProductScreenshot) => ({
             title: screenshot.title || undefined,
@@ -143,13 +147,18 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
           const formattedTechnologies = technologies.map((tech: ProductTechnology) => tech.technology_name);
           
           // Format makers with profile data
-          const formattedMakers = makers.map((maker: any) => ({
-            email: maker.profiles?.email || maker.profiles?.username || 'Unknown',
-            id: maker.profile_id,
-            isCreator: maker.profile_id === product.created_by,
-            username: maker.profiles?.username,
-            avatar_url: maker.profiles?.avatar_url
-          }));
+          const formattedMakers = makers.map((maker: any) => {
+            console.log('Processing maker:', maker);
+            return {
+              email: maker.profiles?.email || maker.profiles?.username || 'Unknown',
+              id: maker.profile_id,
+              isCreator: maker.profile_id === product.created_by,
+              username: maker.profiles?.username || null,
+              avatar_url: maker.profiles?.avatar_url || null
+            };
+          });
+          
+          console.log('Formatted makers for form:', formattedMakers);
           
           // Set form values
           form.reset({

@@ -25,6 +25,8 @@ export const MakerItem: React.FC<MakerItemProps> = ({ maker, index, onRemove }) 
   // Get a displayable name for the maker
   const displayName = maker.username || maker.email || 'Unknown';
 
+  console.log('MakerItem rendering maker:', maker);
+
   return (
     <div className="flex items-center gap-2 bg-secondary rounded-full py-1 pl-1 pr-3">
       <Avatar className="h-8 w-8">

@@ -34,6 +34,8 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
     // Ensure we have a valid email for the maker (required by form validation)
     const email = profile.email || `${profile.username || 'user'}@example.com`;
     
+    console.log('Adding maker profile:', profile);
+    
     form.setValue('makers', [
       ...makers, 
       { 
@@ -56,6 +58,8 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
     updatedMakers.splice(index, 1);
     form.setValue('makers', updatedMakers, { shouldValidate: true });
   };
+
+  console.log('Current makers in MakersSection:', makers);
 
   return (
     <Card>
