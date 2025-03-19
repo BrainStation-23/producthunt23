@@ -50,8 +50,8 @@ const getFormSchema = (isEditing: boolean) => {
       });
 };
 
-type CreateFormValues = z.infer<typeof getFormSchema(false)>;
-type EditFormValues = z.infer<typeof getFormSchema(true)>;
+type CreateFormValues = z.infer<ReturnType<typeof getFormSchema>>;
+type EditFormValues = z.infer<ReturnType<typeof getFormSchema>>;
 type FormValues = CreateFormValues | EditFormValues;
 
 interface User {
