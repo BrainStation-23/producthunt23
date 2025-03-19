@@ -1,69 +1,113 @@
-# Welcome to your Lovable project
 
-## Project info
+# ProductHunt23
 
-**URL**: https://lovable.dev/projects/f1005ed7-b92b-4e98-a747-0699e55bc9d5
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-dark.svg)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
 
-## How can I edit this code?
+## About
 
-There are several ways of editing your application.
+ProductHunt23 is a platform for discovering and sharing new digital products. Users can submit their own products, browse and search for products, upvote their favorites, and engage with the community through comments. The platform includes features for product categorization, technology tagging, and user profiles.
 
-**Use Lovable**
+## Technology Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f1005ed7-b92b-4e98-a747-0699e55bc9d5) and start prompting.
+This project is built with modern web technologies:
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**:
+  - [React](https://reactjs.org/) - JavaScript library for building user interfaces
+  - [TypeScript](https://www.typescriptlang.org/) - Typed superset of JavaScript
+  - [Vite](https://vitejs.dev/) - Next-generation frontend tooling
+  - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+  - [shadcn/ui](https://ui.shadcn.com/) - Reusable UI components built with Radix UI and Tailwind CSS
+  - [React Router](https://reactrouter.com/) - Declarative routing for React
+  - [Tanstack React Query](https://tanstack.com/query/latest) - Data fetching and state management
 
-**Use your preferred IDE**
+- **Backend**:
+  - [Supabase](https://supabase.com/) - Open-source Firebase alternative
+  - PostgreSQL - Advanced open-source relational database
+  - Row Level Security (RLS) - Database-level security policies
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
 
-Follow these steps:
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- npm or [bun](https://bun.sh/) package manager
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Installation
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. Clone the repository:
+   ```sh
+   git clone <repository-url>
+   cd producthunt23
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. Install dependencies:
+   ```sh
+   npm install
+   # or with bun
+   bun install
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+3. Start the development server:
+   ```sh
+   npm run dev
+   # or with bun
+   bun run dev
+   ```
 
-**Edit a file directly in GitHub**
+4. Open your browser and navigate to `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Connecting to Your Own Supabase Backend
 
-**Use GitHub Codespaces**
+1. Create a new Supabase project at [https://supabase.com](https://supabase.com)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+2. Configure your Supabase project:
+   - Set up authentication providers as needed
+   - Run the database migrations found in the `supabase/migrations` directory
+   - Set up storage buckets if needed
 
-## What technologies are used for this project?
+3. Update the Supabase client configuration:
+   - Create a `.env.local` file in the project root (it's git-ignored)
+   - Add your Supabase URL and anon key:
+     ```
+     VITE_SUPABASE_URL=https://your-project-id.supabase.co
+     VITE_SUPABASE_ANON_KEY=your-anon-key
+     ```
 
-This project is built with .
+4. Alternatively, you can directly update the `src/integrations/supabase/client.ts` file with your project details.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Deployment
 
-## How can I deploy this project?
+### Deploy with Netlify
 
-Simply open [Lovable](https://lovable.dev/projects/f1005ed7-b92b-4e98-a747-0699e55bc9d5) and click on Share -> Publish.
+1. Push your repository to GitHub, GitLab, or Bitbucket
+2. Sign up for [Netlify](https://www.netlify.com/)
+3. Create a new site from Git
+4. Select your repository and configure build settings:
+   - Build command: `npm run build` or `bun run build`
+   - Publish directory: `dist`
+5. Configure environment variables for Supabase in the Netlify dashboard
 
-## I want to use a custom domain - is that possible?
+### Deploy with Vercel
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+1. Push your repository to GitHub, GitLab, or Bitbucket
+2. Sign up for [Vercel](https://vercel.com/)
+3. Import your repository
+4. Configure build settings:
+   - Framework preset: Vite
+   - Build command: `npm run build` or `bun run build`
+   - Output directory: `dist`
+5. Configure environment variables for Supabase in the Vercel dashboard
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
