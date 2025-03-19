@@ -4,6 +4,7 @@ import HeroSection from './components/HeroSection';
 import CategorySection from './components/CategorySection';
 import CtaSection from './components/CtaSection';
 import { useLandingData } from './hooks/useLandingData';
+import ProductSearch from '@/components/search/ProductSearch';
 
 const LandingPage: React.FC = () => {
   const {
@@ -27,6 +28,11 @@ const LandingPage: React.FC = () => {
         featuredProduct={featuredProduct}
         isLoading={isProductsLoading}
       />
+      
+      {/* Mobile Search (visible on small screens only) */}
+      <div className="md:hidden container px-4 -mt-4 mb-6">
+        <ProductSearch className="w-full" />
+      </div>
       
       {/* Categories Section */}
       <CategorySection 

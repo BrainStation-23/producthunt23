@@ -1,9 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, Bell, LayoutDashboard } from 'lucide-react';
+import { Menu, Bell, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   DropdownMenu, 
@@ -15,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import ProductSearch from '@/components/search/ProductSearch';
 
 interface NavbarProps {
   isLoggedIn?: boolean;
@@ -81,12 +80,7 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
 
         <div className="hidden md:flex flex-1 items-center justify-center px-4">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              className="w-full bg-muted pl-8 py-2 pr-4 rounded-full"
-            />
+            <ProductSearch placeholder="Search products..." />
           </div>
         </div>
 
