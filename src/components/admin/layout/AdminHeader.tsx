@@ -1,17 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Search,
-  X,
   ChevronLeft
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { toast } from '@/components/ui/sonner';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import AdminNotifications from './AdminNotifications';
+import ProductSearch from '@/components/search/ProductSearch';
 
 interface AdminHeaderProps {
   avatarUrl: string | null;
@@ -24,16 +20,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   hasNotifications,
   getAdminInitials
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      toast.info(`Searching for: ${searchQuery}`);
-      // In a real app, this would perform a search or navigate to search results
-    }
-  };
-
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <SidebarTrigger>
@@ -41,28 +27,14 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
       </SidebarTrigger>
       
       <div className="w-full flex-1">
-        <form onSubmit={handleSearch}>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search products, users..."
-              className="w-full bg-muted pl-8 py-2 rounded-md"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button 
-                type="button" 
-                className="absolute right-2.5 top-2.5" 
-                onClick={() => setSearchQuery('')}
-                aria-label="Clear search"
-              >
-                <X className="h-4 w-4 text-muted-foreground" />
-              </button>
-            )}
-          </div>
-        </form>
+        <ProductSearch 
+          placeholder="Search products, users..." 
+          className="w-full"
+          onSearch={(term) => {
+            // This will use ProductSearch's built-in navigation
+            // No need for additional navigation logic here
+          }}
+        />
       </div>
       
       <AdminNotifications hasNotifications={hasNotifications} />
