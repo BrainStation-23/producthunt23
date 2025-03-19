@@ -530,6 +530,26 @@ export type Database = {
         }
         Returns: boolean
       }
+      search_products: {
+        Args: {
+          search_query: string
+          result_limit?: number
+        }
+        Returns: {
+          categories: string[] | null
+          created_at: string | null
+          created_by: string | null
+          description: string
+          id: string
+          image_url: string | null
+          name: string
+          rejection_feedback: string | null
+          status: string
+          tagline: string
+          upvotes: number | null
+          website_url: string | null
+        }[]
+      }
     }
     Enums: {
       category_status: "active" | "inactive"
