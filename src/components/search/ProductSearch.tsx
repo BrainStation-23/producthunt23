@@ -69,7 +69,14 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
 
         if (error) throw error;
         
-        setResults(data || []);
+        // Convert the response data to match Product type by setting technologies to empty array if missing
+        const formattedResults: Product[] = data?.map((item: any) => ({
+          ...item,
+          technologies: [], // Add missing technologies property as empty array
+          categoryNames: item.categories, // Map categories to categoryNames for display if needed
+        })) || [];
+        
+        setResults(formattedResults);
       } catch (error) {
         console.error('Error searching products:', error);
         setResults([]);
