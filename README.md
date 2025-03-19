@@ -2,6 +2,7 @@
 # ProductHunt23
 
 [![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-dark.svg)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
+------------------
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_producthunt23&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
