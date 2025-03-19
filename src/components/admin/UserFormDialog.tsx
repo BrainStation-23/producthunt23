@@ -33,26 +33,24 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-// Define form schema based on whether it's for creating or editing
-const getFormSchema = (isEditing: boolean) => {
-  const baseSchema = {
-    email: z.string().email({ message: 'Please enter a valid email address' }),
-    username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
-    role: z.enum(['admin', 'user']),
-  };
-
-  // Add password field only for creation
-  return isEditing 
-    ? z.object(baseSchema)
-    : z.object({
-        ...baseSchema,
-        password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
-      });
+// Define common schema fields
+const baseSchema = {
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
+  role: z.enum(['admin', 'user']),
 };
 
-type CreateFormValues = z.infer<ReturnType<typeof getFormSchema>>;
-type EditFormValues = z.infer<ReturnType<typeof getFormSchema>>;
-type FormValues = CreateFormValues | EditFormValues;
+// Define form schema based on whether it's for creating or editing
+const createSchema = z.object({
+  ...baseSchema,
+  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+});
+
+const editSchema = z.object(baseSchema);
+
+// Define our form types
+type CreateFormValues = z.infer<typeof createSchema>;
+type EditFormValues = z.infer<typeof editSchema>;
 
 interface User {
   id: string;
@@ -84,39 +82,38 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
   description,
 }) => {
   const { session } = useAuth();
-  const formSchema = getFormSchema(isEditing);
   
-  // Default values depends on whether we're editing or creating
-  const defaultValues = isEditing
-    ? {
-        email: user?.email || '',
-        username: user?.username || '',
-        role: (user?.role as 'admin' | 'user') || 'user',
-      }
-    : {
-        email: '',
-        username: '',
-        password: '',
-        role: 'user',
-      };
+  // Use the appropriate form schema based on mode
+  const formSchema = isEditing ? editSchema : createSchema;
   
-  const form = useForm({
+  // Create type-safe default values
+  const defaultEditValues: EditFormValues = {
+    email: user?.email || '',
+    username: user?.username || '',
+    role: (user?.role as 'admin' | 'user') || 'user',
+  };
+  
+  const defaultCreateValues: CreateFormValues = {
+    email: '',
+    username: '',
+    password: '',
+    role: 'user',
+  };
+  
+  // Use the correct default values type based on mode
+  const form = useForm<typeof formSchema._type>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: isEditing ? defaultEditValues : defaultCreateValues,
   });
 
   // Update form when user changes (for editing)
   useEffect(() => {
     if (isEditing && user) {
-      form.reset({
-        email: user.email,
-        username: user.username || '',
-        role: (user.role as 'admin' | 'user'),
-      });
+      form.reset(defaultEditValues);
     }
   }, [user, form, isEditing]);
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: typeof formSchema._type) => {
     try {
       if (isEditing && user) {
         // Handle edit user case
