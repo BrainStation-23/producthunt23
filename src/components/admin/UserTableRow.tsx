@@ -18,9 +18,18 @@ interface User {
 interface UserTableRowProps {
   user: User;
   handleRoleChange: (userId: string, newRole: 'admin' | 'user') => Promise<void>;
+  onViewProfile: (user: User) => void;
+  onEditUser: (user: User) => void;
+  onUserUpdated: () => void;
 }
 
-const UserTableRow: React.FC<UserTableRowProps> = ({ user, handleRoleChange }) => {
+const UserTableRow: React.FC<UserTableRowProps> = ({ 
+  user, 
+  handleRoleChange,
+  onViewProfile,
+  onEditUser,
+  onUserUpdated
+}) => {
   return (
     <TableRow key={user.id}>
       <TableCell className="font-medium">
@@ -55,9 +64,11 @@ const UserTableRow: React.FC<UserTableRowProps> = ({ user, handleRoleChange }) =
       </TableCell>
       <TableCell>
         <UserActions 
-          userId={user.id} 
-          userRole={user.role} 
-          handleRoleChange={handleRoleChange} 
+          user={user}
+          handleRoleChange={handleRoleChange}
+          onViewProfile={onViewProfile}
+          onEditUser={onEditUser}
+          onUserUpdated={onUserUpdated}
         />
       </TableCell>
     </TableRow>

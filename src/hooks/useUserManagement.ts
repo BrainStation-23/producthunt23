@@ -128,5 +128,6 @@ export const useUserManagement = () => {
     totalPages,
     handleSearch,
     handleRoleChange,
+    refetch,
   };
 };

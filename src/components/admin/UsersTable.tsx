@@ -20,13 +20,19 @@ interface UsersTableProps {
   isLoading: boolean;
   searchQuery: string;
   handleRoleChange: (userId: string, newRole: 'admin' | 'user') => Promise<void>;
+  onViewProfile: (user: User) => void;
+  onEditUser: (user: User) => void;
+  onUserUpdated: () => void;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({ 
   users, 
   isLoading, 
   searchQuery,
-  handleRoleChange
+  handleRoleChange,
+  onViewProfile,
+  onEditUser,
+  onUserUpdated
 }) => {
   return (
     <div className="border rounded-md">
@@ -63,7 +69,10 @@ const UsersTable: React.FC<UsersTableProps> = ({
               <UserTableRow 
                 key={user.id} 
                 user={user} 
-                handleRoleChange={handleRoleChange} 
+                handleRoleChange={handleRoleChange}
+                onViewProfile={onViewProfile}
+                onEditUser={onEditUser}
+                onUserUpdated={onUserUpdated}
               />
             ))
           ) : (
