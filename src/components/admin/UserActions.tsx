@@ -50,6 +50,7 @@ const UserActions: React.FC<UserActionsProps> = ({
   onUserUpdated
 }) => {
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const { session } = useAuth();
   
   const handleSuspendUser = async () => {
@@ -76,9 +77,29 @@ const UserActions: React.FC<UserActionsProps> = ({
     }
   };
 
+  const handleViewProfile = () => {
+    setDropdownOpen(false);
+    onViewProfile(user);
+  };
+
+  const handleEditUser = () => {
+    setDropdownOpen(false);
+    onEditUser(user);
+  };
+
+  const handleRoleChangeAction = async (newRole: 'admin' | 'user') => {
+    setDropdownOpen(false);
+    await handleRoleChange(user.id, newRole);
+  };
+
+  const handleSuspendClick = () => {
+    setDropdownOpen(false);
+    setSuspendDialogOpen(true);
+  };
+
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">
             <MoreHorizontal className="h-4 w-4" />
@@ -88,20 +109,20 @@ const UserActions: React.FC<UserActionsProps> = ({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => onViewProfile(user)}>
+          <DropdownMenuItem onClick={handleViewProfile}>
             View profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onEditUser(user)}>
+          <DropdownMenuItem onClick={handleEditUser}>
             Edit user
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {user.role === 'admin' ? (
-            <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'user')}>
+            <DropdownMenuItem onClick={() => handleRoleChangeAction('user')}>
               <ShieldOff className="mr-2 h-4 w-4" />
               Remove admin role
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'admin')}>
+            <DropdownMenuItem onClick={() => handleRoleChangeAction('admin')}>
               <Shield className="mr-2 h-4 w-4" />
               Make admin
             </DropdownMenuItem>
@@ -109,7 +130,7 @@ const UserActions: React.FC<UserActionsProps> = ({
           <DropdownMenuSeparator />
           <DropdownMenuItem 
             className="text-red-500"
-            onClick={() => setSuspendDialogOpen(true)}
+            onClick={handleSuspendClick}
           >
             <AlertTriangle className="mr-2 h-4 w-4" />
             Suspend user

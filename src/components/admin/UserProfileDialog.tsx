@@ -38,8 +38,10 @@ const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
   if (!user) return null;
 
   const handleEditClick = () => {
-    onOpenChange(false);
-    onEditUser();
+    onOpenChange(false); // Close this dialog first
+    setTimeout(() => {
+      onEditUser(); // Then open the edit dialog
+    }, 100); // Small delay to ensure proper state transition
   };
 
   return (
