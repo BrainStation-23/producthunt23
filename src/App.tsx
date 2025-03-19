@@ -20,6 +20,8 @@ import SubmitProductPage from './pages/products/SubmitProductPage';
 import EditProductPage from './pages/products/EditProductPage';
 import ProductDetailPage from './pages/products/ProductDetailPage';
 import NotFound from './pages/NotFound';
+import TermsOfServicePage from './pages/legal/TermsOfServicePage';
+import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -56,6 +58,9 @@ function App() {
               <Route path="products/submit" element={<SubmitProductPage />} />
               <Route path="products/edit/:productId" element={<EditProductPage />} />
               <Route path="products/:productId" element={<ProductDetailPage />} />
+              {/* Legal Pages */}
+              <Route path="terms" element={<TermsOfServicePage />} />
+              <Route path="privacy" element={<PrivacyPolicyPage />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
