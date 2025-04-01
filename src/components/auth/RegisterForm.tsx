@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { toast } from '@/components/ui/sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, Github } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client'; // Added this import
 
 const RegisterForm: React.FC = () => {
   const [name, setName] = useState('');
