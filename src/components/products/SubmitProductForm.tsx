@@ -7,6 +7,7 @@ import { ProductFormValues } from '@/types/product';
 import { useProductForm } from '@/hooks/useProductForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Import form sections
 import BasicInfoSection from '@/components/products/form/BasicInfoSection';
@@ -29,6 +30,7 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
   mode = 'create'
 }) => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { 
     form, 
     isSubmitting, 
@@ -60,7 +62,7 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-8">
         <div className="space-y-4">
           <Skeleton className="h-10 w-1/3" />
           <Skeleton className="h-20 w-full" />
@@ -83,16 +85,16 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
           <BasicInfoSection form={form} />
 
           <Tabs defaultValue="categories">
-            <TabsList className="grid grid-cols-1 md:grid-cols-5 w-full mb-4">
-              <TabsTrigger value="categories">Categories</TabsTrigger>
-              <TabsTrigger value="technologies">Technologies</TabsTrigger>
-              <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
-              <TabsTrigger value="videos">Videos</TabsTrigger>
-              <TabsTrigger value="makers">Makers</TabsTrigger>
+            <TabsList className={`grid w-full mb-4 ${isMobile ? 'grid-cols-3 overflow-x-auto gap-1 p-1' : 'grid-cols-1 md:grid-cols-5'}`}>
+              <TabsTrigger value="categories" className={isMobile ? 'text-xs' : ''}>Categories</TabsTrigger>
+              <TabsTrigger value="technologies" className={isMobile ? 'text-xs' : ''}>Technologies</TabsTrigger>
+              <TabsTrigger value="screenshots" className={isMobile ? 'text-xs' : ''}>Screenshots</TabsTrigger>
+              <TabsTrigger value="videos" className={isMobile ? 'text-xs' : ''}>Videos</TabsTrigger>
+              <TabsTrigger value="makers" className={isMobile ? 'text-xs' : ''}>Makers</TabsTrigger>
             </TabsList>
             
             <TabsContent value="categories" className="space-y-4">
@@ -130,7 +132,7 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
       </Form>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>Product Preview</DialogTitle>
             <DialogDescription>

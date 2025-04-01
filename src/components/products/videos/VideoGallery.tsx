@@ -5,6 +5,7 @@ import { Video } from '@/types/product';
 import VideoThumbnail from './VideoThumbnail';
 import VideoDetails from './VideoDetails';
 import VideoEmptyState from './VideoEmptyState';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface VideoGalleryProps {
   videos: Video[];
@@ -25,27 +26,31 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({
   onRemoveVideo,
   onAddClick
 }) => {
+  const isMobile = useIsMobile();
+
   if (videos.length === 0) {
     return <VideoEmptyState type="gallery" onAddClick={onAddClick} />;
   }
 
   return (
-    <div className="min-h-[300px] grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="col-span-1 md:col-span-1 h-fit">
-        <ScrollArea className="max-h-[600px] pr-4">
-          {videos.map((video, index) => (
-            <VideoThumbnail
-              key={index}
-              video={video}
-              index={index}
-              isSelected={selectedVideoIndex === index}
-              onClick={() => onSelectVideo(index)}
-            />
-          ))}
+    <div className={`min-h-[300px] ${isMobile ? 'flex flex-col gap-4' : 'grid grid-cols-1 md:grid-cols-3 gap-4'}`}>
+      <div className={isMobile ? 'order-2' : 'col-span-1 md:col-span-1 h-fit'}>
+        <ScrollArea className={`${isMobile ? 'max-h-[200px]' : 'max-h-[600px]'} pr-4`}>
+          <div className={isMobile ? 'flex gap-2 overflow-x-auto pb-2' : ''}>
+            {videos.map((video, index) => (
+              <VideoThumbnail
+                key={index}
+                video={video}
+                index={index}
+                isSelected={selectedVideoIndex === index}
+                onClick={() => onSelectVideo(index)}
+              />
+            ))}
+          </div>
         </ScrollArea>
       </div>
 
-      <div className="col-span-1 md:col-span-2">
+      <div className={isMobile ? 'order-1' : 'col-span-1 md:col-span-2'}>
         {selectedVideoIndex !== null ? (
           <VideoDetails
             video={videos[selectedVideoIndex]}
