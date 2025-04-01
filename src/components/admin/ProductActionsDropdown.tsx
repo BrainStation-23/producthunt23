@@ -18,6 +18,7 @@ import {
   FilePenLine, 
   MoreVertical
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface ProductActionsDropdownProps {
   productId: string;
@@ -55,9 +56,11 @@ const ProductActionsDropdown: React.FC<ProductActionsDropdownProps> = ({
           <Edit className="mr-2 h-4 w-4" />
           Edit
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <ExternalLink className="mr-2 h-4 w-4" />
-          View
+        <DropdownMenuItem asChild>
+          <Link to={`/products/${productId}`} target="_blank" rel="noopener noreferrer">
+            <ExternalLink className="mr-2 h-4 w-4" />
+            View
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         
