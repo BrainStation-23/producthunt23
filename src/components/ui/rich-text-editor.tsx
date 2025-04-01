@@ -2,8 +2,8 @@
 import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
+import { Link as TiptapLink } from '@tiptap/extension-link';
+import { Image as TiptapImage } from '@tiptap/extension-image';
 import { 
   Bold, 
   Italic, 
@@ -40,13 +40,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Link.configure({
+      TiptapLink.configure({
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-blue-500 underline cursor-pointer',
         },
       }),
-      Image.configure({
+      TiptapImage.configure({
         HTMLAttributes: {
           class: 'rounded-md max-w-full h-auto',
         },
@@ -163,7 +163,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   size="sm"
                   onClick={() => {
                     if (editor.isActive('link')) {
-                      editor.chain().focus().unsetLink().run();
+                      editor.chain().focus().extendMarkRange('link').unsetLink().run();
                     }
                   }}
                 >
@@ -177,6 +177,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                       editor
                         .chain()
                         .focus()
+                        .extendMarkRange('link')
                         .setLink({ href: linkUrl })
                         .run();
                       setLinkUrl('');
