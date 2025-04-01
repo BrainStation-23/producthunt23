@@ -8,6 +8,10 @@ import { useProductForm } from '@/hooks/useProductForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 // Import form sections
 import BasicInfoSection from '@/components/products/form/BasicInfoSection';
@@ -43,6 +47,7 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
     productId
   });
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [currentTab, setCurrentTab] = useState("categories");
 
   const onSubmit = (data: ProductFormValues) => {
     handleSubmit(data, false);
@@ -82,41 +87,91 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
     );
   }
 
+  const tabItems = [
+    { id: "categories", label: "Categories" },
+    { id: "technologies", label: "Technologies" },
+    { id: "screenshots", label: "Screenshots" },
+    { id: "videos", label: "Videos" },
+    { id: "makers", label: "Makers" }
+  ];
+
+  const renderTabContent = (tabId: string) => {
+    switch (tabId) {
+      case "categories":
+        return <CategoriesSection form={form} />;
+      case "technologies":
+        return <TechnologiesSection form={form} />;
+      case "screenshots":
+        return <ScreenshotsSection form={form} />;
+      case "videos":
+        return <VideosSection form={form} />;
+      case "makers":
+        return <MakersSection form={form} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
           <BasicInfoSection form={form} />
 
-          <Tabs defaultValue="categories">
-            <TabsList className={`grid w-full mb-4 ${isMobile ? 'grid-cols-3 overflow-x-auto gap-1 p-1' : 'grid-cols-1 md:grid-cols-5'}`}>
-              <TabsTrigger value="categories" className={isMobile ? 'text-xs' : ''}>Categories</TabsTrigger>
-              <TabsTrigger value="technologies" className={isMobile ? 'text-xs' : ''}>Technologies</TabsTrigger>
-              <TabsTrigger value="screenshots" className={isMobile ? 'text-xs' : ''}>Screenshots</TabsTrigger>
-              <TabsTrigger value="videos" className={isMobile ? 'text-xs' : ''}>Videos</TabsTrigger>
-              <TabsTrigger value="makers" className={isMobile ? 'text-xs' : ''}>Makers</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="categories" className="space-y-4">
-              <CategoriesSection form={form} />
-            </TabsContent>
-
-            <TabsContent value="technologies" className="space-y-4">
-              <TechnologiesSection form={form} />
-            </TabsContent>
-
-            <TabsContent value="screenshots" className="space-y-4">
-              <ScreenshotsSection form={form} />
-            </TabsContent>
-
-            <TabsContent value="videos" className="space-y-4">
-              <VideosSection form={form} />
-            </TabsContent>
-            
-            <TabsContent value="makers" className="space-y-4">
-              <MakersSection form={form} />
-            </TabsContent>
-          </Tabs>
+          {isMobile ? (
+            <div className="space-y-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    {tabItems.find(tab => tab.id === currentTab)?.label || "Select section"}
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <div className="grid gap-1 p-2">
+                    {tabItems.map((tab) => (
+                      <Button 
+                        key={tab.id}
+                        variant={currentTab === tab.id ? "secondary" : "ghost"}
+                        className="justify-start font-normal"
+                        onClick={() => setCurrentTab(tab.id)}
+                      >
+                        {tab.label}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
+              <div className="mt-4 space-y-4">
+                {renderTabContent(currentTab)}
+              </div>
+            </div>
+          ) : (
+            <Tabs defaultValue="categories" onValueChange={setCurrentTab}>
+              <div className="relative">
+                <ScrollArea className="pb-2">
+                  <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+                    {tabItems.map((tab) => (
+                      <TabsTrigger 
+                        key={tab.id} 
+                        value={tab.id}
+                        className="py-2"
+                      >
+                        {tab.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </ScrollArea>
+              </div>
+              
+              {tabItems.map((tab) => (
+                <TabsContent key={tab.id} value={tab.id} className="space-y-4 mt-4">
+                  {renderTabContent(tab.id)}
+                </TabsContent>
+              ))}
+            </Tabs>
+          )}
 
           {mode === 'create' && <AgreementSection form={form} />}
 
