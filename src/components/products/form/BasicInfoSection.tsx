@@ -11,8 +11,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 
 interface BasicInfoSectionProps {
   form: UseFormReturn<ProductFormValues>;
@@ -64,10 +64,11 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ form }) => {
               <FormItem>
                 <FormLabel>Description*</FormLabel>
                 <FormControl>
-                  <Textarea 
+                  <RichTextEditor 
+                    value={field.value} 
+                    onChange={field.onChange}
+                    minHeight="200px"
                     placeholder="Describe your product in detail" 
-                    className="min-h-32"
-                    {...field} 
                   />
                 </FormControl>
                 <FormDescription>

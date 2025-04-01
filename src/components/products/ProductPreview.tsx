@@ -38,7 +38,11 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({ formData }) => {
         )}
         
         <div className="prose max-w-none dark:prose-invert">
-          <p>{formData.description || 'Your product description will appear here...'}</p>
+          {formData.description ? (
+            <div dangerouslySetInnerHTML={{ __html: formData.description }} />
+          ) : (
+            <p>Your product description will appear here...</p>
+          )}
         </div>
         
         {formData.website_url && (
