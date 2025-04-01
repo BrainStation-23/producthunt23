@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,6 @@ const LoginForm: React.FC = () => {
   const location = useLocation();
   const { signIn, signInWithGithub, user, userRole, isLoading } = useAuth();
 
-  // Check if user is already logged in and redirect accordingly
   useEffect(() => {
     if (user && userRole && !isLoading) {
       const from = location.state?.from?.pathname;
@@ -42,7 +40,6 @@ const LoginForm: React.FC = () => {
       const role = await signIn(email, password);
       toast.success('Successfully logged in');
       
-      // Redirection will happen in the useEffect above
       console.log('Login successful, user role:', role);
     } catch (error: any) {
       console.error('Login error:', error);
