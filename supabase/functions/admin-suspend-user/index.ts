@@ -68,8 +68,7 @@ serve(async (req) => {
     const { data: updatedUser, error: suspendError } = await supabase.auth.admin.updateUserById(
       user_id,
       { 
-        banned: suspended,
-        disabled: suspended
+        app_metadata: { disabled: suspended }
       }
     );
 

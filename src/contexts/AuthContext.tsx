@@ -33,9 +33,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (event, session) => {
         console.log('Auth event:', event, 'User:', session?.user?.email || 'No user');
         
-        // Check if user is banned or disabled
-        if (session?.user?.banned || session?.user?.app_metadata?.disabled) {
-          console.log('User is banned or disabled, signing out');
+        // Check if user is disabled
+        if (session?.user?.app_metadata?.disabled) {
+          console.log('User is disabled, signing out');
           // Don't update state yet, handle in the signOut call
           supabase.auth.signOut().then(() => {
             setSession(null);
@@ -66,9 +66,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Getting initial session:', session?.user?.email || 'No session');
       
-      // Check if user is banned or disabled
-      if (session?.user?.banned || session?.user?.app_metadata?.disabled) {
-        console.log('User is banned or disabled, signing out');
+      // Check if user is disabled
+      if (session?.user?.app_metadata?.disabled) {
+        console.log('User is disabled, signing out');
         supabase.auth.signOut().then(() => {
           setSession(null);
           setUser(null);
