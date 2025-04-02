@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Shield, ShieldOff, AlertTriangle, Trash2 } from 'lucide-react';
@@ -51,6 +52,7 @@ const UserActions: React.FC<UserActionsProps> = ({
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { session } = useAuth();
   
   const handleSuspendUser = async () => {
@@ -76,6 +78,9 @@ const UserActions: React.FC<UserActionsProps> = ({
 
   const handleDeleteUser = async () => {
     try {
+      setIsDeleting(true);
+      console.log(`Attempting to delete user ${user.id}`);
+      
       const { data, error } = await supabase.functions.invoke('admin-delete-user', {
         body: { user_id: user.id },
         headers: {
@@ -83,14 +88,18 @@ const UserActions: React.FC<UserActionsProps> = ({
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting user:', error);
+        throw error;
+      }
       
       toast.success(`User ${user.username || user.email} has been permanently deleted`);
       onUserUpdated();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error);
       toast.error(error.message || 'Failed to delete user');
     } finally {
+      setIsDeleting(false);
       setDeleteDialogOpen(false);
     }
   };
@@ -132,20 +141,32 @@ const UserActions: React.FC<UserActionsProps> = ({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleViewProfile}>
+          <DropdownMenuItem onClick={() => {
+            setDropdownOpen(false);
+            onViewProfile(user);
+          }}>
             View profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleEditUser}>
+          <DropdownMenuItem onClick={() => {
+            setDropdownOpen(false);
+            onEditUser(user);
+          }}>
             Edit user
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {user.role === 'admin' ? (
-            <DropdownMenuItem onClick={() => handleRoleChangeAction('user')}>
+            <DropdownMenuItem onClick={() => {
+              setDropdownOpen(false);
+              handleRoleChange(user.id, 'user');
+            }}>
               <ShieldOff className="mr-2 h-4 w-4" />
               Remove admin role
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={() => handleRoleChangeAction('admin')}>
+            <DropdownMenuItem onClick={() => {
+              setDropdownOpen(false);
+              handleRoleChange(user.id, 'admin');
+            }}>
               <Shield className="mr-2 h-4 w-4" />
               Make admin
             </DropdownMenuItem>
@@ -203,8 +224,9 @@ const UserActions: React.FC<UserActionsProps> = ({
             <AlertDialogAction 
               onClick={handleDeleteUser}
               className="bg-destructive hover:bg-destructive/90"
+              disabled={isDeleting}
             >
-              Delete Permanently
+              {isDeleting ? 'Deleting...' : 'Delete Permanently'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
