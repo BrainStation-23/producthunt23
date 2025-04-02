@@ -62,7 +62,7 @@ serve(async (req) => {
       );
     }
     
-    console.log(`Deleting user ${user_id}`);
+    console.log(`Deleting user ${user_id} with cascade delete`);
     
     // Delete the user using the admin API
     const { error: deleteError } = await supabase.auth.admin.deleteUser(
