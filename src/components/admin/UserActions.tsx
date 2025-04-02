@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Shield, ShieldOff, AlertTriangle, Trash2 } from 'lucide-react';
@@ -56,11 +55,8 @@ const UserActions: React.FC<UserActionsProps> = ({
   
   const handleSuspendUser = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('admin-user-management', {
-        body: {
-          action: 'suspend_user',
-          data: { user_id: user.id, suspended: true }
-        },
+      const { data, error } = await supabase.functions.invoke('admin-suspend-user', {
+        body: { user_id: user.id, suspended: true },
         headers: {
           Authorization: `Bearer ${session?.access_token}`
         }
@@ -80,11 +76,8 @@ const UserActions: React.FC<UserActionsProps> = ({
 
   const handleDeleteUser = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('admin-user-management', {
-        body: {
-          action: 'delete_user',
-          data: { user_id: user.id }
-        },
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { user_id: user.id },
         headers: {
           Authorization: `Bearer ${session?.access_token}`
         }

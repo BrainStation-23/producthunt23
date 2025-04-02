@@ -72,14 +72,11 @@ export const useUserForm = (
         }
 
         // Then update the user's profile data
-        const { data, error } = await supabase.functions.invoke('admin-user-management', {
+        const { data, error } = await supabase.functions.invoke('admin-update-user', {
           body: {
-            action: 'update_user',
-            data: {
-              id: user.id,
-              email,
-              user_metadata: { username },
-            }
+            id: user.id,
+            email,
+            user_metadata: { username },
           },
           headers: {
             Authorization: `Bearer ${session?.access_token}`
@@ -92,11 +89,8 @@ export const useUserForm = (
         // Handle create user case
         const { email, password, role, username } = values as CreateFormValues;
         
-        const { data, error } = await supabase.functions.invoke('admin-user-management', {
-          body: {
-            action: 'create_user',
-            data: { email, password, role, username }
-          },
+        const { data, error } = await supabase.functions.invoke('admin-create-user', {
+          body: { email, password, role, username },
           headers: {
             Authorization: `Bearer ${session?.access_token}`
           }
