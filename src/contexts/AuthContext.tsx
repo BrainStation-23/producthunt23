@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +28,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
+    // First, set up the auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth event:', event, 'User:', session?.user?.email || 'No user');
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Use setTimeout to prevent recursive calls
+          setTimeout(() => {
+            fetchUserRole(session.user.id);
+          }, 0);
+        } else {
+          setUserRole(null);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Getting initial session:', session?.user?.email || 'No session');
       setSession(session);
@@ -38,21 +59,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth event:', event);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          fetchUserRole(session.user.id);
-        } else {
-          setUserRole(null);
-          setIsLoading(false);
-        }
-      }
-    );
-
     return () => {
       subscription.unsubscribe();
     };
@@ -61,6 +67,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchUserRole = async (userId: string) => {
     try {
       setIsLoading(true);
+      console.log('Fetching role for user ID:', userId);
+      
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -71,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching user role:', error);
         setUserRole('user'); // Default to user if error
       } else {
+        console.log('User role from database:', data?.role);
         setUserRole(data?.role as UserRole || 'user');
       }
     } catch (error) {
@@ -146,6 +155,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+      
       navigate('/login');
     } catch (error: any) {
       console.error('Error signing out:', error);
@@ -157,16 +171,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGithub = async () => {
     try {
+      console.log('Starting GitHub sign in process');
       const redirectTo = `${window.location.origin}/auth/callback`;
+      console.log('Redirect URL:', redirectTo);
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
           redirectTo: redirectTo,
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('GitHub OAuth error:', error);
+        throw error;
+      }
+      
+      console.log('GitHub OAuth initiated, URL:', data?.url);
     } catch (error: any) {
       console.error('Error signing in with GitHub:', error);
       toast.error(error.message || 'Error signing in with GitHub');
