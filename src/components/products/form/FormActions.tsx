@@ -2,12 +2,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ProductFormValues } from '@/types/product';
-import { Save, Send, Eye, Edit, CheckCircle } from 'lucide-react';
+import { Save, Send, Edit, CheckCircle } from 'lucide-react';
 
 interface FormActionsProps {
   isSubmitting: boolean;
   onSaveAsDraft: () => void;
-  onPreview: () => void;
+  onPreview?: () => void; // Make preview optional
   onSubmitForReview?: () => void;
   mode?: 'create' | 'edit';
   status?: string;
@@ -26,16 +26,6 @@ const FormActions: React.FC<FormActionsProps> = ({
 
   return (
     <div className="flex flex-wrap gap-4 justify-end">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={onPreview}
-        disabled={isSubmitting}
-      >
-        <Eye className="mr-2 h-4 w-4" />
-        Preview
-      </Button>
-      
       {!isEditing && (
         <Button 
           type="button" 

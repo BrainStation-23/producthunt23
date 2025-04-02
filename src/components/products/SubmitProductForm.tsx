@@ -113,7 +113,7 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
         <FormActions 
           isSubmitting={isSubmitting}
           onSaveAsDraft={onSaveAsDraft}
-          onSubmitForReview={onSubmitForReview}
+          onSubmitForReview={handleSubmitForReview}
           mode={mode}
           status={productStatus}
         />
