@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,13 +26,6 @@ const AuthCallback: React.FC = () => {
         }
         
         console.log("Session obtained, user:", sessionData.session.user.email);
-        
-        // Check if user is disabled through app_metadata
-        if (sessionData.session.user.app_metadata?.disabled) {
-          console.error("User account is suspended");
-          await supabase.auth.signOut();
-          throw new Error("Your account has been suspended. Please contact an administrator.");
-        }
         
         // Get user role
         const { data: roleData, error: roleError } = await supabase
