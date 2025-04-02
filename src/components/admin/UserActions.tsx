@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Shield, ShieldOff, AlertTriangle } from 'lucide-react';
+import { MoreHorizontal, Shield, ShieldOff, AlertTriangle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -50,6 +50,7 @@ const UserActions: React.FC<UserActionsProps> = ({
   onUserUpdated
 }) => {
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { session } = useAuth();
   
@@ -77,6 +78,30 @@ const UserActions: React.FC<UserActionsProps> = ({
     }
   };
 
+  const handleDeleteUser = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-user-management', {
+        body: {
+          action: 'delete_user',
+          data: { user_id: user.id }
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+      
+      toast.success(`User ${user.username || user.email} has been permanently deleted`);
+      onUserUpdated();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error(error.message || 'Failed to delete user');
+    } finally {
+      setDeleteDialogOpen(false);
+    }
+  };
+
   const handleViewProfile = () => {
     setDropdownOpen(false);
     onViewProfile(user);
@@ -95,6 +120,11 @@ const UserActions: React.FC<UserActionsProps> = ({
   const handleSuspendClick = () => {
     setDropdownOpen(false);
     setSuspendDialogOpen(true);
+  };
+  
+  const handleDeleteClick = () => {
+    setDropdownOpen(false);
+    setDeleteDialogOpen(true);
   };
 
   return (
@@ -135,6 +165,13 @@ const UserActions: React.FC<UserActionsProps> = ({
             <AlertTriangle className="mr-2 h-4 w-4" />
             Suspend user
           </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="text-red-500"
+            onClick={handleDeleteClick}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete user
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -154,6 +191,27 @@ const UserActions: React.FC<UserActionsProps> = ({
               className="bg-red-500 hover:bg-red-600"
             >
               Suspend
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to permanently delete {user.username || user.email}? 
+              This action cannot be undone and all data associated with this user will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteUser}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

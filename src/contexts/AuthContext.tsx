@@ -32,6 +32,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth event:', event, 'User:', session?.user?.email || 'No user');
+        
+        // Check if user is banned or disabled
+        if (session?.user?.banned || session?.user?.app_metadata?.disabled) {
+          console.log('User is banned or disabled, signing out');
+          // Don't update state yet, handle in the signOut call
+          supabase.auth.signOut().then(() => {
+            setSession(null);
+            setUser(null);
+            setUserRole(null);
+            toast.error('Your account has been suspended. Please contact an administrator.');
+            navigate('/login');
+          });
+          return;
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -50,6 +65,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Getting initial session:', session?.user?.email || 'No session');
+      
+      // Check if user is banned or disabled
+      if (session?.user?.banned || session?.user?.app_metadata?.disabled) {
+        console.log('User is banned or disabled, signing out');
+        supabase.auth.signOut().then(() => {
+          setSession(null);
+          setUser(null);
+          setUserRole(null);
+          toast.error('Your account has been suspended. Please contact an administrator.');
+          navigate('/login');
+        });
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -62,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   const fetchUserRole = async (userId: string) => {
     try {

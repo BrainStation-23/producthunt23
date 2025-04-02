@@ -28,6 +28,13 @@ const AuthCallback: React.FC = () => {
         
         console.log("Session obtained, user:", sessionData.session.user.email);
         
+        // Check if user is banned or disabled
+        if (sessionData.session.user.banned || sessionData.session.user.app_metadata?.disabled) {
+          console.error("User account is suspended");
+          await supabase.auth.signOut();
+          throw new Error("Your account has been suspended. Please contact an administrator.");
+        }
+        
         // Get user role
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')

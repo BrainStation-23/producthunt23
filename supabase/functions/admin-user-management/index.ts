@@ -83,12 +83,47 @@ serve(async (req) => {
       case 'suspend_user':
         // Temporarily disable a user's account
         const { user_id, suspended } = data;
-        const { error: suspendError } = await supabase.auth.admin.updateUserById(
+        
+        console.log(`Suspending user ${user_id}, suspended: ${suspended}`);
+        
+        // Use the updateUserById method to set the user to disabled
+        const { data: updatedUser, error: suspendError } = await supabase.auth.admin.updateUserById(
           user_id,
-          { banned: suspended }
+          { 
+            banned: suspended,
+            // Also mark the user as disabled in the internal auth system
+            disabled: suspended
+          }
         );
 
-        if (suspendError) throw suspendError;
+        if (suspendError) {
+          console.error('Error suspending user:', suspendError);
+          throw suspendError;
+        }
+        
+        console.log('User suspension update result:', updatedUser);
+        
+        result = { success: true, user: updatedUser.user };
+        break;
+
+      case 'delete_user':
+        // Permanently delete a user's account
+        const { user_id: deleteUserId } = data;
+        
+        console.log(`Deleting user ${deleteUserId}`);
+        
+        // Delete the user using the admin API
+        const { error: deleteError } = await supabase.auth.admin.deleteUser(
+          deleteUserId
+        );
+
+        if (deleteError) {
+          console.error('Error deleting user:', deleteError);
+          throw deleteError;
+        }
+        
+        console.log(`User ${deleteUserId} deleted successfully`);
+        
         result = { success: true };
         break;
 
