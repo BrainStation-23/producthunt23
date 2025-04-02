@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/sonner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AuthCallback from './pages/auth/AuthCallback';
+import LogoutPage from './pages/auth/LogoutPage';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -65,6 +66,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/logout" element={<LogoutPage />} />
 
             {/* Admin Routes */}
             <Route
