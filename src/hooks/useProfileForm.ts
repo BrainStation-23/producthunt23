@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -73,7 +72,6 @@ export function useProfileForm(user: User | null) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    // Skip updating if the field is part of verified socials
     if (formData.verified_socials?.includes(name)) {
       return;
     }
@@ -115,7 +113,6 @@ export function useProfileForm(user: User | null) {
     
     const file = e.target.files[0];
     
-    // Validate the file
     const validation = validateImageFile(file);
     if (!validation.isValid) {
       toast.error(validation.error || 'Invalid file');
@@ -125,10 +122,8 @@ export function useProfileForm(user: User | null) {
     try {
       setIsUploading(true);
       
-      // Create a path that includes the user's ID to ensure uniqueness and proper organization
       const filePath = `${user.id}/avatar`;
       
-      // Upload the file using the utility function with the new bucket name
       const publicUrl = await uploadImageToStorage(
         file, 
         'profile_pictures',
@@ -136,7 +131,6 @@ export function useProfileForm(user: User | null) {
         filePath
       );
       
-      // Update profile with the new avatar URL
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
@@ -144,7 +138,6 @@ export function useProfileForm(user: User | null) {
       
       if (updateError) throw updateError;
       
-      // Update local state
       setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
       setDirectAvatarUrl(publicUrl);
       
@@ -175,7 +168,6 @@ export function useProfileForm(user: User | null) {
       
       if (error) throw error;
       
-      // Update local state
       setFormData(prev => ({ ...prev, avatar_url: directAvatarUrl }));
       
       toast.success('Avatar URL updated successfully');

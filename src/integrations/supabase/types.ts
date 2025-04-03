@@ -355,6 +355,7 @@ export type Database = {
           linkedin: string | null
           twitter: string | null
           username: string | null
+          verified_socials: string[] | null
           website: string | null
         }
         Insert: {
@@ -367,6 +368,7 @@ export type Database = {
           linkedin?: string | null
           twitter?: string | null
           username?: string | null
+          verified_socials?: string[] | null
           website?: string | null
         }
         Update: {
@@ -379,6 +381,7 @@ export type Database = {
           linkedin?: string | null
           twitter?: string | null
           username?: string | null
+          verified_socials?: string[] | null
           website?: string | null
         }
         Relationships: []

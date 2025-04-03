@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -122,6 +121,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // We'll use the sub as a unique identifier
           socialData.linkedin = `https://linkedin.com/in/${identity.identity_data.preferred_username || 'profile'}`;
           verifiedSocials.push('linkedin');
+        }
+      } else if (provider === 'twitter') {
+        const identity = identities.find(id => id.provider === 'twitter');
+        if (identity?.identity_data) {
+          const twitterUsername = identity.identity_data.screen_name;
+          if (twitterUsername) {
+            socialData.twitter = `https://twitter.com/${twitterUsername}`;
+            verifiedSocials.push('twitter');
+          }
         }
       }
       
