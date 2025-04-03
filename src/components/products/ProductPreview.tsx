@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -138,7 +139,7 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({ formData }) => {
             <div className="flex flex-wrap gap-2">
               {formData.makers.map((maker, index) => (
                 <Badge key={index} variant="outline">
-                  {maker.email}
+                  {maker.username || 'Unknown User'}
                 </Badge>
               ))}
             </div>
