@@ -4,7 +4,7 @@ project_id = "actvkmglkippzhzwzuzo"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage"]
+schemas = ["public", "storage", "graphql_public"]
 
 [db]
 port = 54322
@@ -17,21 +17,14 @@ port = 54324
 
 [auth]
 enabled = true
-
-[storage]
-enabled = true
+port = 54325
 
 [realtime]
 enabled = true
 
-[functions.admin-create-user]
-verify_jwt = true
+[storage]
+enabled = true
 
-[functions.admin-update-user]
-verify_jwt = true
-
-[functions.admin-suspend-user]
-verify_jwt = true
-
-[functions.admin-delete-user]
+[functions]
+[functions.add-realtime-for-notifications]
 verify_jwt = true

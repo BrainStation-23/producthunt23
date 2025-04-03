@@ -114,6 +114,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          related_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          related_id?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          related_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_makers: {
         Row: {
           created_at: string
@@ -530,6 +566,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_all_notifications_read: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      mark_notification_read: {
+        Args: {
+          notification_id: string
+          is_read?: boolean
+        }
+        Returns: boolean
+      }
       search_products: {
         Args: {
           search_query: string
@@ -553,6 +600,12 @@ export type Database = {
     }
     Enums: {
       category_status: "active" | "inactive"
+      notification_type:
+        | "product_pending"
+        | "product_approved"
+        | "product_rejected"
+        | "report"
+        | "system"
       user_role: "admin" | "user"
     }
     CompositeTypes: {

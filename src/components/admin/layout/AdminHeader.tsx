@@ -11,13 +11,11 @@ import ProductSearch from '@/components/search/ProductSearch';
 
 interface AdminHeaderProps {
   avatarUrl: string | null;
-  hasNotifications: boolean;
   getAdminInitials: () => string;
 }
 
 const AdminHeader: React.FC<AdminHeaderProps> = ({ 
   avatarUrl, 
-  hasNotifications,
   getAdminInitials
 }) => {
   return (
@@ -37,7 +35,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
         />
       </div>
       
-      <AdminNotifications hasNotifications={hasNotifications} />
+      <AdminNotifications />
       
       <Link to="/user/profile">
         <Avatar className="h-8 w-8">
