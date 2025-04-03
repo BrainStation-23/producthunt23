@@ -10,11 +10,12 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Info } from 'lucide-react';
 import { ProductFormValues, Maker } from '@/types/product';
 import MakerItem from './MakerItem';
 import MakerSearch from './MakerSearch';
 import { useMakerSearch, ProfileSearchResult } from './useMakerSearch';
+import { useToast } from '@/hooks/use-toast';
 
 interface MakersSectionProps {
   form: UseFormReturn<ProductFormValues>;
@@ -24,6 +25,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
   const makers = form.watch('makers') || [];
   const hasCreator = makers.some(maker => maker.isCreator);
   const formErrors = form.formState.errors;
+  const { toast } = useToast();
   
   const {
     searchQuery,
@@ -33,7 +35,14 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
   } = useMakerSearch(makers);
 
   const handleAddMaker = (profile: ProfileSearchResult) => {
-    if (makers.some(maker => maker.id === profile.id)) return;
+    if (makers.some(maker => maker.id === profile.id)) {
+      toast({
+        variant: "destructive",
+        title: "Duplicate maker",
+        description: "This person is already added as a maker."
+      });
+      return;
+    }
     
     // Ensure we have a valid email for the maker (required by form validation)
     const email = profile.email || `${profile.username || 'user'}@example.com`;
@@ -45,22 +54,67 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
       { 
         id: profile.id, 
         email: email, 
-        isCreator: false,
+        isCreator: !hasCreator, // If no creator exists, make this person the creator
         username: profile.username,
         avatar_url: profile.avatar_url
       }
     ], { shouldValidate: true });
     
     setSearchQuery('');
+    
+    toast({
+      title: "Maker added",
+      description: `${profile.username || profile.email || 'New maker'} has been added to the product.`
+    });
   };
 
   const handleRemoveMaker = (index: number) => {
     const makerToRemove = makers[index];
-    if (makerToRemove.isCreator) return;
+    if (makerToRemove.isCreator) {
+      toast({
+        variant: "destructive",
+        title: "Cannot remove creator",
+        description: "You cannot remove the product creator. If you want to change the creator, please mark another maker as creator first."
+      });
+      return;
+    }
     
     const updatedMakers = [...makers];
     updatedMakers.splice(index, 1);
     form.setValue('makers', updatedMakers, { shouldValidate: true });
+    
+    toast({
+      title: "Maker removed",
+      description: `${makerToRemove.username || makerToRemove.email || 'Maker'} has been removed from the product.`
+    });
+  };
+
+  const getErrorDetails = () => {
+    if (!formErrors.makers) return null;
+    
+    // Handle array-level errors
+    if (formErrors.makers.message) {
+      return formErrors.makers.message as string;
+    }
+    
+    // Handle field-level errors in the array
+    if (formErrors.makers.root?.message) {
+      return formErrors.makers.root.message as string;
+    }
+    
+    // Check for specific errors in maker items
+    if (typeof formErrors.makers === 'object' && Object.keys(formErrors.makers).length > 0) {
+      const errorKeys = Object.keys(formErrors.makers);
+      const firstErrorKey = errorKeys[0];
+      
+      if (formErrors.makers[firstErrorKey]?.email) {
+        return `Maker ${parseInt(firstErrorKey) + 1}: ${formErrors.makers[firstErrorKey]?.email?.message}`;
+      }
+      
+      return `Error in maker ${parseInt(firstErrorKey) + 1}`;
+    }
+    
+    return 'Please check your makers information';
   };
 
   console.log('Current makers in MakersSection:', makers);
@@ -76,14 +130,14 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Product Makers</FormLabel>
               <FormDescription>
-                Add all the people involved in making this product. You cannot remove yourself as the creator.
+                Add all the people involved in making this product. Every product needs at least one maker marked as creator.
               </FormDescription>
               
               {formErrors.makers && (
                 <Alert variant="destructive" className="mt-2 mb-4">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    {formErrors.makers.message || 'Please add at least one maker with a valid email'}
+                    {getErrorDetails() || 'Please add at least one maker with a valid email'}
                   </AlertDescription>
                 </Alert>
               )}
@@ -93,6 +147,15 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
                   <AlertCircle className="h-4 w-4 text-yellow-500" />
                   <AlertDescription>
                     A product must have at least one creator. Please ensure there is a maker marked as creator.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {makers.length === 0 && (
+                <Alert variant="default" className="mt-2 mb-4 border-blue-500 bg-blue-50 text-blue-700">
+                  <Info className="h-4 w-4 text-blue-500" />
+                  <AlertDescription>
+                    Search for users by name or email to add them as makers of this product.
                   </AlertDescription>
                 </Alert>
               )}
