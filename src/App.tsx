@@ -30,6 +30,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminProfile from './pages/admin/AdminProfile';
 
 // User Pages
 import UserDashboard from './pages/user/UserDashboard';
@@ -83,6 +84,7 @@ function App() {
               <Route path="products/edit/:productId" element={<EditProductPage />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettings />} />
+              <Route path="profile" element={<AdminProfile />} />
             </Route>
 
             {/* User Routes */}
