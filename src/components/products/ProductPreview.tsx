@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +37,11 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({ formData }) => {
         )}
         
         <div className="prose max-w-none dark:prose-invert">
-          <p>{formData.description || 'Your product description will appear here...'}</p>
+          {formData.description ? (
+            <div dangerouslySetInnerHTML={{ __html: formData.description }} />
+          ) : (
+            <p>Your product description will appear here...</p>
+          )}
         </div>
         
         {formData.website_url && (
@@ -146,9 +149,7 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({ formData }) => {
   );
 };
 
-// Function to get embed URL from YouTube or Vimeo URL
 const getEmbedUrl = (url: string): string => {
-  // YouTube URL patterns
   const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
   const youtubeMatch = url.match(youtubeRegex);
   
@@ -156,7 +157,6 @@ const getEmbedUrl = (url: string): string => {
     return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
   }
   
-  // Vimeo URL patterns
   const vimeoRegex = /(?:vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^\/]*\/videos\/|album\/\d+\/video\/|)(\d+)(?:$|\/|\?))/;
   const vimeoMatch = url.match(vimeoRegex);
   
@@ -164,7 +164,6 @@ const getEmbedUrl = (url: string): string => {
     return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
   }
   
-  // If not YouTube or Vimeo, return the original URL
   return url;
 };
 

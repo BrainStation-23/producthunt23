@@ -11,8 +11,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import RichTextFormField from '@/components/ui/rich-text-editor/RichTextFormField';
+import '@/components/ui/rich-text-editor/styles.css';
 
 interface BasicInfoSectionProps {
   form: UseFormReturn<ProductFormValues>;
@@ -57,25 +58,13 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ form }) => {
             )}
           />
 
-          <FormField
-            control={form.control}
+          <RichTextFormField
+            form={form}
             name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description*</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Describe your product in detail" 
-                    className="min-h-32"
-                    {...field} 
-                  />
-                </FormControl>
-                <FormDescription>
-                  A comprehensive description of your product, its features, and benefits.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Description*"
+            placeholder="Describe your product in detail"
+            description="A comprehensive description of your product, its features, and benefits."
+            maxLength={2000}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
