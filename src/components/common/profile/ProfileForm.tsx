@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +30,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   const verifiedSocials = formData.verified_socials || [];
   const isGithubVerified = verifiedSocials.includes('github');
   const isLinkedinVerified = verifiedSocials.includes('linkedin');
-  const isTwitterVerified = verifiedSocials.includes('twitter');
   const isTwitterVerified = verifiedSocials.includes('twitter');
 
   return (
