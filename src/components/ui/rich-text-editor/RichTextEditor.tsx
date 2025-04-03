@@ -4,9 +4,10 @@ import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import CharacterCount from '@tiptap/extension-character-count';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
+import TextAlign from '@tiptap/extension-text-align';
 import { 
   Bold, Italic, List, ListOrdered, Heading1, Heading2, Quote, 
-  Undo, Redo, Code, Link, AlignLeft, AlignCenter, AlignRight 
+  Undo, Redo, Code, AlignLeft, AlignCenter, AlignRight 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -35,6 +36,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         limit: maxLength,
       }),
       BubbleMenuExtension,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content: value,
     onUpdate: ({ editor }) => {
