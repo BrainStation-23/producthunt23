@@ -1,28 +1,11 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Shield, ShieldOff, AlertTriangle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import UserActionsDropdown from './user-actions/UserActionsDropdown';
+import SuspendUserDialog from './user-actions/SuspendUserDialog';
+import DeleteUserDialog from './user-actions/DeleteUserDialog';
 
 interface User {
   id: string;
@@ -78,7 +61,7 @@ const UserActions: React.FC<UserActionsProps> = ({
     }
   };
 
-  const handleDeleteUser = async () => {
+  const handleDeleteUserAction = async () => {
     try {
       setIsDeleting(true);
       console.log(`Attempting to delete user ${user.id}`);
@@ -97,12 +80,12 @@ const UserActions: React.FC<UserActionsProps> = ({
     }
   };
 
-  const handleViewProfile = () => {
+  const handleViewProfileAction = () => {
     setDropdownOpen(false);
     onViewProfile(user);
   };
 
-  const handleEditUser = () => {
+  const handleEditUserAction = () => {
     setDropdownOpen(false);
     onEditUser(user);
   };
@@ -124,94 +107,31 @@ const UserActions: React.FC<UserActionsProps> = ({
 
   return (
     <>
-      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm">
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleViewProfile}>
-            View profile
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleEditUser}>
-            Edit user
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {user.role === 'admin' ? (
-            <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'user')}>
-              <ShieldOff className="mr-2 h-4 w-4" />
-              Remove admin role
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'admin')}>
-              <Shield className="mr-2 h-4 w-4" />
-              Make admin
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem 
-            className="text-red-500"
-            onClick={handleSuspendClick}
-          >
-            <AlertTriangle className="mr-2 h-4 w-4" />
-            Suspend user
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            className="text-red-500"
-            onClick={handleDeleteClick}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete user
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <UserActionsDropdown
+        user={user}
+        dropdownOpen={dropdownOpen}
+        setDropdownOpen={setDropdownOpen}
+        handleViewProfile={handleViewProfileAction}
+        handleEditUser={handleEditUserAction}
+        handleRoleChangeAction={handleRoleChangeAction}
+        handleSuspendClick={handleSuspendClick}
+        handleDeleteClick={handleDeleteClick}
+      />
 
-      <AlertDialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Suspend User</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to suspend {user.username || user.email}? 
-              They will not be able to log in until the account is reactivated.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleSuspendUser}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Suspend
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <SuspendUserDialog
+        user={user}
+        open={suspendDialogOpen}
+        onOpenChange={setSuspendDialogOpen}
+        onConfirm={handleSuspendUser}
+      />
       
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete User</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to permanently delete {user.username || user.email}? 
-              This action cannot be undone and all data associated with this user will be lost.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteUser}
-              className="bg-destructive hover:bg-destructive/90"
-              disabled={isDeleting}
-            >
-              {isDeleting ? 'Deleting...' : 'Delete Permanently'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteUserDialog
+        user={user}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteUserAction}
+        isDeleting={isDeleting}
+      />
     </>
   );
 };
