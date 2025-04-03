@@ -80,7 +80,6 @@ export async function fetchProductMakers(productId: string) {
         profiles:profile_id (
           id, 
           username, 
-          email, 
           avatar_url
         )
       `)
@@ -99,7 +98,7 @@ export async function fetchUserProfile(userId: string) {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, username, email, avatar_url')
+      .select('id, username, avatar_url')
       .eq('id', userId)
       .single();
     
@@ -115,7 +114,6 @@ export function formatMakersData(makers: any[], productCreatedBy: string) {
   return makers.map(maker => {
     console.log('Processing maker:', maker);
     return {
-      email: maker.profiles?.email || maker.profiles?.username || 'Unknown',
       id: maker.profile_id,
       isCreator: maker.profile_id === productCreatedBy,
       username: maker.profiles?.username || null,
