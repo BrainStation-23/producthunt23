@@ -116,6 +116,37 @@ export const useUserManagement = () => {
     }
   };
 
+  const deleteUser = async (userId: string) => {
+    try {
+      const { session } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        toast.error('Authentication required');
+        return false;
+      }
+
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { user_id: userId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (error) {
+        console.error('Error deleting user:', error);
+        toast.error(`Failed to delete user: ${error.message}`);
+        return false;
+      }
+      
+      toast.success('User deleted successfully');
+      refetch();
+      return true;
+    } catch (error: any) {
+      console.error('Error in deleteUser:', error);
+      toast.error(`Failed to delete user: ${error.message || 'Unknown error'}`);
+      return false;
+    }
+  };
+
   return {
     users,
     isLoading,
@@ -128,6 +159,7 @@ export const useUserManagement = () => {
     totalPages,
     handleSearch,
     handleRoleChange,
+    deleteUser,
     refetch,
   };
 };

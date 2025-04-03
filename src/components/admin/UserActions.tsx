@@ -40,6 +40,7 @@ interface UserActionsProps {
   onViewProfile: (user: User) => void;
   onEditUser: (user: User) => void;
   onUserUpdated: () => void;
+  deleteUser: (userId: string) => Promise<boolean>;
 }
 
 const UserActions: React.FC<UserActionsProps> = ({ 
@@ -47,7 +48,8 @@ const UserActions: React.FC<UserActionsProps> = ({
   handleRoleChange, 
   onViewProfile, 
   onEditUser,
-  onUserUpdated
+  onUserUpdated,
+  deleteUser
 }) => {
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -81,26 +83,17 @@ const UserActions: React.FC<UserActionsProps> = ({
       setIsDeleting(true);
       console.log(`Attempting to delete user ${user.id}`);
       
-      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
-        body: { user_id: user.id },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        }
-      });
-
-      if (error) {
-        console.error('Error deleting user:', error);
-        throw error;
-      }
+      const success = await deleteUser(user.id);
       
-      toast.success(`User ${user.username || user.email} has been permanently deleted`);
-      onUserUpdated();
+      if (success) {
+        console.log('User deleted successfully');
+        setDeleteDialogOpen(false);
+      }
     } catch (error: any) {
-      console.error('Error deleting user:', error);
-      toast.error(error.message || 'Failed to delete user');
+      console.error('Error in handleDeleteUser:', error);
+      toast.error(error?.message || 'Error deleting user');
     } finally {
       setIsDeleting(false);
-      setDeleteDialogOpen(false);
     }
   };
 
@@ -141,32 +134,20 @@ const UserActions: React.FC<UserActionsProps> = ({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => {
-            setDropdownOpen(false);
-            onViewProfile(user);
-          }}>
+          <DropdownMenuItem onClick={handleViewProfile}>
             View profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {
-            setDropdownOpen(false);
-            onEditUser(user);
-          }}>
+          <DropdownMenuItem onClick={handleEditUser}>
             Edit user
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {user.role === 'admin' ? (
-            <DropdownMenuItem onClick={() => {
-              setDropdownOpen(false);
-              handleRoleChange(user.id, 'user');
-            }}>
+            <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'user')}>
               <ShieldOff className="mr-2 h-4 w-4" />
               Remove admin role
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={() => {
-              setDropdownOpen(false);
-              handleRoleChange(user.id, 'admin');
-            }}>
+            <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'admin')}>
               <Shield className="mr-2 h-4 w-4" />
               Make admin
             </DropdownMenuItem>

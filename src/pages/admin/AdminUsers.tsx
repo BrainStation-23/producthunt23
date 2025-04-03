@@ -33,6 +33,7 @@ const AdminUsers: React.FC = () => {
     totalPages,
     handleSearch,
     handleRoleChange,
+    deleteUser,
     refetch,
   } = useUserManagement();
 
@@ -80,6 +81,7 @@ const AdminUsers: React.FC = () => {
         onViewProfile={handleViewProfile}
         onEditUser={handleEditUser}
         onUserUpdated={refetch}
+        deleteUser={deleteUser}
       />
       
       <UserPagination

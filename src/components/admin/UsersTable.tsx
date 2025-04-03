@@ -23,6 +23,7 @@ interface UsersTableProps {
   onViewProfile: (user: User) => void;
   onEditUser: (user: User) => void;
   onUserUpdated: () => void;
+  deleteUser: (userId: string) => Promise<boolean>;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({ 
@@ -32,7 +33,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
   handleRoleChange,
   onViewProfile,
   onEditUser,
-  onUserUpdated
+  onUserUpdated,
+  deleteUser
 }) => {
   return (
     <div className="border rounded-md">
@@ -73,6 +75,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 onViewProfile={onViewProfile}
                 onEditUser={onEditUser}
                 onUserUpdated={onUserUpdated}
+                deleteUser={deleteUser}
               />
             ))
           ) : (

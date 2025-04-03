@@ -21,6 +21,7 @@ interface UserTableRowProps {
   onViewProfile: (user: User) => void;
   onEditUser: (user: User) => void;
   onUserUpdated: () => void;
+  deleteUser: (userId: string) => Promise<boolean>;
 }
 
 const UserTableRow: React.FC<UserTableRowProps> = ({ 
@@ -28,7 +29,8 @@ const UserTableRow: React.FC<UserTableRowProps> = ({
   handleRoleChange,
   onViewProfile,
   onEditUser,
-  onUserUpdated
+  onUserUpdated,
+  deleteUser
 }) => {
   return (
     <TableRow key={user.id}>
@@ -69,6 +71,7 @@ const UserTableRow: React.FC<UserTableRowProps> = ({
           onViewProfile={onViewProfile}
           onEditUser={onEditUser}
           onUserUpdated={onUserUpdated}
+          deleteUser={deleteUser}
         />
       </TableCell>
     </TableRow>
