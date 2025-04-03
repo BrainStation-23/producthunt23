@@ -118,16 +118,18 @@ export const useUserManagement = () => {
 
   const deleteUser = async (userId: string) => {
     try {
-      const { session } = await supabase.auth.getSession();
-      if (!session?.access_token) {
+      // Fix: Correctly access the session by destructuring the data property
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !data.session?.access_token) {
         toast.error('Authentication required');
         return false;
       }
 
-      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+      const { data: deleteData, error } = await supabase.functions.invoke('admin-delete-user', {
         body: { user_id: userId },
         headers: {
-          Authorization: `Bearer ${session.access_token}`
+          Authorization: `Bearer ${data.session.access_token}`
         }
       });
 
