@@ -21,10 +21,11 @@ export const productSchema = z.object({
     video_url: z.string().url({ message: 'Please enter a valid URL.' }),
   })),
   makers: z.array(z.object({
+    email: z.string().email({ message: 'Please enter a valid email.' }),
     id: z.string().nullable(),
     isCreator: z.boolean(),
     username: z.string().nullable(),
-    avatar_url: z.string().nullable().optional()
+    avatar_url: z.string().nullable()
   }))
   .min(1, { message: 'Your product must have at least one maker.' })
   .refine((makers) => makers.some(maker => maker.isCreator), {

@@ -1,109 +1,107 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Maker, ProductMaker } from '@/types/product';
+import { ProductFormValues } from '@/types/product';
 
-// Function to fetch product makers
-export const fetchProductMakers = async (productId: string) => {
+export async function deleteProductRelations(productId: string) {
   try {
-    const { data, error } = await supabase
-      .from('product_makers')
-      .select(`
-        id,
-        product_id,
-        profile_id,
-        created_at,
-        profile:profiles(
-          id,
-          username,
-          avatar_url,
-          email
-        )
-      `)
-      .eq('product_id', productId)
-      .order('created_at', { ascending: true });
+    const { error: deleteScreenshotsError } = await supabase
+      .from('product_screenshots')
+      .delete()
+      .eq('product_id', productId);
+      
+    if (deleteScreenshotsError) throw deleteScreenshotsError;
     
-    if (error) {
-      console.error('Error fetching product makers:', error);
-      throw error;
-    }
+    const { error: deleteVideosError } = await supabase
+      .from('product_videos')
+      .delete()
+      .eq('product_id', productId);
+      
+    if (deleteVideosError) throw deleteVideosError;
     
-    return data as ProductMaker[];
-  } catch (error: any) {
-    console.error('Failed to fetch product makers:', error.message);
-    throw new Error(`Failed to fetch product makers: ${error.message}`);
-  }
-};
-
-// Function to fetch user profile by ID
-export const fetchUserProfile = async (userId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, username, avatar_url, email')
-      .eq('id', userId)
-      .single();
+    const { error: deleteTechError } = await supabase
+      .from('product_technologies')
+      .delete()
+      .eq('product_id', productId);
+      
+    if (deleteTechError) throw deleteTechError;
     
-    if (error) {
-      console.error('Error fetching user profile:', error);
-      throw error;
-    }
-    
-    return data;
-  } catch (error: any) {
-    console.error('Failed to fetch user profile:', error.message);
-    throw new Error(`Failed to fetch user profile: ${error.message}`);
-  }
-};
-
-// Utility function to format makers data for the form
-export const formatMakersData = (makers: ProductMaker[], creatorId: string | null): Maker[] => {
-  if (!makers || makers.length === 0) {
-    return [];
-  }
-  
-  return makers.map(maker => {
-    const isCreator = maker.profile_id === creatorId;
-    return {
-      id: maker.profile_id,
-      username: maker.profile?.username || null,
-      avatar_url: maker.profile?.avatar_url || null,
-      isCreator
-    };
-  });
-};
-
-// Function to sync product makers with the database
-export const syncProductMakers = async (productId: string, makers: Maker[]) => {
-  try {
-    // Step 1: Delete all existing makers for this product
-    const { error: deleteError } = await supabase
+    const { error: deleteMakersError } = await supabase
       .from('product_makers')
       .delete()
       .eq('product_id', productId);
-    
-    if (deleteError) {
-      console.error('Error deleting product makers:', deleteError);
-      throw deleteError;
-    }
-    
-    // Step 2: Insert new makers
-    const makersToInsert = makers.map(maker => ({
-      product_id: productId,
-      profile_id: maker.id
-    }));
-    
-    const { error: insertError } = await supabase
-      .from('product_makers')
-      .insert(makersToInsert);
-    
-    if (insertError) {
-      console.error('Error inserting product makers:', insertError);
-      throw insertError;
-    }
-    
-    return true;
-  } catch (error: any) {
-    console.error('Failed to sync product makers:', error.message);
-    throw new Error(`Failed to sync product makers: ${error.message}`);
+      
+    if (deleteMakersError) throw deleteMakersError;
+  } catch (error) {
+    console.error('Error deleting product relations:', error);
+    throw error;
   }
-};
+}
+
+export async function saveProductRelations(productId: string, values: ProductFormValues, userId: string) {
+  try {
+    // Insert the makers
+    if (values.makers.length > 0) {
+      const makerData = values.makers.map(maker => ({
+        product_id: productId,
+        profile_id: maker.id || userId, // Use the creator's ID as a fallback
+      }));
+
+      const { error: makersError } = await supabase
+        .from('product_makers')
+        .insert(makerData);
+
+      if (makersError) throw makersError;
+    }
+
+    // Insert the technologies
+    if (values.technologies.length > 0) {
+      const techData = values.technologies.map((tech, index) => ({
+        product_id: productId,
+        technology_name: tech,
+        display_order: index,
+      }));
+
+      const { error: techError } = await supabase
+        .from('product_technologies')
+        .insert(techData);
+
+      if (techError) throw techError;
+    }
+
+    // Insert screenshots
+    if (values.screenshots.length > 0) {
+      const screenshotData = values.screenshots.map((screenshot, index) => ({
+        product_id: productId,
+        title: screenshot.title || null,
+        image_url: screenshot.image_url,
+        description: screenshot.description || null,
+        display_order: index,
+      }));
+
+      const { error: screenshotError } = await supabase
+        .from('product_screenshots')
+        .insert(screenshotData);
+
+      if (screenshotError) throw screenshotError;
+    }
+
+    // Insert videos
+    if (values.videos.length > 0) {
+      const videoData = values.videos.map((video, index) => ({
+        product_id: productId,
+        title: video.title || null,
+        video_url: video.video_url,
+        display_order: index,
+      }));
+
+      const { error: videoError } = await supabase
+        .from('product_videos')
+        .insert(videoData);
+
+      if (videoError) throw videoError;
+    }
+  } catch (error) {
+    console.error('Error saving product relations:', error);
+    throw error;
+  }
+}
