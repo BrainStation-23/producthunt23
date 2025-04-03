@@ -1,10 +1,16 @@
 
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, UserPlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandEmpty, CommandGroup, CommandList } from '@/components/ui/command';
 import MakerSearchItem from './MakerSearchItem';
-import { ProfileSearchResult } from './useMakerSearch';
+
+interface ProfileSearchResult {
+  id: string;
+  email: string | null;
+  username: string | null;
+  avatar_url: string | null;
+}
 
 interface MakerSearchProps {
   searchQuery: string;
@@ -31,7 +37,7 @@ export const MakerSearch: React.FC<MakerSearchProps> = ({
       <div className="relative">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search makers by name..."
+          placeholder="Search makers by name or email..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-8 pr-4"

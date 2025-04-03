@@ -3,7 +3,13 @@ import React from 'react';
 import { CommandItem } from '@/components/ui/command';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { UserPlus } from 'lucide-react';
-import { ProfileSearchResult } from './useMakerSearch';
+
+interface ProfileSearchResult {
+  id: string;
+  email: string | null;
+  username: string | null;
+  avatar_url: string | null;
+}
 
 interface MakerSearchItemProps {
   profile: ProfileSearchResult;
@@ -12,7 +18,7 @@ interface MakerSearchItemProps {
 
 export const MakerSearchItem: React.FC<MakerSearchItemProps> = ({ profile, onSelect }) => {
   // Get a displayable name for the profile
-  const displayName = profile.username || 'Unknown User';
+  const displayName = profile.username || profile.email || 'Unknown User';
   
   // Get initials for the avatar fallback
   const getInitials = () => {
@@ -35,6 +41,9 @@ export const MakerSearchItem: React.FC<MakerSearchItemProps> = ({ profile, onSel
         </Avatar>
         <div className="flex flex-col">
           <span className="font-medium">{displayName}</span>
+          {profile.username && profile.email && (
+            <span className="text-xs text-muted-foreground">{profile.email}</span>
+          )}
         </div>
       </div>
       <UserPlus className="h-4 w-4 text-muted-foreground hover:text-primary" />

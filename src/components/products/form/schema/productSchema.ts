@@ -21,6 +21,7 @@ export const productSchema = z.object({
     video_url: z.string().url({ message: 'Please enter a valid URL.' }),
   })),
   makers: z.array(z.object({
+    email: z.string().email({ message: 'Please enter a valid email.' }),
     id: z.string().nullable(),
     isCreator: z.boolean(),
     username: z.string().nullable(),

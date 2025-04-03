@@ -44,12 +44,16 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
       return;
     }
     
+    // Ensure we have a valid email for the maker (required by form validation)
+    const email = profile.email || `${profile.username || 'user'}@example.com`;
+    
     console.log('Adding maker profile:', profile);
     
     form.setValue('makers', [
       ...makers, 
       { 
         id: profile.id, 
+        email: email, 
         isCreator: !hasCreator, // If no creator exists, make this person the creator
         username: profile.username,
         avatar_url: profile.avatar_url
@@ -60,7 +64,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
     
     toast({
       title: "Maker added",
-      description: `${profile.username || 'New maker'} has been added to the product.`
+      description: `${profile.username || profile.email || 'New maker'} has been added to the product.`
     });
   };
 
@@ -81,7 +85,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
     
     toast({
       title: "Maker removed",
-      description: `${makerToRemove.username || 'Maker'} has been removed from the product.`
+      description: `${makerToRemove.username || makerToRemove.email || 'Maker'} has been removed from the product.`
     });
   };
 
@@ -103,8 +107,8 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
       const errorKeys = Object.keys(formErrors.makers);
       const firstErrorKey = errorKeys[0];
       
-      if (formErrors.makers[firstErrorKey]?.id) {
-        return `Maker ${parseInt(firstErrorKey) + 1}: ${formErrors.makers[firstErrorKey]?.id?.message}`;
+      if (formErrors.makers[firstErrorKey]?.email) {
+        return `Maker ${parseInt(firstErrorKey) + 1}: ${formErrors.makers[firstErrorKey]?.email?.message}`;
       }
       
       return `Error in maker ${parseInt(firstErrorKey) + 1}`;
@@ -133,7 +137,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
                 <Alert variant="destructive" className="mt-2 mb-4">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    {getErrorDetails() || 'Please add at least one maker with valid information'}
+                    {getErrorDetails() || 'Please add at least one maker with a valid email'}
                   </AlertDescription>
                 </Alert>
               )}
@@ -151,7 +155,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
                 <Alert variant="default" className="mt-2 mb-4 border-blue-500 bg-blue-50 text-blue-700">
                   <Info className="h-4 w-4 text-blue-500" />
                   <AlertDescription>
-                    Search for users by name to add them as makers of this product.
+                    Search for users by name or email to add them as makers of this product.
                   </AlertDescription>
                 </Alert>
               )}

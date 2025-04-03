@@ -5,6 +5,7 @@ import { Maker } from '@/types/product';
 
 export interface ProfileSearchResult {
   id: string;
+  email: string | null;
   username: string | null;
   avatar_url: string | null;
 }
@@ -27,8 +28,8 @@ export const useMakerSearch = (makers: Maker[]) => {
         // Use ILIKE for case-insensitive partial matching
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, username, avatar_url')
-          .ilike('username', `%${searchQuery}%`)
+          .select('id, username, email, avatar_url')
+          .or(`username.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
           .limit(5);
           
         if (error) {
