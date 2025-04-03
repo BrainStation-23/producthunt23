@@ -12,18 +12,14 @@ interface MakerItemProps {
 
 export const MakerItem: React.FC<MakerItemProps> = ({ maker, index, onRemove }) => {
   const getInitials = (maker: Maker) => {
-    const displayName = maker.username || maker.email;
+    const displayName = maker.username || '';
     if (!displayName) return '??';
-    
-    if (displayName.includes('@')) {
-      return displayName.split('@')[0].substring(0, 2).toUpperCase();
-    }
     
     return displayName.substring(0, 2).toUpperCase();
   };
 
   // Get a displayable name for the maker
-  const displayName = maker.username || maker.email || 'Unknown';
+  const displayName = maker.username || 'Unknown';
 
   console.log('MakerItem rendering maker:', maker);
 

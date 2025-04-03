@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Maker } from '@/types/product';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export interface ProfileSearchResult {
   id: string;
@@ -10,62 +10,53 @@ export interface ProfileSearchResult {
   avatar_url: string | null;
 }
 
-export const useMakerSearch = (makers: Maker[]) => {
-  const [searchQuery, setSearchQuery] = useState('');
+export const useMakerSearch = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<ProfileSearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-
-  useEffect(() => {
-    const searchProfiles = async () => {
-      if (!searchQuery || searchQuery.length < 2) {
-        setSearchResults([]);
-        return;
-      }
-      
-      setIsSearching(true);
-      
-      try {
-        // Use ILIKE for case-insensitive partial matching
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, username, email, avatar_url')
-          .or(`username.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
-          .limit(5);
-          
-        if (error) {
-          console.error('Error in search query:', error);
-          throw error;
-        }
-        
-        // Log search results for debugging
-        console.log('Search query:', searchQuery);
-        console.log('Search results:', data);
-        
-        // Filter out makers that are already added
-        const filteredData = data?.filter(profile => 
-          !makers.some(maker => maker.id === profile.id)
-        ) || [];
-        
-        setSearchResults(filteredData);
-      } catch (error) {
-        console.error('Error searching profiles:', error);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    };
+  
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  
+  const searchProfiles = useCallback(async (query: string) => {
+    if (!query || query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
     
-    // Clear any previous timer to prevent race conditions
-    const debounceTimer = setTimeout(searchProfiles, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery, makers]);
-
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, username, avatar_url')
+        .or(`username.ilike.%${query}%, email.ilike.%${query}%`)
+        .limit(5);
+      
+      if (error) {
+        console.error('Error searching profiles:', error);
+        throw error;
+      }
+      
+      console.log('Search results:', data);
+      setSearchResults(data || []);
+    } catch (error) {
+      console.error('Failed to search profiles:', error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  
+  // When debounced search term changes, perform search
+  const updateSearchResults = useCallback(async () => {
+    searchProfiles(debouncedSearchTerm);
+  }, [debouncedSearchTerm, searchProfiles]);
+  
   return {
-    searchQuery,
-    setSearchQuery,
+    searchTerm,
+    setSearchTerm,
     searchResults,
-    isSearching
+    isLoading,
+    updateSearchResults
   };
 };
-
-export default useMakerSearch;

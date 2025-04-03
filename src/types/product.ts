@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -82,10 +83,9 @@ export interface Video {
 }
 
 export interface Maker {
-  email: string;
   id: string | null;
   isCreator: boolean;
-  username?: string | null;
+  username: string | null;
   avatar_url?: string | null;
 }
 
