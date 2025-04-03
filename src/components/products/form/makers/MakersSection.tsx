@@ -89,8 +89,8 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
               )}
 
               {!hasCreator && (
-                <Alert variant="warning" className="mt-2 mb-4">
-                  <AlertCircle className="h-4 w-4" />
+                <Alert variant="default" className="mt-2 mb-4 border-yellow-500 bg-yellow-50 text-yellow-700">
+                  <AlertCircle className="h-4 w-4 text-yellow-500" />
                   <AlertDescription>
                     A product must have at least one creator. Please ensure there is a maker marked as creator.
                   </AlertDescription>
