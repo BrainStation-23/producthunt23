@@ -13,6 +13,7 @@ export interface ProfileData {
   linkedin: string | null;
   github: string | null;
   avatar_url: string | null;
+  verified_socials?: string[];
 }
 
 export function useProfileForm(user: User | null) {
@@ -26,7 +27,8 @@ export function useProfileForm(user: User | null) {
     twitter: '',
     linkedin: '',
     github: '',
-    avatar_url: null
+    avatar_url: null,
+    verified_socials: []
   });
   const [directAvatarUrl, setDirectAvatarUrl] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -38,7 +40,7 @@ export function useProfileForm(user: User | null) {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, bio, website, twitter, linkedin, github, avatar_url')
+        .select('username, bio, website, twitter, linkedin, github, avatar_url, verified_socials')
         .eq('id', user.id)
         .single();
 
@@ -52,7 +54,8 @@ export function useProfileForm(user: User | null) {
           twitter: data.twitter || '',
           linkedin: data.linkedin || '',
           github: data.github || '',
-          avatar_url: data.avatar_url
+          avatar_url: data.avatar_url,
+          verified_socials: data.verified_socials || []
         });
         
         if (data.avatar_url) {
@@ -69,6 +72,12 @@ export function useProfileForm(user: User | null) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Skip updating if the field is part of verified socials
+    if (formData.verified_socials?.includes(name)) {
+      return;
+    }
+    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 

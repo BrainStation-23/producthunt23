@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { User } from '@supabase/supabase-js';
 import { GitHubLogoIcon, LinkedInLogoIcon, TwitterLogoIcon } from '@radix-ui/react-icons';
 import { ProfileData } from '@/hooks/useProfileForm';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2 } from 'lucide-react';
 
 interface ProfileFormProps {
   user: User | null;
@@ -24,6 +26,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   onInputChange, 
   onSave 
 }) => {
+  // Check which social profiles are verified
+  const verifiedSocials = formData.verified_socials || [];
+  const isGithubVerified = verifiedSocials.includes('github');
+  const isLinkedinVerified = verifiedSocials.includes('linkedin');
+  const isTwitterVerified = verifiedSocials.includes('twitter');
+
   return (
     <Card>
       <CardHeader>
@@ -96,6 +104,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <Label htmlFor="twitter" className="flex items-center gap-2">
                   <TwitterLogoIcon className="h-4 w-4" />
                   Twitter
+                  {isTwitterVerified && (
+                    <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200 flex items-center">
+                      <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
+                    </Badge>
+                  )}
                 </Label>
                 <Input 
                   id="twitter" 
@@ -104,13 +117,25 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   value={formData.twitter || ''}
                   onChange={onInputChange}
                   placeholder="https://twitter.com/username" 
+                  readOnly={isTwitterVerified}
+                  className={isTwitterVerified ? "bg-gray-50" : ""}
                 />
+                {isTwitterVerified && (
+                  <p className="text-xs text-muted-foreground">
+                    Your Twitter profile is verified and cannot be changed.
+                  </p>
+                )}
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="linkedin" className="flex items-center gap-2">
                   <LinkedInLogoIcon className="h-4 w-4" />
                   LinkedIn
+                  {isLinkedinVerified && (
+                    <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200 flex items-center">
+                      <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
+                    </Badge>
+                  )}
                 </Label>
                 <Input 
                   id="linkedin" 
@@ -119,13 +144,25 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   value={formData.linkedin || ''}
                   onChange={onInputChange}
                   placeholder="https://linkedin.com/in/username" 
+                  readOnly={isLinkedinVerified}
+                  className={isLinkedinVerified ? "bg-gray-50" : ""}
                 />
+                {isLinkedinVerified && (
+                  <p className="text-xs text-muted-foreground">
+                    Your LinkedIn profile is verified and cannot be changed.
+                  </p>
+                )}
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="github" className="flex items-center gap-2">
                   <GitHubLogoIcon className="h-4 w-4" />
                   GitHub
+                  {isGithubVerified && (
+                    <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200 flex items-center">
+                      <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
+                    </Badge>
+                  )}
                 </Label>
                 <Input 
                   id="github" 
@@ -134,7 +171,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   value={formData.github || ''}
                   onChange={onInputChange}
                   placeholder="https://github.com/username" 
+                  readOnly={isGithubVerified}
+                  className={isGithubVerified ? "bg-gray-50" : ""}
                 />
+                {isGithubVerified && (
+                  <p className="text-xs text-muted-foreground">
+                    Your GitHub profile is verified and cannot be changed.
+                  </p>
+                )}
               </div>
             </div>
           </div>
