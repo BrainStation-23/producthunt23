@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/sonner';
-import { Eye, EyeOff, Github } from 'lucide-react';
+import { Eye, EyeOff, Github, Linkedin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const LoginForm: React.FC = () => {
@@ -15,7 +16,7 @@ const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, signInWithGithub, user, userRole, isLoading } = useAuth();
+  const { signIn, signInWithGithub, signInWithLinkedIn, user, userRole, isLoading } = useAuth();
 
   useEffect(() => {
     if (user && userRole && !isLoading) {
@@ -55,6 +56,18 @@ const LoginForm: React.FC = () => {
       await signInWithGithub();
     } catch (error: any) {
       console.error('GitHub login error:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleLinkedInLogin = async () => {
+    if (loading) return; // Prevent multiple clicks
+    
+    setLoading(true);
+    try {
+      await signInWithLinkedIn();
+    } catch (error: any) {
+      console.error('LinkedIn login error:', error);
       setLoading(false);
     }
   };
@@ -131,16 +144,29 @@ const LoginForm: React.FC = () => {
         <Separator className="flex-1" />
       </div>
       
-      <Button 
-        variant="outline" 
-        className="w-full rounded-md" 
-        type="button" 
-        onClick={handleGithubLogin}
-        disabled={loading || isLoading}
-      >
-        <Github className="mr-2 h-4 w-4" />
-        Continue with GitHub
-      </Button>
+      <div className="flex flex-col space-y-2">
+        <Button 
+          variant="outline" 
+          className="w-full rounded-md" 
+          type="button" 
+          onClick={handleGithubLogin}
+          disabled={loading || isLoading}
+        >
+          <Github className="mr-2 h-4 w-4" />
+          Continue with GitHub
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="w-full rounded-md" 
+          type="button" 
+          onClick={handleLinkedInLogin}
+          disabled={loading || isLoading}
+        >
+          <Linkedin className="mr-2 h-4 w-4" />
+          Continue with LinkedIn
+        </Button>
+      </div>
       
       <p className="text-center text-sm text-muted-foreground">
         Don't have an account?{" "}

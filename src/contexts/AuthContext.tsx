@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +15,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, userData?: any) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
+  signInWithLinkedIn: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,15 +28,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
-    // First, set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth event:', event, 'User:', session?.user?.email || 'No user');
         
-        // Check if user is disabled
         if (session?.user?.app_metadata?.disabled) {
           console.log('User is disabled, signing out');
-          // Don't update state yet, handle in the signOut call
           supabase.auth.signOut().then(() => {
             setSession(null);
             setUser(null);
@@ -51,7 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Use setTimeout to prevent recursive calls
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 0);
@@ -62,11 +58,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Getting initial session:', session?.user?.email || 'No session');
       
-      // Check if user is disabled
       if (session?.user?.app_metadata?.disabled) {
         console.log('User is disabled, signing out');
         supabase.auth.signOut().then(() => {
@@ -106,14 +100,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching user role:', error);
-        setUserRole('user'); // Default to user if error
+        setUserRole('user');
       } else {
         console.log('User role from database:', data?.role);
         setUserRole(data?.role as UserRole || 'user');
       }
     } catch (error) {
       console.error('Error in fetchUserRole:', error);
-      setUserRole('user'); // Default to user if error
+      setUserRole('user');
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
       
-      return 'user'; // Default
+      return 'user';
     } catch (error: any) {
       console.error('Error signing in:', error);
       toast.error(error.message || 'Error signing in');
@@ -224,6 +218,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithLinkedIn = async () => {
+    try {
+      console.log('Starting LinkedIn sign in process');
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      console.log('Redirect URL:', redirectTo);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: redirectTo,
+        },
+      });
+      
+      if (error) {
+        console.error('LinkedIn OAuth error:', error);
+        throw error;
+      }
+      
+      console.log('LinkedIn OAuth initiated, URL:', data?.url);
+    } catch (error: any) {
+      console.error('Error signing in with LinkedIn:', error);
+      toast.error(error.message || 'Error signing in with LinkedIn');
+      throw error;
+    }
+  };
+
   const value = {
     session,
     user,
@@ -233,6 +253,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     signInWithGithub,
+    signInWithLinkedIn,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

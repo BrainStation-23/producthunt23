@@ -7,9 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/sonner';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, EyeOff, Github } from 'lucide-react';
+import { Eye, EyeOff, Github, Linkedin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client'; // Added this import
+import { supabase } from '@/integrations/supabase/client';
 
 const RegisterForm: React.FC = () => {
   const [name, setName] = useState('');
@@ -19,7 +19,7 @@ const RegisterForm: React.FC = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signInWithGithub } = useAuth();
+  const { signInWithGithub, signInWithLinkedIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +63,17 @@ const RegisterForm: React.FC = () => {
     } catch (error: any) {
       console.error('GitHub login error:', error);
       toast.error(error.message || 'GitHub login failed.');
+      setLoading(false);
+    }
+  };
+
+  const handleLinkedInLogin = async () => {
+    try {
+      setLoading(true);
+      await signInWithLinkedIn();
+    } catch (error: any) {
+      console.error('LinkedIn login error:', error);
+      toast.error(error.message || 'LinkedIn login failed.');
       setLoading(false);
     }
   };
@@ -166,10 +177,17 @@ const RegisterForm: React.FC = () => {
         <Separator className="flex-1" />
       </div>
       
-      <Button variant="outline" className="w-full rounded-md" type="button" onClick={handleGithubLogin}>
-        <Github className="mr-2 h-4 w-4" />
-        Continue with GitHub
-      </Button>
+      <div className="flex flex-col space-y-2">
+        <Button variant="outline" className="w-full rounded-md" type="button" onClick={handleGithubLogin}>
+          <Github className="mr-2 h-4 w-4" />
+          Continue with GitHub
+        </Button>
+        
+        <Button variant="outline" className="w-full rounded-md" type="button" onClick={handleLinkedInLogin}>
+          <Linkedin className="mr-2 h-4 w-4" />
+          Continue with LinkedIn
+        </Button>
+      </div>
       
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
