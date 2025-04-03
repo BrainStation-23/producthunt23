@@ -33,6 +33,7 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(!!productId);
   const [productStatus, setProductStatus] = useState<string | undefined>();
+  const [activeTab, setActiveTab] = useState<string>("categories");
   
   // Initialize form with default values
   const form = useForm<ProductFormValues>({
@@ -135,20 +136,55 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
     updateCreatorProfile();
   }, [userId, productId, form]);
 
+  // Function to determine what tab should be selected based on form errors
+  const selectTabWithErrors = (formState: any) => {
+    const errors = formState.errors;
+    if (!errors || Object.keys(errors).length === 0) return;
+
+    // Check basic info fields first (these are always visible)
+    if (errors.name || errors.tagline || errors.description || 
+        errors.website_url || errors.image_url) {
+      return;
+    }
+
+    // Check each tab for errors and set the active tab accordingly
+    if (errors.categories) {
+      setActiveTab("categories");
+    } else if (errors.technologies) {
+      setActiveTab("technologies");
+    } else if (errors.screenshots) {
+      setActiveTab("screenshots");
+    } else if (errors.videos) {
+      setActiveTab("videos");
+    } else if (errors.makers) {
+      setActiveTab("makers");
+      // Show a more specific error for makers
+      if (errors.makers.message) {
+        toast.error(`Makers error: ${errors.makers.message}`);
+      }
+    }
+
+    // Log the errors for debugging
+    console.log('Form validation errors:', errors);
+  };
+
   const handleSubmit = async (values: ProductFormValues, saveAsDraft = false) => {
     if (!userId) {
       toast.error('You must be logged in to submit a product');
       return;
     }
 
-    setIsSubmitting(true);
     try {
+      setIsSubmitting(true);
       const result = await saveProduct(values, userId, saveAsDraft);
       toast.success(result.message);
       navigate('/admin/products');
     } catch (error: any) {
       console.error('Error submitting product:', error);
       toast.error(error.message || 'Failed to submit product');
+      
+      // If there are validation errors, select the appropriate tab
+      selectTabWithErrors(form.formState);
     } finally {
       setIsSubmitting(false);
     }
@@ -160,14 +196,17 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
       return;
     }
 
-    setIsSubmitting(true);
     try {
+      setIsSubmitting(true);
       const result = await submitProductForReview(productId);
       toast.success(result.message);
       navigate('/admin/products');
     } catch (error: any) {
       console.error('Error submitting product for review:', error);
       toast.error(error.message || 'Failed to submit product for review');
+      
+      // If there are validation errors, select the appropriate tab
+      selectTabWithErrors(form.formState);
     } finally {
       setIsSubmitting(false);
     }
@@ -178,6 +217,8 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
     isSubmitting,
     isLoading,
     productStatus,
+    activeTab,
+    setActiveTab,
     handleSubmit,
     handleSubmitForReview
   };

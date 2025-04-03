@@ -26,7 +26,11 @@ export const productSchema = z.object({
     isCreator: z.boolean(),
     username: z.string().nullable(),
     avatar_url: z.string().nullable()
-  })),
+  }))
+  .min(1, { message: 'Your product must have at least one maker.' })
+  .refine((makers) => makers.some(maker => maker.isCreator), {
+    message: 'Your product must have at least one maker marked as creator.',
+  }),
   agreed_to_policies: z.boolean().refine(val => val === true, {
     message: 'You must agree to the policies before submitting.',
   }),

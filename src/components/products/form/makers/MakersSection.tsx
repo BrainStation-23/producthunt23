@@ -9,6 +9,8 @@ import {
   FormDescription,
   FormMessage,
 } from '@/components/ui/form';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 import { ProductFormValues, Maker } from '@/types/product';
 import MakerItem from './MakerItem';
 import MakerSearch from './MakerSearch';
@@ -20,6 +22,8 @@ interface MakersSectionProps {
 
 const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
   const makers = form.watch('makers') || [];
+  const hasCreator = makers.some(maker => maker.isCreator);
+  const formErrors = form.formState.errors;
   
   const {
     searchQuery,
@@ -60,6 +64,7 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
   };
 
   console.log('Current makers in MakersSection:', makers);
+  console.log('Form errors:', formErrors);
 
   return (
     <Card>
@@ -73,6 +78,24 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
               <FormDescription>
                 Add all the people involved in making this product. You cannot remove yourself as the creator.
               </FormDescription>
+              
+              {formErrors.makers && (
+                <Alert variant="destructive" className="mt-2 mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    {formErrors.makers.message || 'Please add at least one maker with a valid email'}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {!hasCreator && (
+                <Alert variant="warning" className="mt-2 mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    A product must have at least one creator. Please ensure there is a maker marked as creator.
+                  </AlertDescription>
+                </Alert>
+              )}
               
               <div className="space-y-4 mt-4">
                 <MakerSearch

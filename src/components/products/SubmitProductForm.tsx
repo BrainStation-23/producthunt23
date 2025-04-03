@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Form } from '@/components/ui/form';
 import { ProductFormValues } from '@/types/product';
@@ -36,13 +36,14 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
     isSubmitting, 
     isLoading, 
     productStatus,
+    activeTab,
+    setActiveTab,
     handleSubmit,
     handleSubmitForReview
   } = useProductForm({
     userId: user?.id,
     productId
   });
-  const [currentTab, setCurrentTab] = useState<string>("categories");
 
   const onSubmit = (data: ProductFormValues) => {
     handleSubmit(data, false);
@@ -65,7 +66,7 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
   ];
 
   const renderTabContent = () => {
-    switch (currentTab) {
+    switch (activeTab) {
       case "categories":
         return <CategoriesSection form={form} />;
       case "technologies":
@@ -90,8 +91,8 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
           <div className="space-y-4">
             <MobileTabNavigation 
               tabItems={tabItems}
-              currentTab={currentTab}
-              setCurrentTab={setCurrentTab}
+              currentTab={activeTab}
+              setCurrentTab={setActiveTab}
             />
             
             <div className="mt-4 space-y-4">
@@ -101,8 +102,8 @@ const SubmitProductForm: React.FC<SubmitProductFormProps> = ({
         ) : (
           <DesktopTabNavigation 
             tabItems={tabItems}
-            currentTab={currentTab}
-            setCurrentTab={setCurrentTab}
+            currentTab={activeTab}
+            setCurrentTab={setActiveTab}
           >
             {renderTabContent()}
           </DesktopTabNavigation>
