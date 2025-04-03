@@ -103,8 +103,8 @@ const MakersSection: React.FC<MakersSectionProps> = ({ form }) => {
       const errorKeys = Object.keys(formErrors.makers);
       const firstErrorKey = errorKeys[0];
       
-      if (formErrors.makers[firstErrorKey]?.email) {
-        return `Maker ${parseInt(firstErrorKey) + 1}: ${formErrors.makers[firstErrorKey]?.email?.message}`;
+      if (formErrors.makers[firstErrorKey]?.id) {
+        return `Maker ${parseInt(firstErrorKey) + 1}: ${formErrors.makers[firstErrorKey]?.id?.message}`;
       }
       
       return `Error in maker ${parseInt(firstErrorKey) + 1}`;

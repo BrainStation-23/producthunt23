@@ -82,7 +82,6 @@ export interface Video {
 }
 
 export interface Maker {
-  email?: string;
   id: string | null;
   isCreator: boolean;
   username?: string | null;

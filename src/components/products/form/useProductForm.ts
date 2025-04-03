@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -48,7 +47,7 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
       categories: [],
       screenshots: [],
       videos: [],
-      makers: userId ? [{ email: '', id: userId, isCreator: true }] : [],
+      makers: userId ? [{ id: userId, isCreator: true, username: null, avatar_url: null }] : [],
       agreed_to_policies: false,
     },
   });
@@ -120,7 +119,6 @@ export const useProductForm = ({ userId, productId }: UseProductFormProps) => {
             maker.isCreator 
               ? { 
                   ...maker, 
-                  email: userData.email || userData.username || 'Creator',
                   username: userData.username,
                   avatar_url: userData.avatar_url
                 }
