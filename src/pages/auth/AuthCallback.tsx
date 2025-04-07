@@ -38,7 +38,11 @@ const AuthCallback: React.FC = () => {
         // We've successfully authenticated, redirect to dashboard
         // The RoleRedirect component will handle routing to the appropriate dashboard
         toast.success('Login successful');
-        navigate('/dashboard', { replace: true });
+        
+        // Use setTimeout to ensure the redirect happens after state updates
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 100);
       } catch (error: any) {
         console.error('Error during authentication callback:', error);
         setError(error.message);

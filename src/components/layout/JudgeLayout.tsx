@@ -8,14 +8,25 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 const JudgeLayout: React.FC = () => {
-  const { isLoading, userRole } = useAuth();
+  const { isLoading, isRoleFetched, userRole } = useAuth();
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  if (isLoading || !isRoleFetched) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (userRole !== 'judge') {
-    return <Navigate to="/login" replace />;
+    if (userRole === 'admin') {
+      return <Navigate to="/admin" replace />;
+    } else {
+      return <Navigate to="/user" replace />;
+    }
   }
 
   return (

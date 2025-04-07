@@ -34,20 +34,8 @@ const RoleRedirect: React.FC = () => {
     );
   }
 
-  // When not loading but role not fetched yet, show waiting indicator
-  if (!isRoleFetched) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-lg">Determining user access...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // When not loading and no role, show loading
-  if (!userRole) {
+  // When not loading but role not fetched yet or no role, show waiting indicator
+  if (!isRoleFetched || !userRole) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">

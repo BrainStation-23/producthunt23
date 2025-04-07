@@ -67,10 +67,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check role-specific restrictions
   if (adminOnly && userRole !== 'admin') {
+    // If user is judge and trying to access admin route, redirect to judge route
+    if (userRole === 'judge') {
+      return <Navigate to="/judge" replace />;
+    }
     return <Navigate to="/user" replace />;
   }
 
   if (userOnly && userRole !== 'user') {
+    // If user is judge and trying to access user route, redirect to judge route
+    if (userRole === 'judge') {
+      return <Navigate to="/judge" replace />;
+    }
     return <Navigate to="/admin" replace />;
   }
 
