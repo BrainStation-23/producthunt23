@@ -27,7 +27,10 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
   const userIsLoggedIn = !!user;
   
   // Determine dashboard path based on role
-  const dashboardPath = userRole === 'admin' ? '/admin' : '/user';
+  const dashboardPath = 
+    userRole === 'admin' ? '/admin' : 
+    userRole === 'judge' ? '/judge' : 
+    '/user';
 
   // Fetch avatar URL from profiles table when user changes
   useEffect(() => {
@@ -123,13 +126,13 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/user/profile">Profile</Link>
+                    <Link to={`${dashboardPath}/profile`}>Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to={dashboardPath}>Dashboard</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/user/settings">Settings</Link>
+                    <Link to={`${dashboardPath}/settings`}>Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>

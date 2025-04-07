@@ -56,6 +56,9 @@ const AuthCallback: React.FC = () => {
         if (roleData?.role === 'admin') {
           toast.success('Welcome back, admin!');
           navigate('/admin');
+        } else if (roleData?.role === 'judge') {
+          toast.success('Welcome back, judge!');
+          navigate('/judge');
         } else {
           toast.success('Login successful');
           navigate('/user');
