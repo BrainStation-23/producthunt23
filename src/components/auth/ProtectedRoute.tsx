@@ -18,7 +18,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   userOnly = false,
   judgeOnly = false
 }) => {
-  const { user, userRole, isLoading } = useAuth();
+  const { user, userRole, isLoading, isRoleFetched } = useAuth();
   const location = useLocation();
 
   // For debugging
@@ -26,6 +26,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     console.log('ProtectedRoute:', { 
       path: location.pathname,
       isLoading, 
+      isRoleFetched,
       userRole, 
       allowedRoles,
       adminOnly,
@@ -33,10 +34,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       judgeOnly,
       isAllowed: userRole ? allowedRoles.includes(userRole) : false
     });
-  }, [isLoading, userRole, allowedRoles, adminOnly, userOnly, judgeOnly, location]);
+  }, [isLoading, isRoleFetched, userRole, allowedRoles, adminOnly, userOnly, judgeOnly, location]);
 
-  // Show loading state
-  if (isLoading) {
+  // Show loading state when auth is loading or role is not yet fetched
+  if (isLoading || (user && !isRoleFetched)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -50,6 +51,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Redirect if not authenticated
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  // Wait for role to be fetched before doing role-based redirects
+  if (!isRoleFetched) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Verifying access...</p>
+        </div>
+      </div>
+    );
   }
 
   // Check role-specific restrictions

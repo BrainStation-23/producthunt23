@@ -4,12 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 const RoleRedirect: React.FC = () => {
-  const { userRole, isLoading } = useAuth();
+  const { userRole, isLoading, isRoleFetched } = useAuth();
   const navigate = useNavigate();
 
-  // Use effect to redirect based on role, but only when not loading and we have a role
+  // Use effect to redirect based on role, but only when not loading and role has been fetched
   useEffect(() => {
-    if (!isLoading && userRole) {
+    if (!isLoading && isRoleFetched && userRole) {
       console.log(`RoleRedirect: routing to /${userRole}`);
       
       if (userRole === 'admin') {
@@ -20,7 +20,7 @@ const RoleRedirect: React.FC = () => {
         navigate('/user', { replace: true });
       }
     }
-  }, [userRole, isLoading, navigate]);
+  }, [userRole, isLoading, isRoleFetched, navigate]);
 
   // When loading, show a loading indicator
   if (isLoading) {
@@ -34,7 +34,19 @@ const RoleRedirect: React.FC = () => {
     );
   }
 
-  // When not loading but no role yet, also show loading
+  // When not loading but role not fetched yet, show waiting indicator
+  if (!isRoleFetched) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-lg">Determining user access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // When not loading and no role, show loading
   if (!userRole) {
     return (
       <div className="flex min-h-screen items-center justify-center">
