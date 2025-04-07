@@ -84,10 +84,31 @@ serve(async (req) => {
       throw createError;
     }
 
-    // Assign role if different from default 'user'
+    // Check if user already has any role assigned (this should not happen for new users,
+    // but adding this check for completeness)
+    const { data: existingRoles, error: checkRoleError } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', newUser.user.id);
+      
+    if (checkRoleError) {
+      console.error('Error checking existing roles:', checkRoleError);
+    } else if (existingRoles && existingRoles.length > 0) {
+      // If roles already exist, delete them to avoid duplicates
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', newUser.user.id);
+        
+      if (deleteError) {
+        console.error('Error deleting existing roles:', deleteError);
+      }
+    }
+
+    // Now insert the single specified role
     const { data: roleInsertData, error: roleInsertError } = await supabase
       .from('user_roles')
-      .upsert({ user_id: newUser.user.id, role })
+      .insert({ user_id: newUser.user.id, role })
       .select();
 
     if (roleInsertError) {
