@@ -8,7 +8,7 @@ import { JudgeHeader } from './JudgeHeader';
 import { AssignmentFilters } from './AssignmentFilters';
 import { AssignmentTable } from './AssignmentTable';
 import { AssignmentEmptyState } from './AssignmentEmptyState';
-import type { Judge } from '../JudgeAssignmentPanel';
+import type { Judge } from '../types';
 
 interface JudgeAssignmentDetailProps {
   judge: Judge;

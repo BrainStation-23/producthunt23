@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { Judge } from '../JudgeAssignmentPanel';
+import type { Judge } from '../types';
 
 interface JudgeHeaderProps {
   judge: Judge;
