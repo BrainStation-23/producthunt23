@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AssignedProduct } from '@/components/admin/settings/judging/types';
@@ -7,12 +7,13 @@ import { toast } from 'sonner';
 
 export const useJudgeAssignments = () => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
+  const queryClient = useQueryClient();
 
   const { data: assignedProducts, isLoading, error, refetch } = useQuery({
     queryKey: ['judgeAssignments', filter],
     queryFn: async () => {
       try {
-        // Fix: get user ID properly from Supabase auth
+        // Get user ID properly from Supabase auth
         const { data: authData } = await supabase.auth.getUser();
         const judgeId = authData.user?.id;
         
@@ -20,26 +21,41 @@ export const useJudgeAssignments = () => {
           throw new Error('No authenticated user found');
         }
 
-        const { data, error } = await supabase
+        // Get assigned products
+        const { data: products, error: productsError } = await supabase
           .rpc('get_judge_assigned_products', {
             judge_uuid: judgeId
           });
 
-        if (error) throw error;
+        if (productsError) throw productsError;
 
-        // Add mock evaluation status for now
-        // In a real implementation, this would come from the database
-        const productsWithStatus = data.map((product: any) => ({
-          ...product,
-          evaluation_status: Math.random() > 0.7 
-            ? 'completed' 
-            : Math.random() > 0.5 
-              ? 'in_progress' 
-              : 'pending',
-          deadline: new Date(Date.now() + Math.random() * 1000 * 60 * 60 * 24 * 14).toISOString(),
-          priority: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high'
-        }));
+        // Get evaluation statuses for these products
+        const { data: evaluations, error: evaluationsError } = await supabase
+          .from('judging_evaluations')
+          .select('*')
+          .eq('judge_id', judgeId);
+          
+        if (evaluationsError) throw evaluationsError;
 
+        // Create a map of product IDs to evaluation status
+        const evaluationMap = (evaluations || []).reduce((map, eval) => {
+          map[eval.product_id] = eval;
+          return map;
+        }, {});
+
+        // Combine product data with evaluation status
+        const productsWithStatus = products.map((product: any) => {
+          const evaluation = evaluationMap[product.id];
+          return {
+            ...product,
+            evaluation_status: evaluation ? evaluation.status : 'pending',
+            priority: evaluation ? evaluation.priority : 'medium',
+            deadline: evaluation ? evaluation.deadline : null,
+            notes: evaluation ? evaluation.notes : null,
+          };
+        });
+
+        // Filter products based on selected filter
         if (filter !== 'all') {
           return productsWithStatus.filter((product: AssignedProduct) => 
             product.evaluation_status === filter
@@ -55,12 +71,79 @@ export const useJudgeAssignments = () => {
     }
   });
 
+  // Mutation to update evaluation status
+  const updateEvaluationStatus = useMutation({
+    mutationFn: async ({
+      productId, 
+      status, 
+      priority = 'medium',
+      notes = ''
+    }: {
+      productId: string;
+      status: 'pending' | 'in_progress' | 'completed';
+      priority?: 'low' | 'medium' | 'high';
+      notes?: string;
+    }) => {
+      const { data: authData } = await supabase.auth.getUser();
+      const judgeId = authData.user?.id;
+      
+      if (!judgeId) {
+        throw new Error('No authenticated user found');
+      }
+
+      // Check if an evaluation record exists
+      const { data: existing } = await supabase
+        .from('judging_evaluations')
+        .select('*')
+        .eq('judge_id', judgeId)
+        .eq('product_id', productId)
+        .maybeSingle();
+
+      if (existing) {
+        // Update existing record
+        const { error } = await supabase
+          .from('judging_evaluations')
+          .update({
+            status,
+            priority,
+            notes,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        // Create new record
+        const { error } = await supabase
+          .from('judging_evaluations')
+          .insert({
+            judge_id: judgeId,
+            product_id: productId,
+            status,
+            priority,
+            notes
+          });
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['judgeAssignments'] });
+      toast.success('Evaluation status updated');
+    },
+    onError: (error) => {
+      toast.error('Failed to update evaluation status');
+      console.error('Error updating evaluation status:', error);
+    }
+  });
+
   return {
     assignedProducts: assignedProducts as AssignedProduct[] || [],
     isLoading,
     error,
     refetch,
     filter,
-    setFilter
+    setFilter,
+    updateEvaluationStatus
   };
 };

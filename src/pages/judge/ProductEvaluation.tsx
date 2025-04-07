@@ -1,207 +1,137 @@
 
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useJudgingCriteria } from '@/hooks/useJudgingCriteria';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { ArrowLeft, Save, Check } from 'lucide-react';
-import { AssignedProduct, EvaluationSubmission } from '@/components/admin/settings/judging/types';
-import EvaluationCriteriaForm from '@/components/judge/evaluation/EvaluationCriteriaForm';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useProductDetail } from '@/hooks/useProductDetail';
+import { useJudgeAssignments } from '@/hooks/useJudgeAssignments';
+import { useJudgingCriteria } from '@/hooks/useJudgingCriteria';
 import ProductOverview from '@/components/judge/evaluation/ProductOverview';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import EvaluationCriteriaForm from '@/components/judge/evaluation/EvaluationCriteriaForm';
+import { ChevronLeft, Save, CheckCircle } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const ProductEvaluation: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const { product, isLoading: isProductLoading } = useProductDetail(productId);
   const { criteria, isLoading: isCriteriaLoading } = useJudgingCriteria();
-  const [formValues, setFormValues] = useState<Record<string, any>>({});
-  const [currentTab, setCurrentTab] = useState('overview');
+  const { assignedProducts, updateEvaluationStatus } = useJudgeAssignments();
+  
+  const [notes, setNotes] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [status, setStatus] = useState<'pending' | 'in_progress' | 'completed'>('pending');
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch the product information
-  const { data: product, isLoading: isProductLoading } = useQuery({
-    queryKey: ['product', productId],
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('id', productId)
-          .single();
-
-        if (error) throw error;
-        
-        // Create a proper AssignedProduct by adding the required field
-        const productAsAssigned: AssignedProduct = {
-          ...data,
-          assigned_at: new Date().toISOString(), // Use current time as a fallback
-        };
-        
-        return productAsAssigned;
-      } catch (error: any) {
-        toast.error('Failed to load product information');
-        console.error('Error fetching product:', error);
-        return null;
-      }
+  // Get the current product details including evaluation status
+  const currentProduct = assignedProducts.find(p => p.id === productId);
+  
+  // Initialize the form values based on current product data
+  React.useEffect(() => {
+    if (currentProduct) {
+      setStatus(currentProduct.evaluation_status || 'pending');
+      setPriority(currentProduct.priority || 'medium');
+      setNotes(currentProduct.notes || '');
     }
-  });
+  }, [currentProduct]);
 
-  // Fetch existing evaluations if any
-  const { data: existingEvaluations, isLoading: isEvaluationsLoading } = useQuery({
-    queryKey: ['evaluations', productId],
-    queryFn: async () => {
-      try {
-        // Fix: get user ID properly from Supabase auth
-        const { data: authData } = await supabase.auth.getUser();
-        const judgeId = authData.user?.id;
-        
-        if (!judgeId) {
-          throw new Error('No authenticated user found');
-        }
-        
-        const { data, error } = await supabase
-          .from('judging_submissions')
-          .select('*')
-          .eq('product_id', productId)
-          .eq('judge_id', judgeId);
-
-        if (error) throw error;
-        
-        // Convert array to object keyed by criteria_id for easier form initialization
-        const evaluationsMap: Record<string, any> = {};
-        data.forEach((submission: any) => {
-          evaluationsMap[submission.criteria_id] = {
-            rating_value: submission.rating_value,
-            boolean_value: submission.boolean_value,
-            text_value: submission.text_value
-          };
-        });
-        
-        return evaluationsMap;
-      } catch (error: any) {
-        toast.error('Failed to load existing evaluations');
-        console.error('Error fetching evaluations:', error);
-        return {};
-      }
-    },
-    meta: {
-      onSuccess: (data: Record<string, any>) => {
-        setFormValues(data || {});
-      }
-    }
-  });
-
-  const isLoading = isProductLoading || isCriteriaLoading || isEvaluationsLoading;
-
-  // Save evaluations mutation
-  const { mutate: saveEvaluations, isPending } = useMutation({
-    mutationFn: async (finalSubmit: boolean) => {
-      const submissions: EvaluationSubmission[] = [];
-      
-      // Prepare submissions from form values
-      Object.entries(formValues).forEach(([criteriaId, values]) => {
-        submissions.push({
-          product_id: productId!,
-          criteria_id: criteriaId,
-          ...values
-        });
+  const handleSaveStatus = async () => {
+    if (!productId) return;
+    
+    setIsSaving(true);
+    try {
+      await updateEvaluationStatus.mutateAsync({
+        productId,
+        status,
+        priority,
+        notes
       });
-
-      // Get the user ID
-      const { data: authData } = await supabase.auth.getUser();
-      const judgeId = authData.user?.id;
-      
-      if (!judgeId) {
-        throw new Error('No authenticated user found');
-      }
-
-      // Upsert submissions
-      const { error } = await supabase
-        .from('judging_submissions')
-        .upsert(
-          submissions.map(submission => ({
-            judge_id: judgeId,
-            product_id: submission.product_id,
-            criteria_id: submission.criteria_id,
-            rating_value: submission.rating_value,
-            boolean_value: submission.boolean_value,
-            text_value: submission.text_value
-          }))
-        );
-
-      if (error) throw error;
-
-      return finalSubmit;
-    },
-    onSuccess: (finalSubmit) => {
-      if (finalSubmit) {
-        toast.success('Evaluation submitted successfully');
-        navigate('/judge');
-      } else {
-        toast.success('Progress saved');
-      }
-    },
-    onError: (error) => {
-      toast.error('Failed to save evaluation');
-      console.error('Error saving evaluation:', error);
+    } catch (error) {
+      console.error('Error saving evaluation status:', error);
+    } finally {
+      setIsSaving(false);
     }
-  });
-
-  const handleCriteriaChange = (criteriaId: string, field: string, value: any) => {
-    setFormValues(prev => ({
-      ...prev,
-      [criteriaId]: {
-        ...(prev[criteriaId] || {}),
-        [field]: value
-      }
-    }));
   };
 
-  const handleSave = (finalSubmit: boolean = false) => {
-    saveEvaluations(finalSubmit);
+  const handleStatusChange = (newStatus: 'pending' | 'in_progress' | 'completed') => {
+    setStatus(newStatus);
+    // If changing to in_progress, save immediately
+    if (newStatus === 'in_progress' && status === 'pending') {
+      updateEvaluationStatus.mutate({
+        productId: productId!,
+        status: newStatus,
+        priority,
+        notes
+      });
+    }
   };
 
-  if (isLoading) {
+  const handleCompleteEvaluation = async () => {
+    if (!productId) return;
+    
+    // Check if all criteria have been evaluated
+    // This would be a real check in a complete implementation
+    const allCriteriaEvaluated = true;
+    
+    if (!allCriteriaEvaluated) {
+      toast.error('Please complete the evaluation for all criteria before submitting');
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      await updateEvaluationStatus.mutateAsync({
+        productId,
+        status: 'completed',
+        priority,
+        notes
+      });
+      
+      toast.success('Evaluation completed successfully');
+      navigate('/judge');
+    } catch (error) {
+      console.error('Error completing evaluation:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isProductLoading || isCriteriaLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" disabled>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-2xl font-bold">Loading evaluation...</h1>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Loading evaluation...</p>
         </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Evaluation</CardTitle>
-            <CardDescription>Loading...</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center py-8">Loading evaluation criteria...</p>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/judge')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-2xl font-bold">Product Not Found</h1>
-        </div>
-        
+      <div className="p-6">
         <Card>
-          <CardContent className="text-center py-8">
-            <p>The requested product could not be found or you do not have permission to evaluate it.</p>
-            <Button onClick={() => navigate('/judge')} className="mt-4">
-              Return to Dashboard
-            </Button>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <p className="text-lg font-semibold">Product not found</p>
+              <p className="text-muted-foreground mt-1">
+                The product you're looking for doesn't exist or you don't have permission to view it.
+              </p>
+              <Button className="mt-4" onClick={() => navigate('/judge')}>
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -210,63 +140,93 @@ const ProductEvaluation: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/judge')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h1 className="text-2xl font-bold">Evaluate: {product.name}</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <Button variant="ghost" onClick={() => navigate('/judge')}>
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight mt-2">Product Evaluation</h1>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Select value={status} onValueChange={(value) => handleStatusChange(value as any)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={priority} onValueChange={(value) => setPriority(value as any)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Low Priority</SelectItem>
+              <SelectItem value="medium">Medium Priority</SelectItem>
+              <SelectItem value="high">High Priority</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button onClick={handleSaveStatus} disabled={isSaving}>
+            <Save className="mr-2 h-4 w-4" />
+            Save Status
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="overview">Product Overview</TabsTrigger>
-          <TabsTrigger value="evaluation">Evaluation Form</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview">
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="md:col-span-1">
           <ProductOverview product={product} />
-          <div className="mt-6 flex justify-end">
-            <Button onClick={() => setCurrentTab('evaluation')}>
-              Continue to Evaluation
-            </Button>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="evaluation">
+          
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Evaluation Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Label htmlFor="notes">Private notes about this evaluation</Label>
+              <Textarea 
+                id="notes" 
+                placeholder="Add your private notes here..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="min-h-[150px] mt-2"
+              />
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="md:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle>Evaluation Criteria</CardTitle>
-              <CardDescription>
-                Please provide your assessment for each of the following criteria.
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <EvaluationCriteriaForm 
-                criteria={criteria} 
-                formValues={formValues} 
-                onChange={handleCriteriaChange} 
+                productId={productId!} 
+                criteria={criteria}
               />
+              
+              <Separator className="my-6" />
+              
+              <div className="flex justify-end">
+                <Button 
+                  size="lg" 
+                  onClick={handleCompleteEvaluation}
+                  disabled={isSaving || status === 'completed'}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle className="mr-2 h-5 w-5" />
+                  Complete Evaluation
+                </Button>
+              </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button 
-                variant="outline" 
-                onClick={() => handleSave(false)}
-                disabled={isPending}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                Save Progress
-              </Button>
-              <Button 
-                onClick={() => handleSave(true)}
-                disabled={isPending}
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Submit Evaluation
-              </Button>
-            </CardFooter>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 };

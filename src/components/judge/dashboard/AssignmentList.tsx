@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
 import { AssignedProduct } from '@/components/admin/settings/judging/types';
 import { format } from 'date-fns';
-import { Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { Clock, AlertCircle, CheckCircle, Calendar, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AssignmentListProps {
@@ -53,12 +53,12 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ products, isLoading }) 
   return (
     <div className="space-y-4">
       {products.map((product) => (
-        <Card key={product.id}>
-          <CardHeader>
+        <Card key={product.id} className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle>{product.name}</CardTitle>
-                <CardDescription>{product.tagline}</CardDescription>
+                <CardDescription className="line-clamp-1">{product.tagline}</CardDescription>
               </div>
               <StatusBadge status={product.evaluation_status || 'pending'} />
             </div>
@@ -66,23 +66,36 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ products, isLoading }) 
           <CardContent>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="space-y-2">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {product.deadline 
-                      ? `Due: ${format(new Date(product.deadline), 'MMM d, yyyy')}`
-                      : 'No deadline set'}
-                  </span>
+                {product.deadline && (
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      Due: {format(new Date(product.deadline), 'MMM d, yyyy')}
+                    </span>
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <PriorityBadge priority={product.priority || 'medium'} />
+                  {product.categories && product.categories.length > 0 && (
+                    <Badge variant="outline" className="text-xs">
+                      {product.categories[0]}
+                    </Badge>
+                  )}
                 </div>
-                <PriorityBadge priority={product.priority || 'medium'} />
+                {product.notes && (
+                  <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
+                    Note: {product.notes}
+                  </p>
+                )}
               </div>
               <Button asChild>
-                <Link to={`/judge/evaluations/${product.id}`}>
+                <Link to={`/judge/evaluations/${product.id}`} className="w-full md:w-auto">
                   {product.evaluation_status === 'completed'
                     ? 'View Evaluation'
                     : product.evaluation_status === 'in_progress'
                     ? 'Continue Evaluation'
                     : 'Start Evaluation'}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>

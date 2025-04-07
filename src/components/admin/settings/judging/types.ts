@@ -17,7 +17,7 @@ export interface AssignedProduct {
   evaluation_status?: 'pending' | 'in_progress' | 'completed';
   deadline?: string | null;
   priority?: 'low' | 'medium' | 'high';
-  // Add the missing properties
+  notes?: string | null;
   description?: string;
   website_url?: string | null;
   categories?: string[] | null;
