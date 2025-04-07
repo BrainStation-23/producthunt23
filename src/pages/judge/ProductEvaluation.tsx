@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { DatePicker } from '@/components/ui/date-picker';
+import { AssignedProduct } from '@/components/admin/settings/judging/types';
 
 const ProductEvaluation: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
