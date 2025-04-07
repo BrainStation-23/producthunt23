@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +32,18 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Get current user ID on component mount
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session?.user) {
+        setCurrentUserId(data.session.user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
 
   // Fetch available products not already assigned to this judge
   const fetchAvailableProducts = async () => {
@@ -44,15 +56,25 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
 
       if (assignedError) throw assignedError;
 
-      const assignedProductIds = assignedData.map(a => a.product_id);
+      const assignedProductIds = assignedData.length > 0 
+        ? assignedData.map(a => a.product_id) 
+        : ['00000000-0000-0000-0000-000000000000']; // Use a dummy UUID if no assignments
 
       // Then fetch products not already assigned
-      const { data: productsData, error: productsError } = await supabase
+      let query = supabase
         .from('products')
         .select('id, name, tagline, image_url')
-        .eq('status', 'approved')
-        .not('id', 'in', `(${assignedProductIds.join(',')})`)
-        .ilike('name', `%${searchQuery}%`);
+        .eq('status', 'approved');
+      
+      if (assignedProductIds.length > 0) {
+        query = query.not('id', 'in', `(${assignedProductIds.join(',')})`);
+      }
+      
+      if (searchQuery) {
+        query = query.ilike('name', `%${searchQuery}%`);
+      }
+
+      const { data: productsData, error: productsError } = await query;
 
       if (productsError) throw productsError;
 
@@ -79,6 +101,11 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
       return;
     }
 
+    if (!currentUserId) {
+      toast.error('Could not determine current user. Please try again.');
+      return;
+    }
+
     try {
       setIsLoading(true);
       
@@ -86,7 +113,7 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
       const assignmentData = selectedProducts.map(productId => ({
         judge_id: judgeId,
         product_id: productId,
-        assigned_by: 'YOUR_CURRENT_USER_ID' // Replace with actual user ID from context
+        assigned_by: currentUserId
       }));
 
       const { error } = await supabase
@@ -109,7 +136,7 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       fetchAvailableProducts();
     }
