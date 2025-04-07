@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,14 +51,17 @@ const AuthCallback: React.FC = () => {
         
         console.log("User role:", roleData?.role);
         
-        // Navigate based on user role
-        if (roleData?.role === 'admin') {
-          toast.success('Welcome back, admin!');
-          navigate('/admin');
-        } else if (roleData?.role === 'judge') {
+        // Navigate based on user role - ensure this is the only redirection happening
+        if (roleData?.role === 'judge') {
+          console.log("Redirecting judge to /judge");
           toast.success('Welcome back, judge!');
           navigate('/judge');
+        } else if (roleData?.role === 'admin') {
+          console.log("Redirecting admin to /admin");
+          toast.success('Welcome back, admin!');
+          navigate('/admin');
         } else {
+          console.log("Redirecting user to /user");
           toast.success('Login successful');
           navigate('/user');
         }

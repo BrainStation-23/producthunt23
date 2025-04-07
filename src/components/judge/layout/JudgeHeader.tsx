@@ -82,6 +82,12 @@ const JudgeHeader: React.FC = () => {
                   <span>Profile</span>
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/judge" className="flex items-center">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()} className="text-red-500">
                 <LogOut className="mr-2 h-4 w-4" />
