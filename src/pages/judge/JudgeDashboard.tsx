@@ -2,19 +2,16 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useJudgeAssignments } from '@/hooks/useJudgeAssignments';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AssignmentList from '@/components/judge/dashboard/AssignmentList';
 import DashboardStats from '@/components/judge/dashboard/DashboardStats';
 import { useJudgingCriteria } from '@/hooks/useJudgingCriteria';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { CalendarClock, AlertCircle } from 'lucide-react';
+import { CalendarClock, AlertCircle, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const JudgeDashboard: React.FC = () => {
   const { 
-    assignedProducts, 
-    isLoading,
-    filter, 
-    setFilter 
+    assignedProducts
   } = useJudgeAssignments();
 
   const { criteria } = useJudgingCriteria();
@@ -62,7 +59,7 @@ const JudgeDashboard: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Judge Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome to your judge dashboard. Here you can see your assigned products and evaluation progress.
+          Welcome to your judge dashboard. Here you can see your evaluation progress and stats.
         </p>
       </div>
 
@@ -154,10 +151,18 @@ const JudgeDashboard: React.FC = () => {
       {/* Upcoming Deadlines */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarClock className="h-5 w-5" />
-            Upcoming Deadlines
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <CalendarClock className="h-5 w-5" />
+              Upcoming Deadlines
+            </CardTitle>
+            <Button variant="outline" asChild>
+              <Link to="/judge/evaluations">
+                View All Assignments
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
           <CardDescription>
             Evaluations due within the next 7 days
           </CardDescription>
@@ -196,42 +201,6 @@ const JudgeDashboard: React.FC = () => {
           )}
         </CardContent>
       </Card>
-
-      <h2 className="text-2xl font-bold tracking-tight mt-8">Your Assignments</h2>
-
-      <Tabs defaultValue="all" className="w-full" onValueChange={(value) => setFilter(value as any)}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All Assignments ({total})</TabsTrigger>
-          <TabsTrigger value="pending">Pending ({pending})</TabsTrigger>
-          <TabsTrigger value="in_progress">In Progress ({inProgress})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({completed})</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4">
-          <AssignmentList products={assignedProducts} isLoading={isLoading} />
-        </TabsContent>
-        
-        <TabsContent value="pending" className="space-y-4">
-          <AssignmentList 
-            products={assignedProducts.filter(p => p.evaluation_status === 'pending')} 
-            isLoading={isLoading} 
-          />
-        </TabsContent>
-        
-        <TabsContent value="in_progress" className="space-y-4">
-          <AssignmentList 
-            products={assignedProducts.filter(p => p.evaluation_status === 'in_progress')} 
-            isLoading={isLoading} 
-          />
-        </TabsContent>
-        
-        <TabsContent value="completed" className="space-y-4">
-          <AssignmentList 
-            products={assignedProducts.filter(p => p.evaluation_status === 'completed')} 
-            isLoading={isLoading} 
-          />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
