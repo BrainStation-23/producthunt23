@@ -30,18 +30,18 @@ const JudgesList: React.FC = () => {
     queryFn: async () => {
       try {
         // First, get all users with the judge role
-        const { data: roleData, error: roleError } = await supabase
+        const { data: judgesWithRoles, error: roleError } = await supabase
           .from('user_roles')
           .select('user_id')
           .eq('role', 'judge');
 
         if (roleError) throw roleError;
 
-        if (!roleData || roleData.length === 0) {
+        if (!judgesWithRoles || judgesWithRoles.length === 0) {
           return [];
         }
 
-        const judgeIds = roleData.map(item => item.user_id);
+        const judgeIds = judgesWithRoles.map(item => item.user_id);
 
         // Then, get the profile information for these judge IDs
         const { data: profileData, error: profileError } = await supabase

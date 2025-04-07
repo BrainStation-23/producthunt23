@@ -32,7 +32,7 @@ export const useUserForm = (
   const defaultEditValues: EditFormValues = {
     email: user?.email || '',
     username: user?.username || '',
-    role: (user?.role as 'admin' | 'user') || 'user',
+    role: (user?.role as 'admin' | 'user' | 'judge') || 'user',
   };
   
   const defaultCreateValues: CreateFormValues = {
