@@ -90,10 +90,11 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
         data.max_value = null;
       }
 
-      const { error } = await supabase
-        .from('judging_criteria')
+      // Use type assertion to work around TypeScript limitations
+      const { error } = await (supabase
+        .from('judging_criteria' as any)
         .update(data)
-        .eq('id', criteria.id);
+        .eq('id', criteria.id) as any);
 
       if (error) throw error;
       

@@ -39,12 +39,12 @@ const DeleteCriteriaDialog: React.FC<DeleteCriteriaDialogProps> = ({
 }) => {
   const handleDelete = async () => {
     try {
-      // Check if the criteria is in use
-      const { data: submissions, error: checkError } = await supabase
-        .from('judging_submissions')
+      // Check if the criteria is in use - use type assertion to work around TypeScript limitations
+      const { data: submissions, error: checkError } = await (supabase
+        .from('judging_submissions' as any)
         .select('id')
         .eq('criteria_id', criteria.id)
-        .limit(1);
+        .limit(1) as any);
 
       if (checkError) throw checkError;
 
@@ -54,11 +54,11 @@ const DeleteCriteriaDialog: React.FC<DeleteCriteriaDialogProps> = ({
         return;
       }
 
-      // Delete the criteria
-      const { error } = await supabase
-        .from('judging_criteria')
+      // Delete the criteria - use type assertion to work around TypeScript limitations
+      const { error } = await (supabase
+        .from('judging_criteria' as any)
         .delete()
-        .eq('id', criteria.id);
+        .eq('id', criteria.id) as any);
 
       if (error) throw error;
 

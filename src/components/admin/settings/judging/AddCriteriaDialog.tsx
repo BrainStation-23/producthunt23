@@ -66,9 +66,10 @@ const AddCriteriaDialog: React.FC<AddCriteriaDialogProps> = ({
         data.max_value = null;
       }
 
-      const { error } = await supabase
-        .from('judging_criteria')
-        .insert([data]);
+      // Use type assertion to work around TypeScript limitations
+      const { error } = await (supabase
+        .from('judging_criteria' as any)
+        .insert([data]) as any);
 
       if (error) throw error;
       

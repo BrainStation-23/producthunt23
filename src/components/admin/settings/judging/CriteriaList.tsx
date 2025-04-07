@@ -31,10 +31,11 @@ const CriteriaList: React.FC = () => {
   const { data: criteria, isLoading, refetch } = useQuery({
     queryKey: ['judgingCriteria'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('judging_criteria')
+      // Use type assertion to work around TypeScript limitations
+      const { data, error } = await (supabase
+        .from('judging_criteria' as any)
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any);
 
       if (error) {
         toast.error(`Failed to load criteria: ${error.message}`);
