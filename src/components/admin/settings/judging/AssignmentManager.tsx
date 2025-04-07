@@ -51,7 +51,12 @@ interface Assignment {
   judge_id: string;
   product_id: string;
   assigned_at: string;
-  judge: Judge;
+  judge: {
+    id: string;
+    username: string | null;
+    email: string;
+    avatar_url: string | null;
+  };
   product: Product;
 }
 
@@ -68,7 +73,7 @@ const AssignmentManager: React.FC = () => {
         .from('products')
         .select('id, name, tagline, image_url, status')
         .in('status', ['pending', 'approved'])
-        .order('created_at', { ascending: false }) as any;
+        .order('created_at', { ascending: false });
 
       if (error) {
         toast.error(`Failed to load products: ${error.message}`);
@@ -89,24 +94,56 @@ const AssignmentManager: React.FC = () => {
     queryFn: async () => {
       if (!selectedProduct) return [];
 
-      const { data, error } = await (supabase
-        .from('judge_assignments' as any)
-        .select(`
-          id,
-          judge_id,
-          product_id,
-          assigned_at,
-          judge:judge_id(id, username, email, avatar_url),
-          product:product_id(id, name, tagline, image_url, status)
-        `)
-        .eq('product_id', selectedProduct) as any);
+      // First get the assignments
+      const { data: assignmentData, error: assignmentError } = await supabase
+        .from('judge_assignments')
+        .select('id, judge_id, product_id, assigned_at')
+        .eq('product_id', selectedProduct);
 
-      if (error) {
-        toast.error(`Failed to load assignments: ${error.message}`);
-        throw error;
+      if (assignmentError) {
+        toast.error(`Failed to load assignments: ${assignmentError.message}`);
+        throw assignmentError;
       }
 
-      return data as Assignment[];
+      if (!assignmentData || assignmentData.length === 0) {
+        return [];
+      }
+
+      // Then fetch judge details for each assignment
+      const assignments = await Promise.all(
+        assignmentData.map(async (assignment) => {
+          const { data: judgeData, error: judgeError } = await supabase
+            .from('profiles')
+            .select('id, username, email, avatar_url')
+            .eq('id', assignment.judge_id)
+            .single();
+
+          if (judgeError) {
+            console.error('Error fetching judge data:', judgeError);
+            return null;
+          }
+
+          const { data: productData, error: productError } = await supabase
+            .from('products')
+            .select('id, name, tagline, image_url, status')
+            .eq('id', assignment.product_id)
+            .single();
+
+          if (productError) {
+            console.error('Error fetching product data:', productError);
+            return null;
+          }
+
+          return {
+            ...assignment,
+            judge: judgeData,
+            product: productData
+          };
+        })
+      );
+
+      // Filter out any null results from failed fetches
+      return assignments.filter(Boolean) as Assignment[];
     },
     enabled: !!selectedProduct
   });
@@ -119,10 +156,10 @@ const AssignmentManager: React.FC = () => {
     try {
       setIsDeleting(assignmentId);
       
-      const { error } = await (supabase
-        .from('judge_assignments' as any)
+      const { error } = await supabase
+        .from('judge_assignments')
         .delete()
-        .eq('id', assignmentId) as any);
+        .eq('id', assignmentId);
 
       if (error) throw error;
 
