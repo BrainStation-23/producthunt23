@@ -179,6 +179,50 @@ export type Database = {
         }
         Relationships: []
       }
+      judging_evaluations: {
+        Row: {
+          created_at: string
+          deadline: string | null
+          id: string
+          judge_id: string
+          notes: string | null
+          priority: string
+          product_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          judge_id: string
+          notes?: string | null
+          priority?: string
+          product_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          judge_id?: string
+          notes?: string | null
+          priority?: string
+          product_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "judging_evaluations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       judging_submissions: {
         Row: {
           boolean_value: boolean | null

@@ -2,14 +2,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { AssignedProduct } from '@/components/admin/settings/judging/types';
+import { AssignedProduct, JudgingEvaluation } from '@/components/admin/settings/judging/types';
 import { toast } from 'sonner';
 
 export const useJudgeAssignments = () => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
   const queryClient = useQueryClient();
 
-  const { data: assignedProducts, isLoading, error, refetch } = useQuery({
+  const { data: assignedProducts, isLoading, error } = useQuery({
     queryKey: ['judgeAssignments', filter],
     queryFn: async () => {
       try {
@@ -22,15 +22,15 @@ export const useJudgeAssignments = () => {
         }
 
         // Get assigned products
-        const { data: products, error: productsError } = await supabase
+        const { data: assignedProductsData, error: assignmentsError } = await supabase
           .rpc('get_judge_assigned_products', {
             judge_uuid: judgeId
           });
 
-        if (productsError) throw productsError;
+        if (assignmentsError) throw assignmentsError;
 
         // Get evaluation statuses for these products
-        const { data: evaluations, error: evaluationsError } = await supabase
+        const { data: evaluationsData, error: evaluationsError } = await supabase
           .from('judging_evaluations')
           .select('*')
           .eq('judge_id', judgeId);
@@ -38,13 +38,13 @@ export const useJudgeAssignments = () => {
         if (evaluationsError) throw evaluationsError;
 
         // Create a map of product IDs to evaluation status
-        const evaluationMap = (evaluations || []).reduce((map, eval) => {
-          map[eval.product_id] = eval;
+        const evaluationMap = (evaluationsData || []).reduce((map, evaluation) => {
+          map[evaluation.product_id] = evaluation;
           return map;
         }, {});
 
         // Combine product data with evaluation status
-        const productsWithStatus = products.map((product: any) => {
+        const productsWithStatus = assignedProductsData.map((product) => {
           const evaluation = evaluationMap[product.id];
           return {
             ...product,
@@ -57,13 +57,13 @@ export const useJudgeAssignments = () => {
 
         // Filter products based on selected filter
         if (filter !== 'all') {
-          return productsWithStatus.filter((product: AssignedProduct) => 
+          return productsWithStatus.filter((product) => 
             product.evaluation_status === filter
           );
         }
 
         return productsWithStatus;
-      } catch (error: any) {
+      } catch (error) {
         toast.error('Failed to load assigned products');
         console.error('Error fetching judge assignments:', error);
         return [];
@@ -77,12 +77,14 @@ export const useJudgeAssignments = () => {
       productId, 
       status, 
       priority = 'medium',
-      notes = ''
+      notes = '',
+      deadline = null
     }: {
       productId: string;
       status: 'pending' | 'in_progress' | 'completed';
       priority?: 'low' | 'medium' | 'high';
       notes?: string;
+      deadline?: string | null;
     }) => {
       const { data: authData } = await supabase.auth.getUser();
       const judgeId = authData.user?.id;
@@ -99,6 +101,8 @@ export const useJudgeAssignments = () => {
         .eq('product_id', productId)
         .maybeSingle();
 
+      const currentTime = new Date().toISOString();
+
       if (existing) {
         // Update existing record
         const { error } = await supabase
@@ -107,7 +111,8 @@ export const useJudgeAssignments = () => {
             status,
             priority,
             notes,
-            updated_at: new Date().toISOString()
+            deadline,
+            updated_at: currentTime
           })
           .eq('id', existing.id);
 
@@ -121,7 +126,8 @@ export const useJudgeAssignments = () => {
             product_id: productId,
             status,
             priority,
-            notes
+            notes,
+            deadline
           });
 
         if (error) throw error;
@@ -141,7 +147,6 @@ export const useJudgeAssignments = () => {
     assignedProducts: assignedProducts as AssignedProduct[] || [],
     isLoading,
     error,
-    refetch,
     filter,
     setFilter,
     updateEvaluationStatus

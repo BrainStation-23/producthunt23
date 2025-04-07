@@ -14,9 +14,9 @@ export interface AssignedProduct {
   image_url: string | null;
   status: string;
   assigned_at: string;
-  evaluation_status?: 'pending' | 'in_progress' | 'completed';
+  evaluation_status: 'pending' | 'in_progress' | 'completed';
   deadline?: string | null;
-  priority?: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high';
   notes?: string | null;
   description?: string;
   website_url?: string | null;
@@ -38,4 +38,16 @@ export interface EvaluationSubmission {
   rating_value?: number;
   boolean_value?: boolean;
   text_value?: string;
+}
+
+export interface JudgingEvaluation {
+  id: string;
+  judge_id: string;
+  product_id: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  priority: 'low' | 'medium' | 'high';
+  notes?: string | null;
+  deadline?: string | null;
+  created_at: string;
+  updated_at: string;
 }
