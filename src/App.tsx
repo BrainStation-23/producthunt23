@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,6 +6,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import AuthCallback from './pages/auth/AuthCallback';
 import LogoutPage from './pages/auth/LogoutPage';
 import RoleRedirect from './components/auth/RoleRedirect';
+import JudgeEvaluations from './pages/judge/JudgeEvaluations';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -115,7 +115,7 @@ function App() {
               }
             >
               <Route index element={<JudgeDashboard />} />
-              <Route path="evaluations" element={<JudgeDashboard />} />
+              <Route path="evaluations" element={<JudgeEvaluations />} />
               <Route path="evaluations/:productId" element={<ProductEvaluation />} />
               <Route path="profile" element={<UserProfile />} />
               <Route path="settings" element={<UserSettings />} />
