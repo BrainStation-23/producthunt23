@@ -11,6 +11,7 @@ import LogoutPage from './pages/auth/LogoutPage';
 import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import UserLayout from './components/layout/UserLayout';
+import JudgeLayout from './components/layout/JudgeLayout';
 
 // Public Pages
 import Index from './pages/Index';
@@ -39,6 +40,10 @@ import UserProfile from './pages/user/UserProfile';
 import UserProducts from './pages/user/UserProducts';
 import UserSettings from './pages/user/UserSettings';
 import SavedProductsPage from './pages/user/SavedProductsPage';
+
+// Judge Pages
+import JudgeDashboard from './pages/judge/JudgeDashboard';
+import ProductEvaluation from './pages/judge/ProductEvaluation';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -89,16 +94,18 @@ function App() {
               <Route path="judging" element={<AdminJudging />} />
             </Route>
 
-            {/* Judge Routes (placeholder - to be implemented in the next phase) */}
+            {/* Judge Routes */}
             <Route
               path="/judge"
               element={
                 <ProtectedRoute allowedRoles={['judge']} judgeOnly={true}>
-                  <UserLayout />
+                  <JudgeLayout />
                 </ProtectedRoute>
               }
             >
-              <Route index element={<UserDashboard />} />
+              <Route index element={<JudgeDashboard />} />
+              <Route path="evaluations" element={<JudgeDashboard />} />
+              <Route path="evaluations/:productId" element={<ProductEvaluation />} />
               <Route path="profile" element={<UserProfile />} />
               <Route path="settings" element={<UserSettings />} />
             </Route>
