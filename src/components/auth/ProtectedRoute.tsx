@@ -5,16 +5,18 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children?: ReactNode;
-  allowedRoles?: ('admin' | 'user')[];
-  adminOnly?: boolean; // New prop to explicitly mark admin-only routes
-  userOnly?: boolean; // New prop to explicitly mark user-only routes
+  allowedRoles?: ('admin' | 'user' | 'judge')[];
+  adminOnly?: boolean;
+  userOnly?: boolean;
+  judgeOnly?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children,
-  allowedRoles = ['admin', 'user'],
+  allowedRoles = ['admin', 'user', 'judge'],
   adminOnly = false,
-  userOnly = false
+  userOnly = false,
+  judgeOnly = false
 }) => {
   const { user, userRole, isLoading } = useAuth();
   const location = useLocation();
@@ -28,9 +30,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       allowedRoles,
       adminOnly,
       userOnly,
+      judgeOnly,
       isAllowed: userRole ? allowedRoles.includes(userRole) : false
     });
-  }, [isLoading, userRole, allowedRoles, adminOnly, userOnly, location]);
+  }, [isLoading, userRole, allowedRoles, adminOnly, userOnly, judgeOnly, location]);
 
   // Show loading state
   if (isLoading) {
@@ -58,10 +61,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/admin" replace />;
   }
 
-  // Redirect if not in allowed roles
-  if (!allowedRoles.includes(userRole as 'admin' | 'user')) {
+  if (judgeOnly && userRole !== 'judge') {
     if (userRole === 'admin') {
       return <Navigate to="/admin" replace />;
+    } else {
+      return <Navigate to="/user" replace />;
+    }
+  }
+
+  // Redirect if not in allowed roles
+  if (!allowedRoles.includes(userRole as 'admin' | 'user' | 'judge')) {
+    if (userRole === 'admin') {
+      return <Navigate to="/admin" replace />;
+    } else if (userRole === 'judge') {
+      return <Navigate to="/judge" replace />;
     } else {
       return <Navigate to="/user" replace />;
     }

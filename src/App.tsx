@@ -85,6 +85,21 @@ function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="profile" element={<AdminProfile />} />
+              <Route path="judging" element={<AdminSettings />} />
+            </Route>
+
+            {/* Judge Routes (placeholder - to be implemented in the next phase) */}
+            <Route
+              path="/judge"
+              element={
+                <ProtectedRoute allowedRoles={['judge']} judgeOnly={true}>
+                  <UserLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<UserDashboard />} />
+              <Route path="profile" element={<UserProfile />} />
+              <Route path="settings" element={<UserSettings />} />
             </Route>
 
             {/* User Routes */}

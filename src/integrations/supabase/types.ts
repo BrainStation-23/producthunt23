@@ -114,6 +114,122 @@ export type Database = {
           },
         ]
       }
+      judge_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          judge_id: string
+          product_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          judge_id: string
+          product_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          judge_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "judge_assignments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      judging_criteria: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          max_value: number | null
+          min_value: number | null
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_value?: number | null
+          min_value?: number | null
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_value?: number | null
+          min_value?: number | null
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      judging_submissions: {
+        Row: {
+          boolean_value: boolean | null
+          created_at: string
+          criteria_id: string
+          id: string
+          judge_id: string
+          product_id: string
+          rating_value: number | null
+          text_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          boolean_value?: boolean | null
+          created_at?: string
+          criteria_id: string
+          id?: string
+          judge_id: string
+          product_id: string
+          rating_value?: number | null
+          text_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          boolean_value?: boolean | null
+          created_at?: string
+          criteria_id?: string
+          id?: string
+          judge_id?: string
+          product_id?: string
+          rating_value?: number | null
+          text_value?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "judging_submissions_criteria_id_fkey"
+            columns: ["criteria_id"]
+            isOneToOne: false
+            referencedRelation: "judging_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "judging_submissions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -491,9 +607,7 @@ export type Database = {
     }
     Functions: {
       delete_comment_with_replies: {
-        Args: {
-          comment_id: string
-        }
+        Args: { comment_id: string }
         Returns: undefined
       }
       filter_products: {
@@ -556,6 +670,29 @@ export type Database = {
           display_order: number
         }[]
       }
+      get_judge_assigned_products: {
+        Args: { judge_uuid: string }
+        Returns: {
+          id: string
+          name: string
+          tagline: string
+          image_url: string
+          status: string
+          assigned_at: string
+        }[]
+      }
+      get_product_judging_summary: {
+        Args: { product_uuid: string }
+        Returns: {
+          criteria_id: string
+          criteria_name: string
+          criteria_type: string
+          avg_rating: number
+          count_judges: number
+          count_true: number
+          count_false: number
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string
@@ -564,9 +701,11 @@ export type Database = {
         Returns: boolean
       }
       is_admin: {
-        Args: {
-          uid: string
-        }
+        Args: { uid: string }
+        Returns: boolean
+      }
+      is_judge: {
+        Args: { uid: string }
         Returns: boolean
       }
       mark_all_notifications_read: {
@@ -574,17 +713,11 @@ export type Database = {
         Returns: boolean
       }
       mark_notification_read: {
-        Args: {
-          notification_id: string
-          is_read?: boolean
-        }
+        Args: { notification_id: string; is_read?: boolean }
         Returns: boolean
       }
       search_products: {
-        Args: {
-          search_query: string
-          result_limit?: number
-        }
+        Args: { search_query: string; result_limit?: number }
         Returns: {
           categories: string[] | null
           created_at: string | null
@@ -609,7 +742,7 @@ export type Database = {
         | "product_rejected"
         | "report"
         | "system"
-      user_role: "admin" | "user"
+      user_role: "admin" | "user" | "judge"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -617,27 +750,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -645,20 +780,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -666,20 +803,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -687,21 +826,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -710,6 +851,22 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      category_status: ["active", "inactive"],
+      notification_type: [
+        "product_pending",
+        "product_approved",
+        "product_rejected",
+        "report",
+        "system",
+      ],
+      user_role: ["admin", "user", "judge"],
+    },
+  },
+} as const
