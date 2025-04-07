@@ -32,7 +32,14 @@ const ProductEvaluation: React.FC = () => {
           .single();
 
         if (error) throw error;
-        return data as AssignedProduct;
+        
+        // Create a proper AssignedProduct by adding the required field
+        const productAsAssigned: AssignedProduct = {
+          ...data,
+          assigned_at: new Date().toISOString(), // Use current time as a fallback
+        };
+        
+        return productAsAssigned;
       } catch (error: any) {
         toast.error('Failed to load product information');
         console.error('Error fetching product:', error);
@@ -46,11 +53,19 @@ const ProductEvaluation: React.FC = () => {
     queryKey: ['evaluations', productId],
     queryFn: async () => {
       try {
+        // Fix: get user ID properly from Supabase auth
+        const { data: authData } = await supabase.auth.getUser();
+        const judgeId = authData.user?.id;
+        
+        if (!judgeId) {
+          throw new Error('No authenticated user found');
+        }
+        
         const { data, error } = await supabase
           .from('judging_submissions')
           .select('*')
           .eq('product_id', productId)
-          .eq('judge_id', supabase.auth.getUser()?.data.user?.id);
+          .eq('judge_id', judgeId);
 
         if (error) throw error;
         
@@ -71,8 +86,10 @@ const ProductEvaluation: React.FC = () => {
         return {};
       }
     },
-    onSuccess: (data) => {
-      setFormValues(data || {});
+    meta: {
+      onSuccess: (data: Record<string, any>) => {
+        setFormValues(data || {});
+      }
     }
   });
 
@@ -92,12 +109,20 @@ const ProductEvaluation: React.FC = () => {
         });
       });
 
+      // Get the user ID
+      const { data: authData } = await supabase.auth.getUser();
+      const judgeId = authData.user?.id;
+      
+      if (!judgeId) {
+        throw new Error('No authenticated user found');
+      }
+
       // Upsert submissions
       const { error } = await supabase
         .from('judging_submissions')
         .upsert(
           submissions.map(submission => ({
-            judge_id: supabase.auth.getUser()?.data.user?.id,
+            judge_id: judgeId,
             product_id: submission.product_id,
             criteria_id: submission.criteria_id,
             rating_value: submission.rating_value,

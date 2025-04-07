@@ -12,9 +12,17 @@ export const useJudgeAssignments = () => {
     queryKey: ['judgeAssignments', filter],
     queryFn: async () => {
       try {
+        // Fix: get user ID properly from Supabase auth
+        const { data: authData } = await supabase.auth.getUser();
+        const judgeId = authData.user?.id;
+        
+        if (!judgeId) {
+          throw new Error('No authenticated user found');
+        }
+
         const { data, error } = await supabase
           .rpc('get_judge_assigned_products', {
-            judge_uuid: supabase.auth.getUser()?.data.user?.id
+            judge_uuid: judgeId
           });
 
         if (error) throw error;
