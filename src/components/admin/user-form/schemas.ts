@@ -5,7 +5,7 @@ import { z } from 'zod';
 export const baseSchema = {
   email: z.string().email({ message: 'Please enter a valid email address' }),
   username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
-  role: z.enum(['admin', 'user']),
+  role: z.enum(['admin', 'user', 'judge']),
 };
 
 // Define form schema based on whether it's for creating or editing

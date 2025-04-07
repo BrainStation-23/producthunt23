@@ -81,6 +81,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({ form, isEditing }) => {
               <SelectContent>
                 <SelectItem value="user">User</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="judge">Judge</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />

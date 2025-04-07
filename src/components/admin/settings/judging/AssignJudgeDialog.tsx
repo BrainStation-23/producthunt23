@@ -49,45 +49,57 @@ const AssignJudgeDialog: React.FC<AssignJudgeDialogProps> = ({
   const { data: judges, isLoading } = useQuery({
     queryKey: ['available-judges', productId],
     queryFn: async () => {
-      // Get all users with judge role
-      const { data: judgeRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select(`
-          user_id,
-          profiles:user_id(
-            id,
-            email,
-            username,
-            avatar_url
-          )
-        `)
-        .eq('role', 'judge') as any;
+      try {
+        // Get all users with judge role
+        const { data: judgeRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'judge');
 
-      if (rolesError) {
-        toast.error(`Failed to load judges: ${rolesError.message}`);
-        throw rolesError;
+        if (rolesError) {
+          toast.error(`Failed to load judges: ${rolesError.message}`);
+          throw rolesError;
+        }
+
+        if (!judgeRoles || judgeRoles.length === 0) {
+          return [];
+        }
+
+        const judgeIds = judgeRoles.map(jr => jr.user_id);
+
+        // Get profiles for these judges
+        const { data: judgeProfiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, email, username, avatar_url')
+          .in('id', judgeIds);
+
+        if (profilesError) {
+          toast.error(`Failed to load judge profiles: ${profilesError.message}`);
+          throw profilesError;
+        }
+
+        // Get already assigned judges for this product
+        const { data: assignments, error: assignmentsError } = await supabase
+          .from('judge_assignments')
+          .select('judge_id')
+          .eq('product_id', productId);
+
+        if (assignmentsError) {
+          toast.error(`Failed to load assignments: ${assignmentsError.message}`);
+          throw assignmentsError;
+        }
+
+        // Filter out already assigned judges
+        const assignedJudgeIds = assignments.map((a) => a.judge_id);
+        const availableJudges = judgeProfiles.filter((judge) => 
+          !assignedJudgeIds.includes(judge.id)
+        );
+
+        return availableJudges;
+      } catch (error: any) {
+        console.error('Error fetching available judges:', error);
+        throw error;
       }
-
-      const allJudges = judgeRoles.map((jr: any) => jr.profiles);
-
-      // Get already assigned judges for this product
-      const { data: assignments, error: assignmentsError } = await (supabase
-        .from('judge_assignments' as any)
-        .select('judge_id')
-        .eq('product_id', productId) as any);
-
-      if (assignmentsError) {
-        toast.error(`Failed to load assignments: ${assignmentsError.message}`);
-        throw assignmentsError;
-      }
-
-      // Filter out already assigned judges
-      const assignedJudgeIds = assignments.map((a: any) => a.judge_id);
-      const availableJudges = allJudges.filter((judge: Judge) => 
-        !assignedJudgeIds.includes(judge.id)
-      );
-
-      return availableJudges;
     },
     enabled: open,
   });
@@ -101,12 +113,12 @@ const AssignJudgeDialog: React.FC<AssignJudgeDialogProps> = ({
     try {
       setIsSubmitting(true);
 
-      const { error } = await (supabase
-        .from('judge_assignments' as any)
+      const { error } = await supabase
+        .from('judge_assignments')
         .insert({
           judge_id: selectedJudge,
           product_id: productId,
-        }) as any);
+        });
 
       if (error) throw error;
 
