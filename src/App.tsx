@@ -31,6 +31,7 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminProfile from './pages/admin/AdminProfile';
+import AdminJudging from './pages/admin/AdminJudging';
 
 // User Pages
 import UserDashboard from './pages/user/UserDashboard';
@@ -85,7 +86,7 @@ function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="profile" element={<AdminProfile />} />
-              <Route path="judging" element={<AdminSettings />} />
+              <Route path="judging" element={<AdminJudging />} />
             </Route>
 
             {/* Judge Routes (placeholder - to be implemented in the next phase) */}
