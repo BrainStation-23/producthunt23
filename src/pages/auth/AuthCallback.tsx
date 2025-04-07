@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,26 +46,15 @@ const AuthCallback: React.FC = () => {
           console.error('Error fetching user role:', roleError);
           // Default to user dashboard if there's an error with role fetch
           toast.success('Login successful');
-          navigate('/user');
+          navigate('/dashboard');
           return;
         }
         
         console.log("User role:", roleData?.role);
         
-        // Navigate based on user role - ensure this is the only redirection happening
-        if (roleData?.role === 'judge') {
-          console.log("Redirecting judge to /judge");
-          toast.success('Welcome back, judge!');
-          navigate('/judge');
-        } else if (roleData?.role === 'admin') {
-          console.log("Redirecting admin to /admin");
-          toast.success('Welcome back, admin!');
-          navigate('/admin');
-        } else {
-          console.log("Redirecting user to /user");
-          toast.success('Login successful');
-          navigate('/user');
-        }
+        // Simplify navigation - let the role redirect component handle it
+        toast.success(`Welcome back${roleData?.role ? ', ' + roleData.role : ''}!`);
+        navigate('/dashboard');
       } catch (error: any) {
         console.error('Error during authentication callback:', error);
         setError(error.message);

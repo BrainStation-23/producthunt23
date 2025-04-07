@@ -6,6 +6,7 @@ import { Toaster } from './components/ui/sonner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AuthCallback from './pages/auth/AuthCallback';
 import LogoutPage from './pages/auth/LogoutPage';
+import RoleRedirect from './components/auth/RoleRedirect';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -75,6 +76,16 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/logout" element={<LogoutPage />} />
+            
+            {/* Role-based redirect route */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <RoleRedirect />
+                </ProtectedRoute>
+              } 
+            />
 
             {/* Admin Routes */}
             <Route

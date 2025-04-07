@@ -27,10 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
   const userIsLoggedIn = !!user;
   
   // Determine dashboard path based on role
-  const dashboardPath = 
-    userRole === 'admin' ? '/admin' : 
-    userRole === 'judge' ? '/judge' : 
-    '/user';
+  const dashboardPath = '/dashboard';
 
   // Fetch avatar URL from profiles table when user changes
   useEffect(() => {
