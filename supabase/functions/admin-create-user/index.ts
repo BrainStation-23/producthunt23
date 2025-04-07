@@ -62,6 +62,15 @@ serve(async (req) => {
       );
     }
     
+    // Validate role to be one of the allowed types
+    const validRoles = ['user', 'admin', 'judge'];
+    if (!validRoles.includes(role)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid role. Must be one of: user, admin, judge' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     // Create a new user with email/password
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email,
@@ -76,11 +85,14 @@ serve(async (req) => {
     }
 
     // Assign role if different from default 'user'
-    if (role !== 'user') {
-      await supabase
-        .from('user_roles')
-        .upsert({ user_id: newUser.user.id, role })
-        .select();
+    const { data: roleInsertData, error: roleInsertError } = await supabase
+      .from('user_roles')
+      .upsert({ user_id: newUser.user.id, role })
+      .select();
+
+    if (roleInsertError) {
+      console.error('Error assigning role:', roleInsertError);
+      // Don't throw here, just log it - the user was created successfully
     }
 
     return new Response(
