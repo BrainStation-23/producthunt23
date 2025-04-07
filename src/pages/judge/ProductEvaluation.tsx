@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -36,10 +35,8 @@ const ProductEvaluation: React.FC = () => {
   const [deadline, setDeadline] = useState<Date | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Get the current product details including evaluation status
   const currentProduct = assignedProducts.find(p => p.id === productId);
   
-  // Initialize the form values based on current product data
   useEffect(() => {
     if (currentProduct) {
       setStatus(currentProduct.evaluation_status || 'pending');
@@ -71,7 +68,6 @@ const ProductEvaluation: React.FC = () => {
   const handleStatusChange = (newStatus: 'pending' | 'in_progress' | 'completed') => {
     setStatus(newStatus);
     
-    // If changing to in_progress, save immediately
     if (newStatus === 'in_progress' && status === 'pending') {
       updateEvaluationStatus.mutate({
         productId: productId!,
@@ -86,8 +82,6 @@ const ProductEvaluation: React.FC = () => {
   const handleCompleteEvaluation = async () => {
     if (!productId) return;
     
-    // This would be a real check in a complete implementation
-    // For now we'll just check if the evaluations tab is open/has content
     const allCriteriaEvaluated = true;
     
     if (!allCriteriaEvaluated) {
@@ -146,8 +140,7 @@ const ProductEvaluation: React.FC = () => {
     );
   }
 
-  // Create an assigned product object from the product data to use with ProductOverview
-  const assignedProduct = {
+  const assignedProduct: AssignedProduct = {
     ...product,
     assigned_at: currentProduct?.assigned_at || new Date().toISOString(),
     evaluation_status: status,

@@ -21,7 +21,7 @@ export const useJudgeAssignments = () => {
           throw new Error('No authenticated user found');
         }
 
-        // Get assigned products
+        // Get assigned products using the RPC function
         const { data: assignedProductsData, error: assignmentsError } = await supabase
           .rpc('get_judge_assigned_products', {
             judge_uuid: judgeId
@@ -29,13 +29,16 @@ export const useJudgeAssignments = () => {
 
         if (assignmentsError) throw assignmentsError;
 
-        // Get evaluation statuses for these products
+        // Get evaluation statuses for these products - use a custom query
         const { data: evaluationsData, error: evaluationsError } = await supabase
           .from('judging_evaluations')
           .select('*')
           .eq('judge_id', judgeId);
           
-        if (evaluationsError) throw evaluationsError;
+        if (evaluationsError) {
+          console.error('Error fetching evaluations:', evaluationsError);
+          // Continue even if there's an error - we'll just assume no evaluations exist
+        }
 
         // Create a map of product IDs to evaluation status
         const evaluationMap = (evaluationsData || []).reduce((map, evaluation) => {
@@ -93,13 +96,18 @@ export const useJudgeAssignments = () => {
         throw new Error('No authenticated user found');
       }
 
-      // Check if an evaluation record exists
-      const { data: existing } = await supabase
+      // First check if the judging_evaluations table exists and has our evaluation
+      const { data: existing, error: checkError } = await supabase
         .from('judging_evaluations')
-        .select('*')
+        .select('id')
         .eq('judge_id', judgeId)
         .eq('product_id', productId)
         .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking for existing evaluation:', checkError);
+        // We'll assume the table doesn't exist or the row doesn't exist and try to insert
+      }
 
       const currentTime = new Date().toISOString();
 

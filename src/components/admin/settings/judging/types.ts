@@ -12,7 +12,7 @@ export interface AssignedProduct {
   name: string;
   tagline: string;
   image_url: string | null;
-  status: string;
+  status?: string;
   assigned_at: string;
   evaluation_status: 'pending' | 'in_progress' | 'completed';
   deadline?: string | null;
