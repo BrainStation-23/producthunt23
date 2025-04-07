@@ -35,26 +35,10 @@ const AuthCallback: React.FC = () => {
           throw new Error("Your account has been suspended. Please contact an administrator.");
         }
         
-        // Get user role
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', sessionData.session.user.id)
-          .single();
-        
-        if (roleError && roleError.code !== 'PGRST116') {
-          console.error('Error fetching user role:', roleError);
-          // Default to user dashboard if there's an error with role fetch
-          toast.success('Login successful');
-          navigate('/dashboard');
-          return;
-        }
-        
-        console.log("User role:", roleData?.role);
-        
-        // Simplify navigation - let the role redirect component handle it
-        toast.success(`Welcome back${roleData?.role ? ', ' + roleData.role : ''}!`);
-        navigate('/dashboard');
+        // We've successfully authenticated, redirect to dashboard
+        // The RoleRedirect component will handle routing to the appropriate dashboard
+        toast.success('Login successful');
+        navigate('/dashboard', { replace: true });
       } catch (error: any) {
         console.error('Error during authentication callback:', error);
         setError(error.message);

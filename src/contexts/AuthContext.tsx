@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,70 +27,130 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // This is the only place where we fetch the user's role
+  const fetchUserRole = async (userId: string) => {
+    try {
+      console.log('Fetching role for user ID:', userId);
+      
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return 'user' as UserRole;
+      } else {
+        console.log('User role from database:', data?.role);
+        return (data?.role as UserRole) || 'user';
+      }
+    } catch (error) {
+      console.error('Error in fetchUserRole:', error);
+      return 'user' as UserRole;
+    }
+  };
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth event:', event, 'User:', session?.user?.email || 'No user');
-        
-        if (session?.user?.app_metadata?.disabled) {
-          console.log('User is disabled, signing out');
-          supabase.auth.signOut().then(() => {
+    let mounted = true;
+    
+    const setupAuthListener = async () => {
+      setIsLoading(true);
+      
+      // Set up auth state listener first
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, newSession) => {
+          console.log('Auth event:', event, 'User:', newSession?.user?.email || 'No user');
+          
+          if (!mounted) return;
+          
+          // Handle disabled users
+          if (newSession?.user?.app_metadata?.disabled) {
+            console.log('User is disabled, signing out');
+            await supabase.auth.signOut();
             setSession(null);
             setUser(null);
             setUserRole(null);
+            setIsLoading(false);
             toast.error('Your account has been suspended. Please contact an administrator.');
             navigate('/login');
-          });
-          return;
-        }
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // If this is a new sign-in event with a provider, update the social profile links
-          if (event === 'SIGNED_IN' && session.user.app_metadata?.provider) {
-            setTimeout(() => {
-              updateSocialProfileLinks(session.user);
-            }, 0);
+            return;
           }
           
-          setTimeout(() => {
-            fetchUserRole(session.user.id);
-          }, 0);
-        } else {
-          setUserRole(null);
-          setIsLoading(false);
+          // Update session and user state
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+          
+          // If we have a new user session, fetch their role
+          if (newSession?.user) {
+            if (event === 'SIGNED_IN' && newSession.user.app_metadata?.provider) {
+              setTimeout(() => {
+                updateSocialProfileLinks(newSession.user);
+              }, 0);
+            }
+            
+            // Fetch user role only when signed in or session changed
+            if (['SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event)) {
+              const role = await fetchUserRole(newSession.user.id);
+              if (mounted) {
+                setUserRole(role);
+              }
+            }
+          } else {
+            // No user, so no role
+            if (mounted) {
+              setUserRole(null);
+            }
+          }
+          
+          if (mounted) {
+            setIsLoading(false);
+          }
         }
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Getting initial session:', session?.user?.email || 'No session');
+      );
       
-      if (session?.user?.app_metadata?.disabled) {
+      // Then check for existing session
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      console.log('Getting initial session:', initialSession?.user?.email || 'No session');
+      
+      if (!mounted) return;
+      
+      if (initialSession?.user?.app_metadata?.disabled) {
         console.log('User is disabled, signing out');
-        supabase.auth.signOut().then(() => {
-          setSession(null);
-          setUser(null);
-          setUserRole(null);
-          toast.error('Your account has been suspended. Please contact an administrator.');
-          navigate('/login');
-        });
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setUserRole(null);
+        setIsLoading(false);
+        toast.error('Your account has been suspended. Please contact an administrator.');
+        navigate('/login');
         return;
       }
       
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserRole(session.user.id);
-      } else {
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
+      
+      // Get the role for the initial session
+      if (initialSession?.user) {
+        const role = await fetchUserRole(initialSession.user.id);
+        if (mounted) {
+          setUserRole(role);
+        }
+      }
+      
+      if (mounted) {
         setIsLoading(false);
       }
-    });
-
+      
+      return subscription;
+    };
+    
+    const subscription = setupAuthListener();
+    
     return () => {
-      subscription.unsubscribe();
+      mounted = false;
+      // Clean up the subscription when component unmounts
+      subscription.then(sub => sub?.unsubscribe());
     };
   }, [navigate]);
 
@@ -155,32 +214,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const fetchUserRole = async (userId: string) => {
-    try {
-      setIsLoading(true);
-      console.log('Fetching role for user ID:', userId);
-      
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user role:', error);
-        setUserRole('user');
-      } else {
-        console.log('User role from database:', data?.role);
-        setUserRole(data?.role as UserRole || 'user');
-      }
-    } catch (error) {
-      console.error('Error in fetchUserRole:', error);
-      setUserRole('user');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const signIn = async (email: string, password: string): Promise<UserRole> => {
     try {
       setIsLoading(true);
@@ -192,24 +225,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       
       const signInUser = data.user;
-      setUser(signInUser);
       
       if (signInUser) {
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', signInUser.id)
-          .single();
-          
-        if (roleError) {
-          console.error('Error fetching user role:', roleError);
-          setUserRole('user');
-          return 'user';
-        } else {
-          const role = roleData?.role as UserRole || 'user';
-          setUserRole(role);
-          return role;
-        }
+        const role = await fetchUserRole(signInUser.id);
+        setUserRole(role);
+        return role;
       }
       
       return 'user';
