@@ -8,47 +8,35 @@ import { useJudgeAssignments } from '@/hooks/useJudgeAssignments';
 import { useJudgingCriteria } from '@/hooks/useJudgingCriteria';
 import ProductOverview from '@/components/judge/evaluation/ProductOverview';
 import EvaluationCriteriaForm from '@/components/judge/evaluation/EvaluationCriteriaForm';
-import { ChevronLeft, Save, CheckCircle, Calendar } from 'lucide-react';
+import { ChevronLeft, Save, CheckCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { DatePicker } from '@/components/ui/date-picker';
 import { AssignedProduct } from '@/components/admin/settings/judging/types';
 
 const ProductEvaluation: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
-  const { product, isLoading: isProductLoading } = useProductDetail(productId);
+  const { product, isLoading: isProductLoading, screenshots } = useProductDetail(productId);
   const { criteria, isLoading: isCriteriaLoading } = useJudgingCriteria();
   const { assignedProducts, updateEvaluationStatus } = useJudgeAssignments();
   
   const [notes, setNotes] = useState('');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
-  const [status, setStatus] = useState<'pending' | 'in_progress' | 'completed'>('pending');
-  const [deadline, setDeadline] = useState<Date | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
 
   const currentProduct = assignedProducts.find(p => p.id === productId);
+  const status = currentProduct?.evaluation_status || 'pending';
+  const priority = currentProduct?.priority || 'medium';
   
   useEffect(() => {
     if (currentProduct) {
-      setStatus(currentProduct.evaluation_status || 'pending');
-      setPriority(currentProduct.priority || 'medium');
       setNotes(currentProduct.notes || '');
-      setDeadline(currentProduct.deadline ? new Date(currentProduct.deadline) : undefined);
     }
   }, [currentProduct]);
 
-  const handleSaveStatus = async () => {
+  const handleSaveNotes = async () => {
     if (!productId) return;
     
     setIsSaving(true);
@@ -58,33 +46,21 @@ const ProductEvaluation: React.FC = () => {
         status,
         priority,
         notes,
-        deadline: deadline ? deadline.toISOString() : null
+        deadline: new Date().toISOString() // Automatically set deadline to now
       });
+      toast.success('Notes saved successfully');
     } catch (error) {
-      console.error('Error saving evaluation status:', error);
+      console.error('Error saving notes:', error);
+      toast.error('Error saving notes');
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleStatusChange = (newStatus: 'pending' | 'in_progress' | 'completed') => {
-    setStatus(newStatus);
-    
-    if (newStatus === 'in_progress' && status === 'pending') {
-      updateEvaluationStatus.mutate({
-        productId: productId!,
-        status: newStatus,
-        priority,
-        notes,
-        deadline: deadline ? deadline.toISOString() : null
-      });
     }
   };
 
   const handleCompleteEvaluation = async () => {
     if (!productId) return;
     
-    const allCriteriaEvaluated = true;
+    const allCriteriaEvaluated = true; // This would need actual validation logic
     
     if (!allCriteriaEvaluated) {
       toast.error('Please complete the evaluation for all criteria before submitting');
@@ -98,15 +74,42 @@ const ProductEvaluation: React.FC = () => {
         status: 'completed',
         priority,
         notes,
-        deadline: deadline ? deadline.toISOString() : null
+        deadline: new Date().toISOString()
       });
       
       toast.success('Evaluation completed successfully');
-      navigate('/judge');
+      navigate('/judge/evaluations');
     } catch (error) {
       console.error('Error completing evaluation:', error);
+      toast.error('Error completing evaluation');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">Pending</Badge>;
+      case 'in_progress':
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">In Progress</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Completed</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
+    }
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case 'low':
+        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Low Priority</Badge>;
+      case 'medium':
+        return <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">Medium Priority</Badge>;
+      case 'high':
+        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">High Priority</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
@@ -131,9 +134,9 @@ const ProductEvaluation: React.FC = () => {
               <p className="text-muted-foreground mt-1">
                 The product you're looking for doesn't exist or you don't have permission to view it.
               </p>
-              <Button className="mt-4" onClick={() => navigate('/judge')}>
+              <Button className="mt-4" onClick={() => navigate('/judge/evaluations')}>
                 <ChevronLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
+                Back to Evaluations
               </Button>
             </div>
           </CardContent>
@@ -147,7 +150,7 @@ const ProductEvaluation: React.FC = () => {
     assigned_at: currentProduct?.assigned_at || new Date().toISOString(),
     evaluation_status: status,
     priority: priority,
-    deadline: deadline ? deadline.toISOString() : null,
+    deadline: new Date().toISOString(),
     notes: notes
   };
 
@@ -155,60 +158,27 @@ const ProductEvaluation: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <Button variant="ghost" onClick={() => navigate('/judge')}>
+          <Button variant="ghost" onClick={() => navigate('/judge/evaluations')}>
             <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
+            Back to Evaluations
           </Button>
           <h1 className="text-3xl font-bold tracking-tight mt-2">Product Evaluation</h1>
         </div>
         <div className="flex items-center space-x-2">
-          <Select value={status} onValueChange={(value) => handleStatusChange(value as any)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={priority} onValueChange={(value) => setPriority(value as any)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Low Priority</SelectItem>
-              <SelectItem value="medium">Medium Priority</SelectItem>
-              <SelectItem value="high">High Priority</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button onClick={handleSaveStatus} disabled={isSaving}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Status
-          </Button>
+          {getStatusBadge(status)}
+          {getPriorityBadge(priority)}
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-1">
-          <ProductOverview product={assignedProduct} />
+          <ProductOverview product={assignedProduct} screenshots={screenshots} />
           
           <Card className="mt-6">
             <CardHeader>
               <CardTitle>Evaluation Notes</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="deadline">Deadline</Label>
-                <DatePicker 
-                  date={deadline} 
-                  onSelect={setDeadline} 
-                  className="w-full mt-1"
-                />
-              </div>
-              
               <div>
                 <Label htmlFor="notes">Private notes about this evaluation</Label>
                 <Textarea 
@@ -218,6 +188,14 @@ const ProductEvaluation: React.FC = () => {
                   onChange={(e) => setNotes(e.target.value)}
                   className="min-h-[150px] mt-2"
                 />
+                <Button 
+                  onClick={handleSaveNotes} 
+                  disabled={isSaving}
+                  className="mt-2"
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Notes
+                </Button>
               </div>
             </CardContent>
           </Card>

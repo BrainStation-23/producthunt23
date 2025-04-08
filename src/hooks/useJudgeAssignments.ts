@@ -96,17 +96,21 @@ export const useJudgeAssignments = () => {
         throw new Error('No authenticated user found');
       }
 
+      // Auto-set status to 'in_progress' when notes are added for a 'pending' item
+      if (status === 'pending' && notes && notes.trim() !== '') {
+        status = 'in_progress';
+      }
+
       // First check if the judging_evaluations table exists and has our evaluation
       const { data: existing, error: checkError } = await supabase
         .from('judging_evaluations')
-        .select('id')
+        .select('id, status')
         .eq('judge_id', judgeId)
         .eq('product_id', productId)
         .maybeSingle();
 
       if (checkError) {
         console.error('Error checking for existing evaluation:', checkError);
-        // We'll assume the table doesn't exist or the row doesn't exist and try to insert
       }
 
       const currentTime = new Date().toISOString();
@@ -135,7 +139,7 @@ export const useJudgeAssignments = () => {
             status,
             priority,
             notes,
-            deadline
+            deadline: deadline || currentTime
           });
 
         if (error) throw error;

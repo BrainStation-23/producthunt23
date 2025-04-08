@@ -83,10 +83,24 @@ export const useProductDetail = (productId: string | undefined) => {
           
         if (videosError) throw videosError;
         
+        // Fetch category names
+        const categoryNames = [];
+        if (productData.categories && productData.categories.length > 0) {
+          const { data: categoriesData, error: categoriesError } = await supabase
+            .from('categories')
+            .select('name')
+            .in('name', productData.categories);
+            
+          if (!categoriesError && categoriesData) {
+            categoryNames.push(...categoriesData.map(c => c.name));
+          }
+        }
+        
         // Combine product data with technologies
         const completeProductData = {
           ...productData,
           technologies,
+          categoryNames,
           profile_username: productData.profiles?.username,
           profile_avatar_url: productData.profiles?.avatar_url
         };
