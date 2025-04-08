@@ -62,7 +62,7 @@ const ProductOverview: React.FC<ProductOverviewProps> = ({ product, screenshots 
                   <div>
                     <h4 className="text-sm font-medium mb-1">Categories</h4>
                     <div className="flex flex-wrap gap-2">
-                      {product.categoryNames && product.categoryNames.map((category: string) => (
+                      {product.categories.map((category: string) => (
                         <Badge key={category} variant="outline">
                           {category}
                         </Badge>

@@ -21,6 +21,8 @@ export interface AssignedProduct {
   description?: string;
   website_url?: string | null;
   categories?: string[] | null;
+  categoryNames?: string[] | null;
+  technologies?: string[] | null;
 }
 
 export interface JudgingCriteria {
