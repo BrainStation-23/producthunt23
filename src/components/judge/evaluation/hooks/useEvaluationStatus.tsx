@@ -4,10 +4,12 @@ import { NavigateFunction } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useJudgeAssignments } from '@/hooks/useJudgeAssignments';
 
+type EvaluationPriority = 'low' | 'medium' | 'high';
+
 export const useEvaluationStatus = (
   productId: string | undefined,
   notes: string,
-  priority: string,
+  priority: EvaluationPriority,
   navigate: NavigateFunction
 ) => {
   const [isSaving, setIsSaving] = useState(false);

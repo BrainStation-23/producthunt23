@@ -4,11 +4,14 @@ import { toast } from 'sonner';
 import { useJudgeAssignments } from '@/hooks/useJudgeAssignments';
 import { AssignedProduct } from '@/components/admin/settings/judging/types';
 
+type EvaluationStatus = 'pending' | 'in_progress' | 'completed';
+type EvaluationPriority = 'low' | 'medium' | 'high';
+
 export const useEvaluationNotes = (
   productId: string | undefined,
   currentProduct: AssignedProduct | undefined,
-  status: string,
-  priority: string
+  status: EvaluationStatus,
+  priority: EvaluationPriority
 ) => {
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);

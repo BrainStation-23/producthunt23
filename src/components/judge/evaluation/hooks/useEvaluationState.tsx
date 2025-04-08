@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useJudgeAssignments } from '@/hooks/useJudgeAssignments';
 import { useEvaluationNotes } from './useEvaluationNotes';
 import { useEvaluationStatus } from './useEvaluationStatus';
+import { AssignedProduct } from '@/components/admin/settings/judging/types';
 
 export const useEvaluationState = (productId: string | undefined) => {
   const navigate = useNavigate();
