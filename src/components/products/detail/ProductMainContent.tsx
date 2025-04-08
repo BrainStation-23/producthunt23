@@ -24,7 +24,7 @@ const ProductMainContent: React.FC<ProductMainContentProps> = ({ product }) => {
 
       <div className="prose max-w-none">
         <h2 className="text-2xl font-semibold mb-4">About</h2>
-        <p>{product?.description}</p>
+        <div dangerouslySetInnerHTML={{ __html: product?.description }} />
       </div>
     </div>
   );
