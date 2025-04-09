@@ -7,19 +7,16 @@ export const useUserRole = (refetch: () => void) => {
     try {
       console.log(`Updating role for user ${userId} to ${newRole}`);
       
-      // Since we've added a unique constraint to the user_id column,
-      // we can simply use upsert which will either:
-      // - Insert a new role if the user doesn't have one
-      // - Update the existing role if the user already has one
+      // Call the assign_user_role RPC function that handles the upsert logic
       const { error } = await supabase
-        .from('user_roles')
-        .upsert({ 
+        .rpc('assign_user_role', { 
           user_id: userId, 
-          role: newRole 
+          role_name: newRole 
         });
       
       if (error) {
         console.error('Error updating user role:', error);
+        toast.error(`Failed to update user role: ${error.message}`);
         throw error;
       }
       
