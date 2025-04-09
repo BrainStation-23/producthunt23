@@ -650,6 +650,10 @@ export type Database = {
       }
     }
     Functions: {
+      assign_user_role: {
+        Args: { user_id: string; role_name: string }
+        Returns: undefined
+      }
       delete_comment_with_replies: {
         Args: { comment_id: string }
         Returns: undefined

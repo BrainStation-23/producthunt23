@@ -105,34 +105,16 @@ serve(async (req) => {
           }
         }
         
-        // Update role if provided
+        // Update role if provided using our new centralized function
         if (userData.role && ['admin', 'user', 'judge'].includes(userData.role)) {
-          // Check if user already has a role entry
-          const { data: existingRole } = await supabase
-            .from('user_roles')
-            .select('*')
-            .eq('user_id', userData.id)
-            .maybeSingle();
+          // Use the new assign_user_role function we created
+          const { error: roleError } = await supabase.rpc('assign_user_role', {
+            user_id: userData.id,
+            role_name: userData.role
+          });
           
-          if (existingRole) {
-            // Update existing role
-            const { error: roleUpdateError } = await supabase
-              .from('user_roles')
-              .update({ role: userData.role })
-              .eq('user_id', userData.id);
-            
-            if (roleUpdateError) {
-              console.error(`Error updating role for user ${userData.id}:`, roleUpdateError);
-            }
-          } else {
-            // Insert new role
-            const { error: roleInsertError } = await supabase
-              .from('user_roles')
-              .insert({ user_id: userData.id, role: userData.role });
-            
-            if (roleInsertError) {
-              console.error(`Error inserting role for user ${userData.id}:`, roleInsertError);
-            }
+          if (roleError) {
+            console.error(`Error updating role for user ${userData.id}:`, roleError);
           }
         }
         

@@ -84,14 +84,14 @@ serve(async (req) => {
       throw createError;
     }
 
-    // Now directly insert the role specified by the admin
-    const { data: roleInsertData, error: roleInsertError } = await supabase
-      .from('user_roles')
-      .insert({ user_id: newUser.user.id, role })
-      .select();
+    // Use our new centralized role assignment function
+    const { error: roleError } = await supabase.rpc('assign_user_role', {
+      user_id: newUser.user.id,
+      role_name: role
+    });
 
-    if (roleInsertError) {
-      console.error('Error assigning role:', roleInsertError);
+    if (roleError) {
+      console.error('Error assigning role:', roleError);
       // Don't throw here, just log it - the user was created successfully
     }
 

@@ -97,17 +97,15 @@ serve(async (req) => {
           continue;
         }
         
-        // Set role directly using the specified role or 'user' as fallback
+        // Set role using our centralized function
         const role = userData.role && ['admin', 'user', 'judge'].includes(userData.role) 
           ? userData.role 
           : 'user';
           
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ 
-            user_id: newUser.user.id, 
-            role: role 
-          });
+        const { error: roleError } = await supabase.rpc('assign_user_role', {
+          user_id: newUser.user.id,
+          role_name: role
+        });
         
         if (roleError) {
           console.error(`Error setting role for ${userData.email}:`, roleError);
