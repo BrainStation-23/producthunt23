@@ -11,7 +11,8 @@ import {
   getBrandSlogan, 
   getBrandDescription,
   getPrimaryColorClass,
-  getPrimaryColorHoverClass 
+  getPrimaryColorHoverClass,
+  appConfig 
 } from '@/config/appConfig';
 
 interface HeroSectionProps {
