@@ -7,7 +7,8 @@ export const useUserRole = (refetch: () => void) => {
     try {
       console.log(`Updating role for user ${userId} to ${newRole}`);
       
-      // Call the assign_user_role RPC function that handles the upsert logic
+      // Call the assign_user_role RPC function with properly named parameters
+      // to avoid column ambiguity
       const { error } = await supabase
         .rpc('assign_user_role', { 
           user_id: userId, 

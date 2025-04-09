@@ -116,7 +116,7 @@ serve(async (req) => {
         if (userData.role && ['admin', 'user', 'judge'].includes(userData.role)) {
           console.log(`Updating role for user ${userData.id} to ${userData.role}`);
           
-          // Use the assign_user_role RPC function to update the role
+          // Use the assign_user_role RPC function with proper parameter names to avoid ambiguity
           const { error: roleError } = await supabase
             .rpc('assign_user_role', {
               user_id: userData.id,
