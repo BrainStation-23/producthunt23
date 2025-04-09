@@ -109,33 +109,20 @@ serve(async (req) => {
           
         console.log(`Assigning role '${role}' to user ${newUser.user.id}`);
         
-        // Use our centralized function to assign the role
+        // Use the RPC function to assign the role
         const { error: roleAssignError } = await supabase.rpc('assign_user_role', {
-          user_id: newUser.user.id,
+          input_user_id: newUser.user.id,
           role_name: role
         });
         
         if (roleAssignError) {
           console.error(`Error assigning role to ${userData.email}:`, roleAssignError);
-          
-          // Fallback to direct database insert if RPC fails
-          console.log(`Attempting fallback role assignment for ${newUser.user.id}`);
-          const { error: directRoleError } = await supabase
-            .from('user_roles')
-            .upsert({ 
-              user_id: newUser.user.id, 
-              role: role 
-            });
-            
-          if (directRoleError) {
-            console.error(`Fallback role assignment also failed:`, directRoleError);
-          } else {
-            console.log(`Fallback role assignment succeeded for ${newUser.user.id}`);
-          }
-        } else {
-          console.log(`Role '${role}' assigned successfully to ${newUser.user.id}`);
+          results.failed++;
+          results.errors.push({ email: userData.email, error: `Role assignment failed: ${roleAssignError.message}` });
+          continue;
         }
         
+        console.log(`Role '${role}' assigned successfully to ${newUser.user.id}`);
         results.success++;
       } catch (error) {
         console.error(`Unexpected error processing user:`, error);
