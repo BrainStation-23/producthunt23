@@ -9,6 +9,7 @@ import UserPagination from '@/components/admin/UserPagination';
 import AddUserDialog from '@/components/admin/AddUserDialog';
 import UserProfileDialog from '@/components/admin/UserProfileDialog';
 import EditUserDialog from '@/components/admin/EditUserDialog';
+import ImportUsersDialog from '@/components/admin/user-actions/ImportUsersDialog';
 
 interface User {
   id: string;
@@ -34,12 +35,14 @@ const AdminUsers: React.FC = () => {
     handleSearch,
     handleRoleChange,
     deleteUser,
+    exportUsers,
     refetch,
   } = useUserManagement();
 
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const handleViewProfile = (user: User) => {
@@ -71,6 +74,8 @@ const AdminUsers: React.FC = () => {
         roleFilter={roleFilter}
         setRoleFilter={setRoleFilter}
         handleSearch={handleSearch}
+        onExportUsers={exportUsers}
+        onOpenImport={() => setImportDialogOpen(true)}
       />
       
       <UsersTable
@@ -111,6 +116,12 @@ const AdminUsers: React.FC = () => {
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         onUserUpdated={refetch}
+      />
+
+      <ImportUsersDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onUsersImported={refetch}
       />
     </div>
   );

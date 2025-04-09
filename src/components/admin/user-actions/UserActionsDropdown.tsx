@@ -27,7 +27,7 @@ interface UserActionsDropdownProps {
   setDropdownOpen: (open: boolean) => void;
   handleViewProfile: () => void;
   handleEditUser: () => void;
-  handleRoleChangeAction: (newRole: 'admin' | 'user') => Promise<void>;
+  handleRoleChangeAction: (newRole: 'admin' | 'user' | 'judge') => Promise<void>;
   handleSuspendClick: () => void;
   handleDeleteClick: () => void;
 }
@@ -61,15 +61,38 @@ const UserActionsDropdown: React.FC<UserActionsDropdownProps> = ({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {user.role === 'admin' ? (
-          <DropdownMenuItem onClick={() => handleRoleChangeAction('user')}>
-            <ShieldOff className="mr-2 h-4 w-4" />
-            Remove admin role
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem onClick={() => handleRoleChangeAction('user')}>
+              <ShieldOff className="mr-2 h-4 w-4" />
+              Remove admin role
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleRoleChangeAction('judge')}>
+              <Shield className="mr-2 h-4 w-4" />
+              Make judge
+            </DropdownMenuItem>
+          </>
+        ) : user.role === 'judge' ? (
+          <>
+            <DropdownMenuItem onClick={() => handleRoleChangeAction('user')}>
+              <ShieldOff className="mr-2 h-4 w-4" />
+              Remove judge role
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleRoleChangeAction('admin')}>
+              <Shield className="mr-2 h-4 w-4" />
+              Make admin
+            </DropdownMenuItem>
+          </>
         ) : (
-          <DropdownMenuItem onClick={() => handleRoleChangeAction('admin')}>
-            <Shield className="mr-2 h-4 w-4" />
-            Make admin
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem onClick={() => handleRoleChangeAction('admin')}>
+              <Shield className="mr-2 h-4 w-4" />
+              Make admin
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleRoleChangeAction('judge')}>
+              <Shield className="mr-2 h-4 w-4" />
+              Make judge
+            </DropdownMenuItem>
+          </>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem 

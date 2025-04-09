@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,7 +18,7 @@ interface User {
 
 interface UserActionsProps {
   user: User;
-  handleRoleChange: (userId: string, newRole: 'admin' | 'user') => Promise<void>;
+  handleRoleChange: (userId: string, newRole: 'admin' | 'user' | 'judge') => Promise<void>;
   onViewProfile: (user: User) => void;
   onEditUser: (user: User) => void;
   onUserUpdated: () => void;
@@ -90,7 +89,7 @@ const UserActions: React.FC<UserActionsProps> = ({
     onEditUser(user);
   };
 
-  const handleRoleChangeAction = async (newRole: 'admin' | 'user') => {
+  const handleRoleChangeAction = async (newRole: 'admin' | 'user' | 'judge') => {
     setDropdownOpen(false);
     await handleRoleChange(user.id, newRole);
   };

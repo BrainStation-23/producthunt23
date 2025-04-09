@@ -68,13 +68,65 @@ export const useUserManagement = () => {
     queryFn: fetchUsers
   });
 
+  const exportUsers = async () => {
+    try {
+      toast.info('Preparing export...');
+      
+      // Get all users without pagination for export
+      const { data, error } = await supabase
+        .rpc('get_admin_users', {
+          search_text: searchQuery,
+          role_filter: roleFilter,
+          page_num: 1,
+          page_size: 1000 // Get a large number of users
+        });
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        toast.error('No users to export');
+        return;
+      }
+      
+      // Format data for CSV
+      const csvData = data.map(user => ({
+        id: user.id,
+        email: user.email || '',
+        username: user.username || '',
+        role: user.role || 'user',
+        created_at: new Date(user.created_at).toISOString(),
+        product_count: user.product_count
+      }));
+      
+      // Convert to CSV
+      const headers = Object.keys(csvData[0]).join(',');
+      const rows = csvData.map(obj => Object.values(obj).join(','));
+      const csv = [headers, ...rows].join('\n');
+      
+      // Create and download file
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Users exported successfully');
+    } catch (error) {
+      console.error('Error exporting users:', error);
+      toast.error('Failed to export users');
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1); // Reset to first page when searching
     refetch();
   };
 
-  const handleRoleChange = async (userId: string, newRole: 'admin' | 'user') => {
+  const handleRoleChange = async (userId: string, newRole: 'admin' | 'user' | 'judge') => {
     try {
       // Check if user already has a role entry
       const { data: existingRole, error: checkError } = await supabase
@@ -162,6 +214,7 @@ export const useUserManagement = () => {
     handleSearch,
     handleRoleChange,
     deleteUser,
+    exportUsers,
     refetch,
   };
 };
