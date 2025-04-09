@@ -9,7 +9,7 @@ export const useUserRole = (refetch: () => void) => {
       
       const { error } = await supabase
         .rpc('assign_user_role', { 
-          input_user_id: userId, 
+          user_id: userId, // Keep using user_id to match the TypeScript types
           role_name: newRole 
         });
       

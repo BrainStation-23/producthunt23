@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
@@ -117,7 +118,7 @@ serve(async (req) => {
           
           const { error: roleError } = await supabase
             .rpc('assign_user_role', {
-              input_user_id: userData.id,
+              input_user_id: userData.id, // Use the updated parameter name in edge function
               role_name: userData.role
             });
             
