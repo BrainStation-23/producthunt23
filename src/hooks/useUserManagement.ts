@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import Papa from 'papaparse';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -88,20 +89,17 @@ export const useUserManagement = () => {
         return;
       }
       
-      // Format data for CSV
+      // Format data for CSV (only include the fields we need)
       const csvData = data.map(user => ({
         id: user.id,
         email: user.email || '',
         username: user.username || '',
         role: user.role || 'user',
-        created_at: new Date(user.created_at).toISOString(),
-        product_count: user.product_count
+        status: 'active' // Add status field (all are active as we don't have a status column yet)
       }));
       
-      // Convert to CSV
-      const headers = Object.keys(csvData[0]).join(',');
-      const rows = csvData.map(obj => Object.values(obj).join(','));
-      const csv = [headers, ...rows].join('\n');
+      // Use Papa.unparse to convert to CSV
+      const csv = Papa.unparse(csvData);
       
       // Create and download file
       const blob = new Blob([csv], { type: 'text/csv' });

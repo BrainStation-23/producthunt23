@@ -25,47 +25,49 @@ const UserFilters: React.FC<UserFiltersProps> = ({
 }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4">
-      <form onSubmit={handleSearch} className="relative w-full sm:w-80">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search users..."
-          className="w-full pl-8"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </form>
-      <div className="flex flex-wrap gap-2">
-        <Button 
-          variant={roleFilter === null ? "default" : "outline"} 
-          size="sm"
-          onClick={() => setRoleFilter(null)}
-        >
-          All
-        </Button>
-        <Button 
-          variant={roleFilter === "user" ? "default" : "outline"} 
-          size="sm"
-          onClick={() => setRoleFilter("user")}
-        >
-          Users
-        </Button>
-        <Button 
-          variant={roleFilter === "admin" ? "default" : "outline"} 
-          size="sm"
-          onClick={() => setRoleFilter("admin")}
-        >
-          Admins
-        </Button>
-        <Button 
-          variant={roleFilter === "judge" ? "default" : "outline"} 
-          size="sm"
-          onClick={() => setRoleFilter("judge")}
-        >
-          Judges
-        </Button>
+      <div className="flex flex-col sm:flex-row gap-2 sm:items-center flex-grow">
+        <form onSubmit={handleSearch} className="relative w-full sm:w-80">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search users..."
+            className="w-full pl-8"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </form>
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant={roleFilter === null ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setRoleFilter(null)}
+          >
+            All
+          </Button>
+          <Button 
+            variant={roleFilter === "user" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setRoleFilter("user")}
+          >
+            Users
+          </Button>
+          <Button 
+            variant={roleFilter === "admin" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setRoleFilter("admin")}
+          >
+            Admins
+          </Button>
+          <Button 
+            variant={roleFilter === "judge" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setRoleFilter("judge")}
+          >
+            Judges
+          </Button>
+        </div>
       </div>
-      <div className="flex ml-auto gap-2">
+      <div className="flex gap-2">
         <Button 
           variant="outline" 
           size="sm"
