@@ -17,7 +17,7 @@ interface User {
 
 interface UserTableRowProps {
   user: User;
-  handleRoleChange: (userId: string, newRole: 'admin' | 'user') => Promise<void>;
+  handleRoleChange: (userId: string, newRole: 'admin' | 'user' | 'judge') => Promise<void>;
   onViewProfile: (user: User) => void;
   onEditUser: (user: User) => void;
   onUserUpdated: () => void;
@@ -32,6 +32,15 @@ const UserTableRow: React.FC<UserTableRowProps> = ({
   onUserUpdated,
   deleteUser
 }) => {
+  // Function to determine badge variant based on role
+  const getBadgeVariant = (role: string) => {
+    switch(role) {
+      case 'admin': return 'default';
+      case 'judge': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
   return (
     <TableRow key={user.id}>
       <TableCell className="font-medium">
@@ -51,7 +60,7 @@ const UserTableRow: React.FC<UserTableRowProps> = ({
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant={user.role === 'admin' ? 'default' : 'outline'}>
+        <Badge variant={getBadgeVariant(user.role)}>
           {user.role}
         </Badge>
       </TableCell>

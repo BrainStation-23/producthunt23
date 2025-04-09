@@ -19,7 +19,7 @@ interface UsersTableProps {
   users: User[] | undefined;
   isLoading: boolean;
   searchQuery: string;
-  handleRoleChange: (userId: string, newRole: 'admin' | 'user') => Promise<void>;
+  handleRoleChange: (userId: string, newRole: 'admin' | 'user' | 'judge') => Promise<void>;
   onViewProfile: (user: User) => void;
   onEditUser: (user: User) => void;
   onUserUpdated: () => void;
