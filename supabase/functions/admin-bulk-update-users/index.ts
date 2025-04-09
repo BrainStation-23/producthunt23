@@ -68,6 +68,8 @@ serve(async (req) => {
       errors: []
     };
     
+    console.log('Updating users:', users);
+    
     // Process each user
     for (const userData of users) {
       try {
@@ -77,6 +79,8 @@ serve(async (req) => {
           results.errors.push({ email: userData.email || 'unknown', error: 'User ID is required' });
           continue;
         }
+        
+        console.log(`Processing user update for ID: ${userData.id}, email: ${userData.email}, role: ${userData.role}`);
         
         // Prepare user metadata update
         const userUpdateData: Record<string, any> = {};
@@ -93,37 +97,65 @@ serve(async (req) => {
         
         // Only update if we have data to update
         if (Object.keys(userUpdateData).length > 0) {
+          console.log(`Updating user data for ID: ${userData.id}`, userUpdateData);
+          
           const { error: updateError } = await supabase.auth.admin.updateUserById(
             userData.id,
             userUpdateData
           );
           
           if (updateError) {
+            console.error(`Error updating user ${userData.id}:`, updateError);
             results.failed++;
             results.errors.push({ id: userData.id, error: updateError.message });
             continue;
           }
         }
         
-        // Update role if provided using our new centralized function
+        // Update role if provided and it's a valid role
         if (userData.role && ['admin', 'user', 'judge'].includes(userData.role)) {
-          // Use the new assign_user_role function we created
-          const { error: roleError } = await supabase.rpc('assign_user_role', {
+          console.log(`Updating role for user ${userData.id} to ${userData.role}`);
+          
+          // Try using the assign_user_role RPC function first
+          const { error: roleRpcError } = await supabase.rpc('assign_user_role', {
             user_id: userData.id,
             role_name: userData.role
           });
           
-          if (roleError) {
-            console.error(`Error updating role for user ${userData.id}:`, roleError);
+          if (roleRpcError) {
+            console.error(`Error using RPC to update role for user ${userData.id}:`, roleRpcError);
+            
+            // Fallback to direct database upsert if RPC fails
+            console.log(`Attempting fallback direct role update for ${userData.id}`);
+            const { error: directRoleError } = await supabase
+              .from('user_roles')
+              .upsert({ 
+                user_id: userData.id, 
+                role: userData.role 
+              });
+              
+            if (directRoleError) {
+              console.error(`Fallback role update also failed for ${userData.id}:`, directRoleError);
+              results.failed++;
+              results.errors.push({ id: userData.id, error: `Role update failed: ${directRoleError.message}` });
+              continue;
+            } else {
+              console.log(`Fallback role update succeeded for ${userData.id}`);
+            }
+          } else {
+            console.log(`Role successfully updated to '${userData.role}' for user ${userData.id}`);
           }
         }
         
         results.success++;
       } catch (error) {
+        console.error(`Unexpected error processing user ${userData.id}:`, error);
         results.failed++;
         results.errors.push({ id: userData.id || 'unknown', error: error.message });
       }
     }
+    
+    console.log('Update results:', results);
     
     return new Response(
       JSON.stringify(results),
