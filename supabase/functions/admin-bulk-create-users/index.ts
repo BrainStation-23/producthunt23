@@ -97,18 +97,20 @@ serve(async (req) => {
           continue;
         }
         
-        // Set role if provided
-        if (userData.role && ['admin', 'user', 'judge'].includes(userData.role)) {
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .upsert({ 
-              user_id: newUser.user.id, 
-              role: userData.role 
-            });
+        // Set role directly using the specified role or 'user' as fallback
+        const role = userData.role && ['admin', 'user', 'judge'].includes(userData.role) 
+          ? userData.role 
+          : 'user';
           
-          if (roleError) {
-            console.error(`Error setting role for ${userData.email}:`, roleError);
-          }
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({ 
+            user_id: newUser.user.id, 
+            role: role 
+          });
+        
+        if (roleError) {
+          console.error(`Error setting role for ${userData.email}:`, roleError);
         }
         
         results.success++;

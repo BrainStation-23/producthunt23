@@ -23,19 +23,7 @@ export const fetchUserRole = async (userId: string): Promise<UserRole> => {
     }
     
     if (!data) {
-      console.log('No role found for user, creating default user role');
-      
-      // If no role exists, try to create a default 'user' role for this user
-      const { error: insertError } = await supabase
-        .from('user_roles')
-        .insert({ user_id: userId, role: 'user' });
-        
-      if (insertError) {
-        console.error('Error creating default user role:', insertError.message);
-      } else {
-        console.log('Default user role created successfully');
-      }
-      
+      console.log('No role found for user, returning default user role');
       return 'user';
     }
     

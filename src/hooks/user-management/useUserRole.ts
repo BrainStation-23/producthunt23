@@ -18,22 +18,15 @@ export const useUserRole = (refetch: () => void) => {
 
       let updateError;
 
-      if (existingRole) {
-        // Update existing role
-        const { error } = await supabase
-          .from('user_roles')
-          .update({ role: newRole })
-          .eq('user_id', userId);
-        
-        updateError = error;
-      } else {
-        // Insert new role
-        const { error } = await supabase
-          .from('user_roles')
-          .insert({ user_id: userId, role: newRole });
-        
-        updateError = error;
-      }
+      // Always use upsert to either update or insert as needed
+      const { error } = await supabase
+        .from('user_roles')
+        .upsert({ 
+          user_id: userId, 
+          role: newRole 
+        });
+      
+      updateError = error;
 
       if (updateError) throw updateError;
       
