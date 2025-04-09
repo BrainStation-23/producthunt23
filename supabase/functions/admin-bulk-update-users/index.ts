@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
@@ -116,10 +115,9 @@ serve(async (req) => {
         if (userData.role && ['admin', 'user', 'judge'].includes(userData.role)) {
           console.log(`Updating role for user ${userData.id} to ${userData.role}`);
           
-          // Use the assign_user_role RPC function with proper parameter names to avoid ambiguity
           const { error: roleError } = await supabase
             .rpc('assign_user_role', {
-              user_id: userData.id,
+              input_user_id: userData.id,
               role_name: userData.role
             });
             
