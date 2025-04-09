@@ -2,12 +2,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { getPrimaryColorClass } from '@/config/appConfig';
 
 const CtaSection: React.FC = () => {
+  const primaryColorClass = getPrimaryColorClass();
+  
   return (
     <section className="py-16 bg-hunt-50">
       <div className="container px-4 md:px-6">
-        <div className="bg-hunt-600 text-white rounded-xl p-8 sm:p-12">
+        <div className={`${primaryColorClass} text-white rounded-xl p-8 sm:p-12`}>
           <div className="grid gap-8 md:grid-cols-2 md:gap-12 items-center">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Ready to launch your product?</h2>

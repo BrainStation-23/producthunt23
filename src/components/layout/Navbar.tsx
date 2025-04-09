@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Bell, LayoutDashboard } from 'lucide-react';
@@ -14,6 +15,11 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import ProductSearch from '@/components/search/ProductSearch';
+import { 
+  getBrandName, 
+  getBrandLogoLetter, 
+  getPrimaryColorClass 
+} from '@/config/appConfig';
 
 interface NavbarProps {
   isLoggedIn?: boolean;
@@ -63,6 +69,8 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
     await signOut();
   };
 
+  const logoColorClass = getPrimaryColorClass();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -71,10 +79,10 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
             <Menu className="h-5 w-5" />
           </Button>
           <Link to="/" className="flex items-center space-x-2">
-            <div className="rounded-full bg-hunt-600 w-8 h-8 flex items-center justify-center">
-              <span className="text-white font-bold">P</span>
+            <div className={`rounded-full ${logoColorClass} w-8 h-8 flex items-center justify-center`}>
+              <span className="text-white font-bold">{getBrandLogoLetter()}</span>
             </div>
-            <span className="hidden md:inline-block font-bold text-xl">ProductHunt</span>
+            <span className="hidden md:inline-block font-bold text-xl">{getBrandName()}</span>
           </Link>
         </div>
 

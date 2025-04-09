@@ -22,18 +22,25 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
+import { 
+  getBrandName, 
+  getBrandLogoLetter, 
+  getPrimaryColorClass 
+} from '@/config/appConfig';
 
 interface UserSidebarProps {
   onLogout: () => void;
 }
 
 const UserSidebar: React.FC<UserSidebarProps> = ({ onLogout }) => {
+  const logoColorClass = getPrimaryColorClass();
+  
   return (
     <>
       <SidebarHeader className="flex h-14 items-center border-b px-4">
         <Link to="/" className="flex items-center space-x-2">
-          <div className="rounded-full bg-hunt-600 w-8 h-8 flex items-center justify-center">
-            <span className="text-white font-bold">P</span>
+          <div className={`rounded-full ${logoColorClass} w-8 h-8 flex items-center justify-center`}>
+            <span className="text-white font-bold">{getBrandLogoLetter()}</span>
           </div>
           <span className="font-bold text-lg">My Account</span>
         </Link>

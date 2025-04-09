@@ -1,5 +1,5 @@
 
-# ProductHunt23
+# InnovateHub
 
 [![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-dark.svg)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_producthunt23)
 ------------------
@@ -12,7 +12,7 @@
 
 ## About
 
-ProductHunt23 is a platform for discovering and sharing new digital products. Users can submit their own products, browse and search for products, upvote their favorites, and engage with the community through comments. The platform includes features for product categorization, technology tagging, and user profiles.
+InnovateHub is a platform for discovering and sharing new digital products. Users can submit their own products, browse and search for products, upvote their favorites, and engage with the community through comments. The platform includes features for product categorization, technology tagging, and user profiles.
 
 ## Technology Stack
 
@@ -44,7 +44,7 @@ This project is built with modern web technologies:
 1. Clone the repository:
    ```sh
    git clone <repository-url>
-   cd producthunt23
+   cd innovatehub
    ```
 
 2. Install dependencies:

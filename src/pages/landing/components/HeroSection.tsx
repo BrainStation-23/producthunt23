@@ -6,6 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FeaturedProduct } from '../types';
+import { 
+  getBrandName, 
+  getBrandSlogan, 
+  getBrandDescription,
+  getPrimaryColorClass,
+  getPrimaryColorHoverClass 
+} from '@/config/appConfig';
 
 interface HeroSectionProps {
   featuredProduct: FeaturedProduct | null;
@@ -13,6 +20,9 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ featuredProduct, isLoading }) => {
+  const primaryColorClass = getPrimaryColorClass();
+  const primaryColorHoverClass = getPrimaryColorHoverClass();
+  
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/20">
       <div className="container px-4 md:px-6">
@@ -20,10 +30,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProduct, isLoading })
           <div className="space-y-6">
             <Badge variant="outline" className="animate-slide-in animate-once">Today's trending products</Badge>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight animate-slide-in animate-once animate-delay-100">
-              Discover the best <span className="text-hunt-600">products</span> in tech
+              {getBrandSlogan()}
             </h1>
             <p className="text-xl text-muted-foreground animate-slide-in animate-once animate-delay-200">
-              Join our community of product enthusiasts and discover the next big thing before anyone else.
+              {getBrandDescription()}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-slide-in animate-once animate-delay-300">
               <Button asChild size="lg" className="font-medium">
@@ -60,7 +70,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProduct, isLoading })
                     />
                     <div className="p-4 space-y-2">
                       <div className="flex items-center justify-between">
-                        <Badge className="bg-hunt-600 hover:bg-hunt-700">New</Badge>
+                        <Badge className={`${primaryColorClass} ${primaryColorHoverClass}`}>New</Badge>
                         <div className="flex items-center">
                           <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                           <span className="ml-1 text-sm font-medium">{featuredProduct.upvotes || 0}</span>
@@ -83,7 +93,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProduct, isLoading })
                     />
                     <div className="p-4 space-y-2">
                       <div className="flex items-center justify-between">
-                        <Badge className="bg-hunt-600 hover:bg-hunt-700">New</Badge>
+                        <Badge className={`${primaryColorClass} ${primaryColorHoverClass}`}>New</Badge>
                         <div className="flex items-center">
                           <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                           <span className="ml-1 text-sm font-medium">0</span>
@@ -96,7 +106,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProduct, isLoading })
                 </div>
               </Link>
             )}
-            <div className="absolute -z-10 top-8 left-8 right-8 bottom-8 bg-hunt-100 rounded-xl transform rotate-2" />
+            <div className={`absolute -z-10 top-8 left-8 right-8 bottom-8 bg-${appConfig.primaryColorClass}-100 rounded-xl transform rotate-2`} />
           </div>
         </div>
       </div>
