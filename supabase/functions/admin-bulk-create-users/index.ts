@@ -74,6 +74,8 @@ serve(async (req) => {
     // Process each user
     for (const userData of users) {
       try {
+        console.log(`Processing user import for email: ${userData.email}, role: ${userData.role}`);
+        
         // Skip if no email (required field)
         if (!userData.email) {
           results.failed++;
@@ -92,31 +94,57 @@ serve(async (req) => {
         });
         
         if (createError) {
+          console.error(`Error creating user ${userData.email}:`, createError);
           results.failed++;
           results.errors.push({ email: userData.email, error: createError.message });
           continue;
         }
         
-        // Set role using our centralized function
+        console.log(`User created successfully for ${userData.email}, ID: ${newUser.user.id}`);
+        
+        // Determine role - validate it's one of the allowed roles
         const role = userData.role && ['admin', 'user', 'judge'].includes(userData.role) 
           ? userData.role 
           : 'user';
           
-        const { error: roleError } = await supabase.rpc('assign_user_role', {
+        console.log(`Assigning role '${role}' to user ${newUser.user.id}`);
+        
+        // Use our centralized function to assign the role
+        const { error: roleAssignError } = await supabase.rpc('assign_user_role', {
           user_id: newUser.user.id,
           role_name: role
         });
         
-        if (roleError) {
-          console.error(`Error setting role for ${userData.email}:`, roleError);
+        if (roleAssignError) {
+          console.error(`Error assigning role to ${userData.email}:`, roleAssignError);
+          
+          // Fallback to direct database insert if RPC fails
+          console.log(`Attempting fallback role assignment for ${newUser.user.id}`);
+          const { error: directRoleError } = await supabase
+            .from('user_roles')
+            .upsert({ 
+              user_id: newUser.user.id, 
+              role: role 
+            });
+            
+          if (directRoleError) {
+            console.error(`Fallback role assignment also failed:`, directRoleError);
+          } else {
+            console.log(`Fallback role assignment succeeded for ${newUser.user.id}`);
+          }
+        } else {
+          console.log(`Role '${role}' assigned successfully to ${newUser.user.id}`);
         }
         
         results.success++;
       } catch (error) {
+        console.error(`Unexpected error processing user:`, error);
         results.failed++;
         results.errors.push({ email: userData.email || 'unknown', error: error.message });
       }
     }
+    
+    console.log(`Import completed: ${results.success} succeeded, ${results.failed} failed`);
     
     return new Response(
       JSON.stringify(results),

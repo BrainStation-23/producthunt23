@@ -68,16 +68,20 @@ const ImportUsersDialog: React.FC<ImportUsersDialogProps> = ({
               throw new Error('Authentication required');
             }
             
-            // Call the admin-bulk-create-users function
-            const { data, error } = await supabase.functions.invoke('admin-bulk-create-users', {
+            // Call the admin-bulk-create-users function with explicit logging
+            const functionResult = await supabase.functions.invoke('admin-bulk-create-users', {
               body: { users },
               headers: {
                 Authorization: `Bearer ${sessionData.session.access_token}`
               }
             });
             
-            if (error) throw error;
+            if (functionResult.error) {
+              console.error('Edge function error:', functionResult.error);
+              throw new Error(functionResult.error.message || 'Failed to import users');
+            }
             
+            const data = functionResult.data;
             console.log('Import results:', data);
             
             if (data.success > 0) {
