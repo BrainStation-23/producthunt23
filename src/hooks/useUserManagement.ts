@@ -9,6 +9,7 @@ export const useUserManagement = () => {
   const {
     searchQuery,
     setSearchQuery,
+    debouncedSearchQuery,
     roleFilter,
     setRoleFilter,
     currentPage,
@@ -18,7 +19,7 @@ export const useUserManagement = () => {
   } = useUserFilters();
 
   const { users, isLoading, refetch } = useUserFetch();
-  const { exportUsers } = useUserExport(searchQuery, roleFilter);
+  const { exportUsers } = useUserExport(debouncedSearchQuery, roleFilter);
   const { handleRoleChange } = useUserRole(refetch);
   const { deleteUser } = useUserDelete(refetch);
 

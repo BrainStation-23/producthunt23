@@ -8,7 +8,7 @@ const ITEMS_PER_PAGE = 10;
 
 export const useUserFetch = () => {
   const {
-    searchQuery,
+    debouncedSearchQuery,
     roleFilter,
     currentPage,
     setTotalPages,
@@ -19,7 +19,7 @@ export const useUserFetch = () => {
     try {
       const { data, error } = await supabase
         .rpc('get_admin_users', {
-          search_text: searchQuery,
+          search_text: debouncedSearchQuery,
           role_filter: roleFilter,
           page_num: currentPage,
           page_size: ITEMS_PER_PAGE
@@ -56,7 +56,7 @@ export const useUserFetch = () => {
   };
 
   const { data: users, isLoading, refetch } = useQuery({
-    queryKey: ['adminUsers', searchQuery, roleFilter, currentPage],
+    queryKey: ['adminUsers', debouncedSearchQuery, roleFilter, currentPage],
     queryFn: fetchUsers
   });
 
