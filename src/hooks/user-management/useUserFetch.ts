@@ -2,24 +2,30 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useUserFilters } from './useUserFilters';
 
 const ITEMS_PER_PAGE = 10;
 
-export const useUserFetch = () => {
-  const {
-    debouncedSearchQuery,
-    roleFilter,
-    currentPage,
-    setTotalPages,
-  } = useUserFilters();
+type UseUserFetchProps = {
+  searchQuery: string;
+  roleFilter: string | null;
+  currentPage: number;
+  setTotalPages: (pages: number) => void;
+};
 
+export const useUserFetch = ({
+  searchQuery,
+  roleFilter,
+  currentPage,
+  setTotalPages
+}: UseUserFetchProps) => {
   // Function to fetch users using our database function
   const fetchUsers = async () => {
     try {
+      console.log('Fetching users with:', { searchQuery, roleFilter, currentPage });
+      
       const { data, error } = await supabase
         .rpc('get_admin_users', {
-          search_text: debouncedSearchQuery,
+          search_text: searchQuery,
           role_filter: roleFilter,
           page_num: currentPage,
           page_size: ITEMS_PER_PAGE
@@ -56,7 +62,7 @@ export const useUserFetch = () => {
   };
 
   const { data: users, isLoading, refetch } = useQuery({
-    queryKey: ['adminUsers', debouncedSearchQuery, roleFilter, currentPage],
+    queryKey: ['adminUsers', searchQuery, roleFilter, currentPage],
     queryFn: fetchUsers
   });
 

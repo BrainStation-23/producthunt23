@@ -8,6 +8,8 @@ export const useUserExport = (searchQuery: string, roleFilter: string | null) =>
     try {
       toast.info('Preparing export...');
       
+      console.log('Exporting users with filters:', { searchQuery, roleFilter });
+      
       // Get all users without pagination for export
       const { data, error } = await supabase
         .rpc('get_admin_users', {

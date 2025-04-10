@@ -15,10 +15,17 @@ export const useUserManagement = () => {
     currentPage,
     setCurrentPage,
     totalPages,
+    setTotalPages,
     handleSearch,
   } = useUserFilters();
 
-  const { users, isLoading, refetch } = useUserFetch();
+  const { users, isLoading, refetch } = useUserFetch({
+    searchQuery: debouncedSearchQuery,
+    roleFilter,
+    currentPage,
+    setTotalPages
+  });
+  
   const { exportUsers } = useUserExport(debouncedSearchQuery, roleFilter);
   const { handleRoleChange } = useUserRole(refetch);
   const { deleteUser } = useUserDelete(refetch);
