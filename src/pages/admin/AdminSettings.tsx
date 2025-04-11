@@ -1,49 +1,59 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
+import GeneralSettings from '@/components/admin/settings/GeneralSettings';
 import CategoriesSettings from '@/components/admin/settings/CategoriesSettings';
 import FeaturedContentSettings from '@/components/admin/settings/FeaturedContentSettings';
-import GeneralSettings from '@/components/admin/settings/GeneralSettings';
+import JudgingSettings from '@/components/admin/settings/judging/JudgingSettings';
+import SystemHealthDashboard from '@/components/admin/settings/SystemHealthDashboard';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const AdminSettings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('categories');
+  const [activeTab, setActiveTab] = useState('general');
+  useDocumentTitle('Admin Settings');
   
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
-          Configure platform settings and manage content.
+          Manage your platform settings and configurations.
         </p>
       </div>
       
-      <Tabs defaultValue="categories" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full bg-transparent p-0 mb-8 grid grid-cols-3 gap-2">
-          <TabsTrigger value="categories" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-            Categories
-          </TabsTrigger>
-          <TabsTrigger value="featured" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-            Featured Content
-          </TabsTrigger>
-          <TabsTrigger value="general" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-            General
-          </TabsTrigger>
+      <Tabs 
+        defaultValue="general" 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
+        <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="featured">Featured Content</TabsTrigger>
+          <TabsTrigger value="judging">Judging</TabsTrigger>
+          <TabsTrigger value="health">System Health</TabsTrigger>
         </TabsList>
         
-        <Card className="p-6">
-          <TabsContent value="categories" className="mt-0">
-            <CategoriesSettings />
-          </TabsContent>
-          
-          <TabsContent value="featured" className="mt-0">
-            <FeaturedContentSettings />
-          </TabsContent>
-          
-          <TabsContent value="general" className="mt-0">
-            <GeneralSettings />
-          </TabsContent>
-        </Card>
+        <TabsContent value="general" className="space-y-4">
+          <GeneralSettings />
+        </TabsContent>
+        
+        <TabsContent value="categories" className="space-y-4">
+          <CategoriesSettings />
+        </TabsContent>
+        
+        <TabsContent value="featured" className="space-y-4">
+          <FeaturedContentSettings />
+        </TabsContent>
+        
+        <TabsContent value="judging" className="space-y-4">
+          <JudgingSettings />
+        </TabsContent>
+        
+        <TabsContent value="health" className="space-y-4">
+          <SystemHealthDashboard />
+        </TabsContent>
       </Tabs>
     </div>
   );

@@ -46,3 +46,6 @@ verify_jwt = true
 
 [functions.admin-bulk-update-users]
 verify_jwt = true
+
+[functions.system-health-check]
+verify_jwt = true
