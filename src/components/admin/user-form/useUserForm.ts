@@ -89,21 +89,33 @@ export const useUserForm = (
         // Handle create user case
         const { email, password, role, username } = values as CreateFormValues;
         
+        if (!session?.access_token) {
+          toast.error('Authentication required. Please login again.');
+          return;
+        }
+        
+        // Add logging to debug
+        console.log('Invoking admin-create-user with token:', session.access_token.substring(0, 10) + '...');
+        
         const { data, error } = await supabase.functions.invoke('admin-create-user', {
           body: { email, password, role, username },
           headers: {
-            Authorization: `Bearer ${session?.access_token}`
+            Authorization: `Bearer ${session.access_token}`
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating user:', error);
+          throw error;
+        }
+        
         toast.success('User created successfully');
       }
       
       form.reset();
       onOpenChange(false);
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error ${isEditing ? 'updating' : 'creating'} user:`, error);
       toast.error(error.message || `Failed to ${isEditing ? 'update' : 'create'} user`);
     }
