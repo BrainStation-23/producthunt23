@@ -183,11 +183,7 @@ serve(async (req) => {
 
     // Fetch recent errors
     const { data: errorLogs, error: logsError } = await supabase
-      .from('system_logs')
-      .select('*')
-      .eq('type', 'error')
-      .order('created_at', { ascending: false })
-      .limit(5);
+      .rpc('get_recent_error_logs', { limit_count: 5 });
 
     // Return all check results
     return new Response(

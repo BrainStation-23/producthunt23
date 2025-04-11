@@ -12,7 +12,7 @@ import {
   XCircle,
   ServerIcon,
   Database,
-  Function,
+  Code,
   Shield,
   Zap
 } from 'lucide-react';
@@ -39,7 +39,7 @@ const ServiceStatusCard: React.FC<ServiceStatusCardProps> = ({ service }) => {
       case 'authentication':
         return <Shield className="h-5 w-5" />;
       case 'edge functions':
-        return <Function className="h-5 w-5" />;
+        return <Code className="h-5 w-5" />;
       case 'realtime':
         return <Zap className="h-5 w-5" />;
       default:

@@ -17,7 +17,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { 
   ServerIcon, 
   Database, 
-  Function, 
+  Code, 
   Shield, 
   CheckCircle, 
   AlertTriangle, 
@@ -100,12 +100,9 @@ const fetchSystemHealth = async (): Promise<SystemHealthData> => {
     };
     
     // Check for any errors in the database (example)
+    // Using a function call instead of direct table access for system_logs
     const { data: errorLogs, error: logsError } = await supabase
-      .from('system_logs')
-      .select('*')
-      .eq('type', 'error')
-      .order('created_at', { ascending: false })
-      .limit(5);
+      .rpc('get_recent_error_logs', { limit_count: 5 });
     
     // Simulated performance data
     const now = new Date();

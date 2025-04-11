@@ -575,6 +575,39 @@ export type Database = {
           },
         ]
       }
+      system_logs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          details: Json | null
+          id: string
+          message: string
+          service: string
+          severity: string | null
+          type: Database["public"]["Enums"]["log_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          details?: Json | null
+          id?: string
+          message: string
+          service: string
+          severity?: string | null
+          type?: Database["public"]["Enums"]["log_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          details?: Json | null
+          id?: string
+          message?: string
+          service?: string
+          severity?: string | null
+          type?: Database["public"]["Enums"]["log_type"]
+        }
+        Relationships: []
+      }
       upvotes: {
         Row: {
           created_at: string | null
@@ -650,6 +683,16 @@ export type Database = {
       }
     }
     Functions: {
+      add_system_log: {
+        Args: {
+          service: string
+          log_type: Database["public"]["Enums"]["log_type"]
+          message: string
+          details?: Json
+          severity?: string
+        }
+        Returns: string
+      }
       assign_user_role: {
         Args: { input_user_id: string; role_name: string }
         Returns: undefined
@@ -784,6 +827,7 @@ export type Database = {
     }
     Enums: {
       category_status: "active" | "inactive"
+      log_type: "info" | "warning" | "error"
       notification_type:
         | "product_pending"
         | "product_approved"
@@ -907,6 +951,7 @@ export const Constants = {
   public: {
     Enums: {
       category_status: ["active", "inactive"],
+      log_type: ["info", "warning", "error"],
       notification_type: [
         "product_pending",
         "product_approved",
