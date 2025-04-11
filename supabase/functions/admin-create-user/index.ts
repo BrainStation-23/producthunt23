@@ -86,13 +86,13 @@ serve(async (req) => {
     }
 
     // Use our new centralized role assignment function
-    const { error: roleError } = await supabase.rpc('assign_user_role', {
+    const { error: assignRoleError } = await supabase.rpc('assign_user_role', {
       input_user_id: newUser.user.id,
       role_name: role
     });
 
-    if (roleError) {
-      console.error('Error assigning role:', roleError);
+    if (assignRoleError) {
+      console.error('Error assigning role:', assignRoleError);
       // Don't throw here, just log it - the user was created successfully
     }
 
