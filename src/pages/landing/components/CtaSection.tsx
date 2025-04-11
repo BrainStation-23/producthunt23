@@ -1,14 +1,10 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getPrimaryColorClass } from '@/config/appConfig';
-
 const CtaSection: React.FC = () => {
   const primaryColorClass = getPrimaryColorClass();
-  
-  return (
-    <section className="py-16 bg-hunt-50">
+  return <section className="py-16 bg-hunt-50">
       <div className="container px-4 md:px-6">
         <div className={`${primaryColorClass} text-white rounded-xl p-8 sm:p-12`}>
           <div className="grid gap-8 md:grid-cols-2 md:gap-12 items-center">
@@ -22,22 +18,16 @@ const CtaSection: React.FC = () => {
                   <Link to="/submit">Submit your product</Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white/10 hover:text-white font-medium">
-                  <Link to="/learn-more">Learn more</Link>
+                  
                 </Button>
               </div>
             </div>
             <div className="hidden md:block">
-              <img 
-                src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" 
-                alt="Product Launch" 
-                className="w-full h-auto rounded-xl object-cover"
-              />
+              <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Product Launch" className="w-full h-auto rounded-xl object-cover" />
             </div>
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default CtaSection;
