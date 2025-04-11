@@ -24,13 +24,11 @@ const LandingPage: React.FC = () => {
     hasError
   } = useLandingData();
 
-  const featuredProduct = featuredProducts && featuredProducts.length > 0 ? featuredProducts[0] : null;
-
   return (
     <div className="animate-fade-in">
       {/* Hero Section */}
       <HeroSection 
-        featuredProduct={featuredProduct}
+        featuredProducts={featuredProducts}
         isLoading={isProductsLoading}
       />
       
