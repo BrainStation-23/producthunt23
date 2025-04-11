@@ -10,9 +10,7 @@ const CtaSection: React.FC = () => {
           <div className="grid gap-8 md:grid-cols-2 md:gap-12 items-center">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Ready to launch your product?</h2>
-              <p className="max-w-[600px] text-hunt-100 md:text-xl/relaxed lg:text-base/relaxed">
-                Join thousands of makers who have successfully launched their products on our platform.
-              </p>
+              <p className="max-w-[600px] text-hunt-100 md:text-xl/relaxed lg:text-base/relaxed">Join the Learnathon Hall of Fame. Bring your project to public.</p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button asChild size="lg" variant="secondary" className="font-medium">
                   <Link to="/submit">Submit your product</Link>
