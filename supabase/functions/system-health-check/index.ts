@@ -181,9 +181,13 @@ serve(async (req) => {
       });
     }
 
-    // Fetch recent errors
+    // Fetch recent errors - using direct query instead of RPC
     const { data: errorLogs, error: logsError } = await supabase
-      .rpc('get_recent_error_logs', { limit_count: 5 });
+      .from('system_logs')
+      .select('*')
+      .eq('type', 'error')
+      .order('created_at', { ascending: false })
+      .limit(5);
 
     // Return all check results
     return new Response(

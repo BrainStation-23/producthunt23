@@ -42,17 +42,19 @@ interface ServiceStatus {
   details?: string;
 }
 
+interface ErrorLog {
+  id: string;
+  service: string;
+  message: string;
+  timestamp: string;
+  severity: 'low' | 'medium' | 'high';
+}
+
 interface SystemHealthData {
   services: ServiceStatus[];
   errors: {
     count: number;
-    recent: Array<{
-      id: string;
-      service: string;
-      message: string;
-      timestamp: string;
-      severity: 'low' | 'medium' | 'high';
-    }>;
+    recent: ErrorLog[];
   };
   performance: {
     database: {
@@ -100,9 +102,16 @@ const fetchSystemHealth = async (): Promise<SystemHealthData> => {
     };
     
     // Check for any errors in the database (example)
-    // Using a function call instead of direct table access for system_logs
-    const { data: errorLogs, error: logsError } = await supabase
-      .rpc('get_recent_error_logs', { limit_count: 5 });
+    // We need to fetch system logs directly instead of using RPC since the function isn't recognized yet
+    const { data: errorLogsData, error: logsError } = await supabase
+      .from('system_logs')
+      .select('*')
+      .eq('type', 'error')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    
+    // Safely handle the returned data
+    const errorLogs = errorLogsData || [];
     
     // Simulated performance data
     const now = new Date();
@@ -149,8 +158,8 @@ const fetchSystemHealth = async (): Promise<SystemHealthData> => {
         }
       ],
       errors: {
-        count: errorLogs?.length || 0,
-        recent: (errorLogs || []).map((log: any) => ({
+        count: errorLogs.length || 0,
+        recent: errorLogs.map((log: any) => ({
           id: log.id,
           service: log.service || 'Unknown',
           message: log.message || 'Unknown error',
