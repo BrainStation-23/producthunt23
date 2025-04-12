@@ -8,7 +8,7 @@ import { ExternalLink, ArrowUp, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { getDevIconClass } from '@/utils/devIconUtils';
+import { getDeviconClass } from '@/services/deviconService'; // Updated import path
 import ProductSaveButton from '@/components/products/card/ProductSaveButton';
 
 interface ProductInfoCardProps {
