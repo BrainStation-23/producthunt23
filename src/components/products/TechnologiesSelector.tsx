@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Code, Search, Loader2 } from 'lucide-react';
-import { useDeviconData, getRelatedTechnologies } from '@/services/deviconService';
+import { useDeviconData, getRelatedTechnologies, techCategories, categorizeTechnology } from '@/services/deviconService';
 import TechnologyGrid from './technologies/TechnologyGrid';
 import TechnologyTabs from './technologies/TechnologyTabs';
 import SelectedTechnologies from './technologies/SelectedTechnologies';
@@ -117,46 +118,6 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
     }
   }, [isDialogOpen]);
 
-  // Import the categorizeTechnology function from deviconService
-  const categorizeTechnology = (tech: any) => {
-    // Check if any of the tech's tags match category tags
-    for (const category of techCategories) {
-      // Check if any tech tags match the category tags
-      if (tech.tags.some((tag: string) => category.tags.includes(tag))) {
-        return category.id;
-      }
-      
-      // Check if the tech name matches any category tags
-      if (category.tags.includes(tech.name)) {
-        return category.id;
-      }
-    }
-    
-    // Special cases based on common technologies
-    if (['react', 'vue', 'angular', 'svelte', 'next', 'nuxt', 'tailwind', 'bootstrap'].includes(tech.name)) {
-      return 'frontend';
-    }
-    
-    if (['nodejs', 'express', 'django', 'flask', 'spring', 'laravel', 'rails'].includes(tech.name)) {
-      return 'backend';
-    }
-    
-    if (['mongodb', 'mysql', 'postgresql', 'firebase', 'supabase', 'redis'].includes(tech.name)) {
-      return 'database';
-    }
-    
-    if (['docker', 'kubernetes', 'aws', 'azure', 'gcp', 'jenkins'].includes(tech.name)) {
-      return 'devops';
-    }
-    
-    if (['javascript', 'typescript', 'python', 'java', 'csharp', 'go', 'rust', 'php', 'ruby'].includes(tech.name)) {
-      return 'languages';
-    }
-    
-    // Default category
-    return 'tools';
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2 min-h-[40px]">
@@ -238,8 +199,5 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
     </div>
   );
 };
-
-// Import the techCategories from deviconService
-import { techCategories } from '@/services/deviconService';
 
 export default TechnologiesSelector;
