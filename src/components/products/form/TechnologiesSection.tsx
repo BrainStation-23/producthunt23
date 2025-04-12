@@ -41,7 +41,7 @@ const TechnologiesSection: React.FC<TechnologiesSectionProps> = ({ form }) => {
                 />
               </FormControl>
               <FormDescription>
-                Select the technologies used to build your product.
+                Select the technologies used to build your product. Browse by category or search by name.
               </FormDescription>
               <FormMessage />
             </FormItem>

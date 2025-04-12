@@ -784,6 +784,19 @@ export type Database = {
           count_false: number
         }[]
       }
+      get_recent_error_logs: {
+        Args: { limit_count?: number }
+        Returns: {
+          id: string
+          service: string
+          message: string
+          type: Database["public"]["Enums"]["log_type"]
+          details: Json
+          severity: string
+          created_at: string
+          created_by: string
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string
