@@ -8,7 +8,7 @@ import { ExternalLink, ArrowUp, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { getDeviconClass } from '@/services/deviconService'; // Updated import path
+import { getDeviconClass } from '@/services/deviconService';
 import ProductSaveButton from '@/components/products/card/ProductSaveButton';
 
 interface ProductInfoCardProps {
@@ -152,7 +152,7 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
             <div className="flex flex-wrap gap-2">
               {product.technologies.map((tech, index) => (
                 <Badge key={index} variant="outline" className="flex items-center gap-1">
-                  <i className={`${getDevIconClass(tech)} text-sm`}></i>
+                  <i className={`${getDeviconClass(tech)} text-sm`}></i>
                   {tech}
                 </Badge>
               ))}
