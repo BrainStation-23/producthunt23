@@ -10,12 +10,18 @@ interface TechnologyTabsProps {
 
 const TechnologyTabs: React.FC<TechnologyTabsProps> = ({ activeTab, onTabChange }) => {
   return (
-    <Tabs defaultValue="all" value={activeTab} onValueChange={onTabChange} className="mb-6">
-      <TabsList className="w-full overflow-x-auto flex flex-nowrap justify-start">
-        <TabsTrigger value="all" className="px-4">All</TabsTrigger>
-        <TabsTrigger value="popular" className="px-4">Popular</TabsTrigger>
+    <Tabs defaultValue="all" value={activeTab} onValueChange={onTabChange} className="mb-4 w-full">
+      <TabsList className="w-full overflow-x-auto flex flex-nowrap justify-start p-1 h-auto">
+        <TabsTrigger value="all" className="px-3 py-1.5 whitespace-nowrap">All</TabsTrigger>
+        <TabsTrigger value="popular" className="px-3 py-1.5 whitespace-nowrap">Popular</TabsTrigger>
         {techCategories.map(category => (
-          <TabsTrigger key={category.id} value={category.id} className="px-4">{category.name}</TabsTrigger>
+          <TabsTrigger 
+            key={category.id} 
+            value={category.id} 
+            className="px-3 py-1.5 whitespace-nowrap"
+          >
+            {category.name}
+          </TabsTrigger>
         ))}
       </TabsList>
     </Tabs>

@@ -19,8 +19,8 @@ const TechnologyGrid: React.FC<TechnologyGridProps> = ({
   toggleTechnology 
 }) => {
   return (
-    <ScrollArea className="h-[400px] pr-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <ScrollArea className="h-[300px] w-full pr-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-2 pr-2">
         {technologies.map(tech => (
           <TechnologyItem
             key={tech.name}

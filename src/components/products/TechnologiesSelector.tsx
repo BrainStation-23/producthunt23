@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Code, Search, Loader2 } from 'lucide-react';
 import { useDeviconData, getRelatedTechnologies, techCategories, categorizeTechnology } from '@/services/deviconService';
@@ -141,19 +141,19 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
             Select Technologies
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="px-6 py-4 border-b">
             <DialogTitle className="text-xl">Select Technologies</DialogTitle>
           </DialogHeader>
           
-          <div className="py-4">
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+          <div className="flex-1 overflow-hidden flex flex-col p-6 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
                 placeholder="Search technologies..." 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 py-6 text-lg"
+                className="pl-10 py-2 text-base w-full"
               />
             </div>
             
@@ -164,36 +164,40 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
             />
             
             {isLoading ? (
-              <div className="flex justify-center items-center h-[400px]">
+              <div className="flex justify-center items-center h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <>
+              <div className="flex-1 overflow-hidden flex flex-col">
                 <RecommendedTechnologies 
                   suggestions={relatedTechSuggestions} 
                   onSelect={toggleTechnology} 
                 />
                 
-                <TechnologyTabs 
-                  activeTab={activeTab} 
-                  onTabChange={setActiveTab} 
-                />
+                <div className="w-full overflow-x-auto">
+                  <TechnologyTabs 
+                    activeTab={activeTab} 
+                    onTabChange={setActiveTab} 
+                  />
+                </div>
                 
-                <TechnologyGrid 
-                  technologies={filteredTechnologies} 
-                  selectedTechnologies={selected} 
-                  searchTerm={searchTerm}
-                  toggleTechnology={toggleTechnology} 
-                />
-              </>
+                <div className="flex-1 overflow-hidden">
+                  <TechnologyGrid 
+                    technologies={filteredTechnologies} 
+                    selectedTechnologies={selected} 
+                    searchTerm={searchTerm}
+                    toggleTechnology={toggleTechnology} 
+                  />
+                </div>
+              </div>
             )}
           </div>
           
-          <div className="flex justify-end mt-4">
+          <DialogFooter className="px-6 py-4 border-t">
             <Button onClick={() => setIsDialogOpen(false)}>
               Done
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
