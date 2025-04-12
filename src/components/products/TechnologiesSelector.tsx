@@ -1,28 +1,14 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Check, X, Code, Search, Loader2 } from 'lucide-react';
-import { 
-  Tabs, TabsContent, TabsList, TabsTrigger 
-} from '@/components/ui/tabs';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger 
-} from '@/components/ui/tooltip';
-import { 
-  useDeviconData, 
-  getDeviconClass, 
-  techCategories, 
-  categorizeTechnology,
-  getRelatedTechnologies,
-  DeviconItem
-} from '@/services/deviconService';
+import { Code, Search, Loader2 } from 'lucide-react';
+import { useDeviconData, getRelatedTechnologies } from '@/services/deviconService';
+import TechnologyGrid from './technologies/TechnologyGrid';
+import TechnologyTabs from './technologies/TechnologyTabs';
+import SelectedTechnologies from './technologies/SelectedTechnologies';
+import RecommendedTechnologies from './technologies/RecommendedTechnologies';
+import TechnologyBadge from './technologies/TechnologyBadge';
 
 interface TechnologiesSelectorProps {
   selected: string[];
@@ -39,7 +25,7 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
   const categorizedTechs = useMemo(() => {
     if (!deviconData) return {};
     
-    const result: Record<string, DeviconItem[]> = {
+    const result: Record<string, any[]> = {
       all: [],
       popular: [],
       frontend: [],
@@ -131,29 +117,59 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
     }
   }, [isDialogOpen]);
 
+  // Import the categorizeTechnology function from deviconService
+  const categorizeTechnology = (tech: any) => {
+    // Check if any of the tech's tags match category tags
+    for (const category of techCategories) {
+      // Check if any tech tags match the category tags
+      if (tech.tags.some((tag: string) => category.tags.includes(tag))) {
+        return category.id;
+      }
+      
+      // Check if the tech name matches any category tags
+      if (category.tags.includes(tech.name)) {
+        return category.id;
+      }
+    }
+    
+    // Special cases based on common technologies
+    if (['react', 'vue', 'angular', 'svelte', 'next', 'nuxt', 'tailwind', 'bootstrap'].includes(tech.name)) {
+      return 'frontend';
+    }
+    
+    if (['nodejs', 'express', 'django', 'flask', 'spring', 'laravel', 'rails'].includes(tech.name)) {
+      return 'backend';
+    }
+    
+    if (['mongodb', 'mysql', 'postgresql', 'firebase', 'supabase', 'redis'].includes(tech.name)) {
+      return 'database';
+    }
+    
+    if (['docker', 'kubernetes', 'aws', 'azure', 'gcp', 'jenkins'].includes(tech.name)) {
+      return 'devops';
+    }
+    
+    if (['javascript', 'typescript', 'python', 'java', 'csharp', 'go', 'rust', 'php', 'ruby'].includes(tech.name)) {
+      return 'languages';
+    }
+    
+    // Default category
+    return 'tools';
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2 min-h-[40px]">
         {selected.length === 0 ? (
           <p className="text-muted-foreground">No technologies selected</p>
         ) : (
-          selected.map(techId => {
-            const tech = deviconData?.find(t => t.name === techId);
-            return (
-              <Badge key={techId} variant="secondary" className="flex items-center gap-2 pl-2 pr-1 py-1.5">
-                <i className={getDeviconClass(techId)} style={{ fontSize: '1.25rem' }}></i>
-                {tech ? tech.name : techId}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-5 w-5 rounded-full hover:bg-muted" 
-                  onClick={() => removeTechnology(techId)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            );
-          })
+          selected.map(techId => (
+            <TechnologyBadge 
+              key={techId} 
+              techId={techId} 
+              onRemove={removeTechnology} 
+            />
+          ))
         )}
       </div>
 
@@ -180,34 +196,11 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
               />
             </div>
             
-            {selected.length > 0 && (
-              <div className="mb-6 bg-secondary/50 p-4 rounded-lg">
-                <h3 className="text-base font-medium mb-2">Selected technologies:</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selected.map(techId => {
-                    const tech = deviconData?.find(t => t.name === techId);
-                    return (
-                      <Badge 
-                        key={techId} 
-                        variant="secondary" 
-                        className="flex items-center gap-2 pl-2 pr-1 py-1.5 bg-background"
-                      >
-                        <i className={getDeviconClass(techId)} style={{ fontSize: '1.25rem' }}></i>
-                        {tech ? tech.name : techId}
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-5 w-5 rounded-full hover:bg-muted" 
-                          onClick={() => removeTechnology(techId)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            <SelectedTechnologies 
+              selected={selected} 
+              onRemove={removeTechnology} 
+              deviconData={deviconData} 
+            />
             
             {isLoading ? (
               <div className="flex justify-center items-center h-[400px]">
@@ -215,95 +208,22 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
               </div>
             ) : (
               <>
-                <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-                  <TabsList className="w-full overflow-x-auto flex flex-nowrap justify-start">
-                    <TabsTrigger value="all" className="px-4">All</TabsTrigger>
-                    <TabsTrigger value="popular" className="px-4">Popular</TabsTrigger>
-                    {techCategories.map(category => (
-                      <TabsTrigger key={category.id} value={category.id} className="px-4">{category.name}</TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
+                <RecommendedTechnologies 
+                  suggestions={relatedTechSuggestions} 
+                  onSelect={toggleTechnology} 
+                />
                 
-                {selected.length > 0 && relatedTechSuggestions.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-base font-medium mb-2">Recommended technologies:</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {relatedTechSuggestions.map(tech => (
-                        <Badge 
-                          key={tech} 
-                          variant="outline" 
-                          className="cursor-pointer hover:bg-secondary flex items-center gap-1.5 py-1.5 px-3"
-                          onClick={() => toggleTechnology(tech)}
-                        >
-                          <i className={getDeviconClass(tech)} style={{ fontSize: '1.25rem' }}></i>
-                          {tech}
-                          <Plus className="h-3.5 w-3.5 ml-1 text-muted-foreground" />
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <TechnologyTabs 
+                  activeTab={activeTab} 
+                  onTabChange={setActiveTab} 
+                />
                 
-                <ScrollArea className="h-[400px] pr-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {filteredTechnologies.map(tech => {
-                      const isSelected = selected.includes(tech.name);
-                      const versions = tech.versions.font || ['plain'];
-                      const preferredVersion = versions.includes('original') ? 'original' : versions[0];
-                      
-                      return (
-                        <TooltipProvider key={tech.name}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div 
-                                className={`
-                                  flex items-center justify-between p-3 rounded-md cursor-pointer transition-colors
-                                  ${isSelected ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted border border-transparent'}
-                                `}
-                                onClick={() => toggleTechnology(tech.name)}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
-                                    <i className={getDeviconClass(tech.name, preferredVersion)} style={{ fontSize: '1.75rem' }}></i>
-                                  </div>
-                                  <div>
-                                    <div className="font-medium">{tech.name}</div>
-                                    {tech.tags.length > 0 && (
-                                      <div className="text-xs text-muted-foreground">{tech.tags.join(', ')}</div>
-                                    )}
-                                  </div>
-                                </div>
-                                {isSelected && (
-                                  <Check className="h-5 w-5 text-primary" />
-                                )}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="right" align="center" className="max-w-xs">
-                              <div className="space-y-1">
-                                <p className="font-medium">{tech.name}</p>
-                                {tech.aliases.length > 0 && (
-                                  <p className="text-xs">Also known as: {tech.aliases.join(', ')}</p>
-                                )}
-                                {tech.versions.font.length > 1 && (
-                                  <p className="text-xs">Available styles: {tech.versions.font.join(', ')}</p>
-                                )}
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      );
-                    })}
-                  </div>
-                  
-                  {filteredTechnologies.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                      <Search className="h-12 w-12 mb-4 opacity-20" />
-                      <p className="text-lg">No technologies found matching "{searchTerm}"</p>
-                      <p className="text-sm">Try a different search term or category</p>
-                    </div>
-                  )}
-                </ScrollArea>
+                <TechnologyGrid 
+                  technologies={filteredTechnologies} 
+                  selectedTechnologies={selected} 
+                  searchTerm={searchTerm}
+                  toggleTechnology={toggleTechnology} 
+                />
               </>
             )}
           </div>
@@ -319,20 +239,7 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
   );
 };
 
-// This is needed for the relatedTechSuggestions
-const Plus = ({ className }: { className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="M12 5v14M5 12h14" />
-  </svg>
-);
+// Import the techCategories from deviconService
+import { techCategories } from '@/services/deviconService';
 
 export default TechnologiesSelector;
