@@ -133,20 +133,20 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 min-h-[40px]">
         {selected.length === 0 ? (
           <p className="text-muted-foreground">No technologies selected</p>
         ) : (
           selected.map(techId => {
             const tech = deviconData?.find(t => t.name === techId);
             return (
-              <Badge key={techId} variant="secondary" className="flex items-center gap-2 pl-2 pr-1 py-1">
+              <Badge key={techId} variant="secondary" className="flex items-center gap-2 pl-2 pr-1 py-1.5">
                 <i className={getDeviconClass(techId)} style={{ fontSize: '1.25rem' }}></i>
                 {tech ? tech.name : techId}
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-5 w-5 rounded-full" 
+                  className="h-5 w-5 rounded-full hover:bg-muted" 
                   onClick={() => removeTechnology(techId)}
                 >
                   <X className="h-3 w-3" />
@@ -159,65 +159,94 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" type="button" className="flex items-center gap-2">
-            <Code className="h-4 w-4" />
+          <Button variant="outline" type="button" className="flex w-full items-center gap-2 p-6 justify-center text-base">
+            <Code className="h-5 w-5" />
             Select Technologies
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>Technologies</DialogTitle>
+            <DialogTitle className="text-xl">Select Technologies</DialogTitle>
           </DialogHeader>
           
           <div className="py-4">
-            <div className="relative mb-4">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
               <Input 
                 placeholder="Search technologies..." 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="pl-10 py-6 text-lg"
               />
             </div>
             
+            {selected.length > 0 && (
+              <div className="mb-6 bg-secondary/50 p-4 rounded-lg">
+                <h3 className="text-base font-medium mb-2">Selected technologies:</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selected.map(techId => {
+                    const tech = deviconData?.find(t => t.name === techId);
+                    return (
+                      <Badge 
+                        key={techId} 
+                        variant="secondary" 
+                        className="flex items-center gap-2 pl-2 pr-1 py-1.5 bg-background"
+                      >
+                        <i className={getDeviconClass(techId)} style={{ fontSize: '1.25rem' }}></i>
+                        {tech ? tech.name : techId}
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-5 w-5 rounded-full hover:bg-muted" 
+                          onClick={() => removeTechnology(techId)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
             {isLoading ? (
-              <div className="flex justify-center items-center h-[300px]">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <div className="flex justify-center items-center h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : (
               <>
-                <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-4">
-                  <TabsList className="w-full overflow-x-auto flex flex-nowrap">
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="popular">Popular</TabsTrigger>
+                <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+                  <TabsList className="w-full overflow-x-auto flex flex-nowrap justify-start">
+                    <TabsTrigger value="all" className="px-4">All</TabsTrigger>
+                    <TabsTrigger value="popular" className="px-4">Popular</TabsTrigger>
                     {techCategories.map(category => (
-                      <TabsTrigger key={category.id} value={category.id}>{category.name}</TabsTrigger>
+                      <TabsTrigger key={category.id} value={category.id} className="px-4">{category.name}</TabsTrigger>
                     ))}
                   </TabsList>
                 </Tabs>
                 
                 {selected.length > 0 && relatedTechSuggestions.length > 0 && (
-                  <div className="mb-4">
-                    <h3 className="text-sm font-medium mb-2">Suggested technologies:</h3>
+                  <div className="mb-6">
+                    <h3 className="text-base font-medium mb-2">Recommended technologies:</h3>
                     <div className="flex flex-wrap gap-2">
                       {relatedTechSuggestions.map(tech => (
                         <Badge 
                           key={tech} 
                           variant="outline" 
-                          className="cursor-pointer hover:bg-secondary flex items-center gap-1.5"
+                          className="cursor-pointer hover:bg-secondary flex items-center gap-1.5 py-1.5 px-3"
                           onClick={() => toggleTechnology(tech)}
                         >
-                          <i className={getDeviconClass(tech)} style={{ fontSize: '1rem' }}></i>
+                          <i className={getDeviconClass(tech)} style={{ fontSize: '1.25rem' }}></i>
                           {tech}
-                          <Plus className="h-3 w-3 text-muted-foreground" />
+                          <Plus className="h-3.5 w-3.5 ml-1 text-muted-foreground" />
                         </Badge>
                       ))}
                     </div>
                   </div>
                 )}
                 
-                <ScrollArea className="h-[300px] pr-4">
-                  <div className="space-y-2">
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {filteredTechnologies.map(tech => {
                       const isSelected = selected.includes(tech.name);
                       const versions = tech.versions.font || ['plain'];
@@ -229,13 +258,15 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
                             <TooltipTrigger asChild>
                               <div 
                                 className={`
-                                  flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors
-                                  ${isSelected ? 'bg-primary/10' : 'hover:bg-muted'}
+                                  flex items-center justify-between p-3 rounded-md cursor-pointer transition-colors
+                                  ${isSelected ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted border border-transparent'}
                                 `}
                                 onClick={() => toggleTechnology(tech.name)}
                               >
                                 <div className="flex items-center gap-3">
-                                  <i className={getDeviconClass(tech.name, preferredVersion)} style={{ fontSize: '1.5rem' }}></i>
+                                  <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
+                                    <i className={getDeviconClass(tech.name, preferredVersion)} style={{ fontSize: '1.75rem' }}></i>
+                                  </div>
                                   <div>
                                     <div className="font-medium">{tech.name}</div>
                                     {tech.tags.length > 0 && (
@@ -244,11 +275,11 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
                                   </div>
                                 </div>
                                 {isSelected && (
-                                  <Check className="h-4 w-4 text-primary" />
+                                  <Check className="h-5 w-5 text-primary" />
                                 )}
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent side="right">
+                            <TooltipContent side="right" align="center" className="max-w-xs">
                               <div className="space-y-1">
                                 <p className="font-medium">{tech.name}</p>
                                 {tech.aliases.length > 0 && (
@@ -264,9 +295,23 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
                       );
                     })}
                   </div>
+                  
+                  {filteredTechnologies.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <Search className="h-12 w-12 mb-4 opacity-20" />
+                      <p className="text-lg">No technologies found matching "{searchTerm}"</p>
+                      <p className="text-sm">Try a different search term or category</p>
+                    </div>
+                  )}
                 </ScrollArea>
               </>
             )}
+          </div>
+          
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setIsDialogOpen(false)}>
+              Done
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
