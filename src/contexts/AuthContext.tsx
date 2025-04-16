@@ -21,7 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isRoleFetched, setIsRoleFetched] = useState(false);
   const navigate = useNavigate();
 
@@ -29,8 +28,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let mounted = true;
     
     const setupAuthListener = async () => {
-      setIsLoading(true);
-      
       // First get the current session
       const { data: { session: initialSession } } = await supabase.auth.getSession();
       console.log('Getting initial session:', initialSession?.user?.email || 'No session');
@@ -44,7 +41,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(null);
         setUser(null);
         setUserRole(null);
-        setIsLoading(false);
         setIsRoleFetched(true);
         toast.error('Your account has been suspended. Please contact an administrator.');
         navigate('/login');
@@ -78,11 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsRoleFetched(true);
       }
       
-      if (mounted) {
-        setIsLoading(false);
-      }
-      
-      // Then set up auth state listener for future changes
+      // Set up auth state listener for future changes
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, newSession) => {
           console.log('Auth event:', event, 'User:', newSession?.user?.email || 'No user');
@@ -101,7 +93,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSession(null);
             setUser(null);
             setUserRole(null);
-            setIsLoading(false);
             setIsRoleFetched(true);
             toast.error('Your account has been suspended. Please contact an administrator.');
             navigate('/login');
@@ -144,10 +135,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setIsRoleFetched(true);
             }
           }
-          
-          if (mounted) {
-            setIsLoading(false);
-          }
         }
       );
       
@@ -164,16 +151,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [navigate]);
 
   const signIn = async (email: string, password: string): Promise<UserRole> => {
-    try {
-      setIsLoading(true);
-      setIsRoleFetched(false);
-      const role = await authSignIn(email, password);
-      setUserRole(role);
-      setIsRoleFetched(true);
-      return role;
-    } finally {
-      setIsLoading(false);
-    }
+    const role = await authSignIn(email, password);
+    setUserRole(role);
+    return role;
   };
 
   const signUp = async (email: string, password: string, userData?: any) => {
@@ -181,19 +161,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    try {
-      setIsLoading(true);
-      await authSignOut();
-      
-      setUser(null);
-      setSession(null);
-      setUserRole(null);
-      setIsRoleFetched(true);
-      
-      navigate('/login');
-    } finally {
-      setIsLoading(false);
-    }
+    await authSignOut();
+    
+    setUser(null);
+    setSession(null);
+    setUserRole(null);
+    setIsRoleFetched(true);
+    
+    navigate('/login');
   };
 
   const signInWithGithub = async () => {
@@ -208,7 +183,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     user,
     userRole,
-    isLoading,
     isRoleFetched,
     signIn,
     signUp,
