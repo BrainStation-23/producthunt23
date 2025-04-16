@@ -15,8 +15,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, userRole, isLoading, isRoleFetched } = useAuth();
 
-  // Only show loading state when auth is initially loading or when we need to fetch role
+  // Show loading state only during initial auth check or when explicitly waiting for role
   if (isLoading || (user && !isRoleFetched)) {
+    console.log('Protected route loading state:', { isLoading, isRoleFetched, user, userRole });
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -27,13 +28,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Redirect to login if not authenticated
+  // If not authenticated, redirect to login
   if (!user) {
+    console.log('User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   // If a required role is specified and user doesn't have it, redirect to their default route
   if (requiredRole && userRole !== requiredRole) {
+    console.log('User lacks required role:', { requiredRole, userRole });
     const redirectPath = userRole === 'admin' ? '/admin' : 
                         userRole === 'judge' ? '/judge' : '/user';
     return <Navigate to={redirectPath} replace />;

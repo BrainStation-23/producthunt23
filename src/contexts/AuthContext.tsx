@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,19 +31,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const setupAuth = async () => {
       try {
-        setIsLoading(true);
-
-        // First, set up auth state listener
+        // First set up auth state listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-          if (!mounted) return;
-
           console.log('Auth state changed:', event);
           
+          if (!mounted) return;
+
           if (newSession?.user?.app_metadata?.disabled) {
             await supabase.auth.signOut();
             setSession(null);
             setUser(null);
             setUserRole(null);
+            setIsRoleFetched(true);
             toast.error('Your account has been suspended');
             navigate('/login');
             return;
@@ -54,8 +54,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Only fetch role for new sessions or user updates
           if (newSession?.user && ['SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event)) {
             try {
+              console.log('Fetching role for event:', event);
               const role = await fetchUserRole(newSession.user.id);
               if (mounted) {
+                console.log('Role fetched:', role);
                 setUserRole(role);
                 setIsRoleFetched(true);
               }
@@ -70,8 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUserRole(null);
             setIsRoleFetched(true);
           }
-          
-          setIsLoading(false);
         });
 
         authSubscription = subscription;
@@ -86,8 +86,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(initialSession.user);
           
           try {
+            console.log('Fetching initial role');
             const role = await fetchUserRole(initialSession.user.id);
             if (mounted) {
+              console.log('Initial role fetched:', role);
               setUserRole(role);
               setIsRoleFetched(true);
             }
@@ -102,13 +104,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUserRole(null);
           setIsRoleFetched(true);
         }
-        
-        setIsLoading(false);
       } catch (error) {
         console.error('Error in auth setup:', error);
         if (mounted) {
-          setIsLoading(false);
           setIsRoleFetched(true);
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
         }
       }
     };
@@ -117,7 +120,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       mounted = false;
-      authSubscription?.unsubscribe();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
   }, [navigate]);
 
