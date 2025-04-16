@@ -35,13 +35,16 @@ export const useRoleManagement = (user: User | null) => {
       }
     };
 
-    setIsRoleFetched(false);
-    fetchAndSetUserRole();
+    // Only fetch the role when the user changes
+    if (!isRoleFetched || user?.id !== userRole) {
+      setIsRoleFetched(false);
+      fetchAndSetUserRole();
+    }
 
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [user]);  // Only depend on the user object
 
   return {
     userRole,
