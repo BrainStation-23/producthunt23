@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, userRole, isLoading, isRoleFetched } = useAuth();
 
-  // Show loading state when auth is loading or role is not yet fetched
+  // Only show loading state when auth is initially loading or when we need to fetch role
   if (isLoading || (user && !isRoleFetched)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
