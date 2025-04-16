@@ -1,12 +1,11 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/sonner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AuthCallback from './pages/auth/AuthCallback';
 import LogoutPage from './pages/auth/LogoutPage';
-import RoleRedirect from './components/auth/RoleRedirect';
 import JudgeEvaluations from './pages/judge/JudgeEvaluations';
 
 // Layouts
@@ -58,6 +57,15 @@ deviconLink.rel = 'stylesheet';
 deviconLink.href = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css';
 document.head.appendChild(deviconLink);
 
+// Dashboard redirect component
+const DashboardRedirect = () => {
+  const { userRole } = useAuth();
+  
+  if (userRole === 'admin') return <Navigate to="/admin" replace />;
+  if (userRole === 'judge') return <Navigate to="/judge" replace />;
+  return <Navigate to="/user" replace />;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -65,16 +73,17 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            
+            {/* Public routes */}
             <Route path="/" element={<MainLayout />}>
               <Route path="landing" element={<LandingPage />} />
               <Route path="products" element={<ProductsPage />} />
-              <Route path="products/submit" element={<SubmitProductPage />} />
-              <Route path="products/edit/:productId" element={<EditProductPage />} />
               <Route path="products/:productId" element={<ProductDetailPage />} />
-              {/* Legal Pages */}
               <Route path="terms" element={<TermsOfServicePage />} />
               <Route path="privacy" element={<PrivacyPolicyPage />} />
             </Route>
+
+            {/* Auth routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -82,39 +91,38 @@ function App() {
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/logout" element={<LogoutPage />} />
             
-            {/* Role-based redirect route */}
+            {/* Protected routes - redirect to role-specific dashboard */}
             <Route 
               path="/dashboard" 
               element={
                 <ProtectedRoute>
-                  <RoleRedirect />
+                  <DashboardRedirect />
                 </ProtectedRoute>
               } 
             />
 
-            {/* Admin Routes */}
+            {/* Admin routes */}
             <Route
               path="/admin"
               element={
-                <ProtectedRoute allowedRoles={['admin']} adminOnly={true}>
+                <ProtectedRoute requiredRole="admin">
                   <AdminLayout />
                 </ProtectedRoute>
               }
             >
               <Route index element={<AdminDashboard />} />
               <Route path="products" element={<AdminProducts />} />
-              <Route path="products/edit/:productId" element={<EditProductPage />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="profile" element={<AdminProfile />} />
               <Route path="judging" element={<AdminJudging />} />
             </Route>
 
-            {/* Judge Routes */}
+            {/* Judge routes */}
             <Route
               path="/judge"
               element={
-                <ProtectedRoute allowedRoles={['judge']} judgeOnly={true}>
+                <ProtectedRoute requiredRole="judge">
                   <JudgeLayout />
                 </ProtectedRoute>
               }
@@ -126,11 +134,11 @@ function App() {
               <Route path="settings" element={<UserSettings />} />
             </Route>
 
-            {/* User Routes */}
+            {/* User routes */}
             <Route
               path="/user"
               element={
-                <ProtectedRoute allowedRoles={['user']} userOnly={true}>
+                <ProtectedRoute requiredRole="user">
                   <UserLayout />
                 </ProtectedRoute>
               }
@@ -140,7 +148,6 @@ function App() {
               <Route path="products" element={<UserProducts />} />
               <Route path="settings" element={<UserSettings />} />
               <Route path="saved" element={<SavedProductsPage />} />
-              <Route path="messages" element={<UserDashboard />} />
             </Route>
 
             <Route path="/404" element={<NotFound />} />
