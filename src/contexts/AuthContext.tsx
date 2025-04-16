@@ -29,45 +29,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let mounted = true;
     let authSubscription: { unsubscribe: () => void } | null = null;
 
+    // Function to fetch and set user role
+    const fetchAndSetUserRole = async (userId: string) => {
+      if (!userId || !mounted) return;
+      
+      try {
+        console.log('Fetching role for user ID:', userId);
+        const role = await fetchUserRole(userId);
+        
+        if (mounted) {
+          console.log('Role fetched:', role);
+          setUserRole(role);
+          setIsRoleFetched(true);
+        }
+      } catch (error) {
+        console.error('Error fetching role:', error);
+        if (mounted) {
+          setUserRole('user');
+          setIsRoleFetched(true);
+        }
+      }
+    };
+
     const setupAuth = async () => {
       try {
+        // Set initial loading state
+        if (mounted) setIsLoading(true);
+        
         // First set up auth state listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
           console.log('Auth state changed:', event);
           
           if (!mounted) return;
 
           if (newSession?.user?.app_metadata?.disabled) {
-            await supabase.auth.signOut();
+            // Handle disabled user synchronously
             setSession(null);
             setUser(null);
             setUserRole(null);
             setIsRoleFetched(true);
             toast.error('Your account has been suspended');
-            navigate('/login');
+            
+            // Sign out asynchronously
+            supabase.auth.signOut().then(() => {
+              if (mounted) navigate('/login');
+            });
             return;
           }
 
+          // Update session and user state synchronously
           setSession(newSession);
           setUser(newSession?.user ?? null);
 
-          // Only fetch role for new sessions or user updates
+          // For certain auth events, fetch the role
           if (newSession?.user && ['SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event)) {
-            try {
-              console.log('Fetching role for event:', event);
-              const role = await fetchUserRole(newSession.user.id);
-              if (mounted) {
-                console.log('Role fetched:', role);
-                setUserRole(role);
-                setIsRoleFetched(true);
-              }
-            } catch (error) {
-              console.error('Error fetching role:', error);
-              if (mounted) {
-                setUserRole('user');
-                setIsRoleFetched(true);
-              }
-            }
+            // Schedule role fetch to avoid Supabase API deadlocks
+            setTimeout(() => {
+              fetchAndSetUserRole(newSession.user.id);
+            }, 0);
           } else if (!newSession?.user) {
             setUserRole(null);
             setIsRoleFetched(true);
@@ -85,21 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(initialSession);
           setUser(initialSession.user);
           
-          try {
-            console.log('Fetching initial role');
-            const role = await fetchUserRole(initialSession.user.id);
-            if (mounted) {
-              console.log('Initial role fetched:', role);
-              setUserRole(role);
-              setIsRoleFetched(true);
-            }
-          } catch (error) {
-            console.error('Error fetching initial role:', error);
-            if (mounted) {
-              setUserRole('user');
-              setIsRoleFetched(true);
-            }
-          }
+          // Fetch role directly from database
+          await fetchAndSetUserRole(initialSession.user.id);
         } else {
           setUserRole(null);
           setIsRoleFetched(true);

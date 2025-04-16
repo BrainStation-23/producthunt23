@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/contexts/auth/types';
@@ -14,6 +14,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRole
 }) => {
   const { user, userRole, isLoading, isRoleFetched } = useAuth();
+
+  useEffect(() => {
+    // Add detailed logging to help track auth state
+    console.log('Protected route state:', { 
+      isLoading, 
+      isRoleFetched, 
+      hasUser: !!user, 
+      userRole,
+      requiredRole 
+    });
+  }, [isLoading, isRoleFetched, user, userRole, requiredRole]);
 
   // Show loading state only during initial auth check or when explicitly waiting for role
   if (isLoading || (user && !isRoleFetched)) {
