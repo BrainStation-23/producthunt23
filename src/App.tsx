@@ -1,5 +1,6 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/sonner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -56,6 +57,15 @@ deviconLink.rel = 'stylesheet';
 deviconLink.href = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css';
 document.head.appendChild(deviconLink);
 
+// Dashboard redirect component
+const DashboardRedirect = () => {
+  const { userRole } = useAuth();
+  
+  if (userRole === 'admin') return <Navigate to="/admin" replace />;
+  if (userRole === 'judge') return <Navigate to="/judge" replace />;
+  return <Navigate to="/user" replace />;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -86,11 +96,7 @@ function App() {
               path="/dashboard" 
               element={
                 <ProtectedRoute>
-                  {({ userRole }) => {
-                    if (userRole === 'admin') return <Navigate to="/admin" replace />;
-                    if (userRole === 'judge') return <Navigate to="/judge" replace />;
-                    return <Navigate to="/user" replace />;
-                  }}
+                  <DashboardRedirect />
                 </ProtectedRoute>
               } 
             />
