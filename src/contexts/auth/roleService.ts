@@ -11,12 +11,11 @@ export const fetchUserRole = async (userId: string): Promise<UserRole> => {
       return 'user'; // Default to user role if no userId is provided
     }
     
-    // Direct SQL query to fetch the role to avoid potential RLS issues
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .maybeSingle();
+      .maybeSingle(); // Using maybeSingle instead of single to avoid errors when no role is found
     
     if (error) {
       console.error('Error fetching user role:', error.message, error.details);
