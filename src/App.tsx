@@ -116,6 +116,7 @@ function App() {
                   <Route path="profile" element={<UserProfile />} />
                   <Route path="products" element={<UserProducts />} />
                   <Route path="products/submit" element={<SubmitProductPage />} />
+                  <Route path="products/edit/:productId" element={<EditProductPage />} />
                   <Route path="settings" element={<UserSettings />} />
                   <Route path="saved" element={<SavedProductsPage />} />
                 </Route>

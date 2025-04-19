@@ -91,7 +91,7 @@ const UserProductCard: React.FC<UserProductCardProps> = ({ product }) => {
         <CardFooter className="flex justify-between pt-2">
           <div className="flex gap-2">
             <Button variant="outline" size="sm" asChild>
-              <Link to={`/products/edit/${product.id}`}>
+              <Link to={`/user/products/edit/${product.id}`}>
                 <Edit className="h-3.5 w-3.5 mr-1" />
                 Edit
               </Link>
