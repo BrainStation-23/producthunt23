@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -112,6 +111,8 @@ function App() {
             >
               <Route index element={<AdminDashboard />} />
               <Route path="products" element={<AdminProducts />} />
+              <Route path="products/submit" element={<SubmitProductPage />} />
+              <Route path="products/edit/:productId" element={<EditProductPage />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="profile" element={<AdminProfile />} />

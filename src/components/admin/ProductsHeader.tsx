@@ -13,7 +13,7 @@ const ProductsHeader: React.FC = () => {
         <h1 className="text-3xl font-bold tracking-tight">Products</h1>
         <p className="text-muted-foreground">Manage all products on the platform.</p>
       </div>
-      <Button className="sm:w-auto w-full" onClick={() => navigate('/products/submit')}>
+      <Button className="sm:w-auto w-full" onClick={() => navigate('/admin/products/submit')}>
         <Plus className="mr-2 h-4 w-4" />
         Add Product
       </Button>
