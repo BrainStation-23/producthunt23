@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Bell, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getDashboardPathForRole } from '@/utils/navigation';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -27,13 +27,14 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
   const { user, userRole, signOut } = useAuth();
+  const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   
   // Determine if user is actually logged in from auth context
   const userIsLoggedIn = !!user;
   
-  // Determine dashboard path based on role
-  const dashboardPath = '/dashboard';
+  // Get dashboard path based on role
+  const dashboardPath = getDashboardPathForRole(userRole);
 
   // Fetch avatar URL from profiles table when user changes
   useEffect(() => {

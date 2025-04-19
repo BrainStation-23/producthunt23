@@ -1,11 +1,13 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
+import { getDashboardPathForRole } from '@/utils/navigation';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
+  const { userRole } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,13 +37,15 @@ const AuthCallback: React.FC = () => {
           throw new Error("Your account has been suspended. Please contact an administrator.");
         }
         
-        // We've successfully authenticated, redirect to dashboard
-        // The RoleRedirect component will handle routing to the appropriate dashboard
+        // Get the appropriate dashboard path based on user role
+        const dashboardPath = getDashboardPathForRole(userRole);
+        
+        // We've successfully authenticated, redirect to the role-specific dashboard
         toast.success('Login successful');
         
         // Use setTimeout to ensure the redirect happens after state updates
         setTimeout(() => {
-          navigate('/dashboard', { replace: true });
+          navigate(dashboardPath, { replace: true });
         }, 100);
       } catch (error: any) {
         console.error('Error during authentication callback:', error);
@@ -52,7 +56,7 @@ const AuthCallback: React.FC = () => {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, userRole]);
 
   if (error) {
     return (
