@@ -122,7 +122,7 @@ const UserProducts: React.FC = () => {
           <p className="text-muted-foreground">Manage your submitted products and products you're a maker on.</p>
         </div>
         <Button asChild>
-          <Link to="/products/submit">
+          <Link to="/user/products/submit">
             <Plus className="mr-2 h-4 w-4" />
             Add New Product
           </Link>
