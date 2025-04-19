@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Bell, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRole } from '@/contexts/RoleContext';
 import { supabase } from '@/integrations/supabase/client';
 import ProductSearch from '@/components/search/ProductSearch';
 import { 
@@ -21,23 +23,20 @@ import {
   getPrimaryColorClass 
 } from '@/config/appConfig';
 
-interface NavbarProps {
-  isLoggedIn?: boolean;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ isLoggedIn = false }) => {
-  const { user, userRole, signOut } = useAuth();
+const Navbar: React.FC = () => {
+  const { user, signOut } = useAuth();
+  const { userRole } = useRole();
   const navigate = useNavigate();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
   
-  // Determine if user is actually logged in from auth context
+  // Determine if user is actually logged in
   const userIsLoggedIn = !!user;
   
   // Get dashboard path based on role
   const dashboardPath = getDashboardPathForRole(userRole);
 
   // Fetch avatar URL from profiles table when user changes
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user) {
         setAvatarUrl(null);

@@ -2,13 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRole } from '@/contexts/RoleContext';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { getDashboardPathForRole } from '@/utils/navigation';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
-  const { userRole, isRoleFetched } = useAuth();
+  const { user } = useAuth();
+  const { userRole, isRoleFetched } = useRole();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
@@ -17,58 +19,42 @@ const AuthCallback: React.FC = () => {
       try {
         console.log("Auth callback started");
         
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Session error:", sessionError.message);
-          throw sessionError;
-        }
-        
-        if (!sessionData.session) {
-          console.error("No session found");
-          throw new Error("Authentication failed. No session found.");
-        }
-        
-        console.log("Session obtained, user:", sessionData.session.user.email);
-        
-        if (sessionData.session.user.app_metadata?.disabled) {
+        // Check for suspended user
+        if (user?.app_metadata?.disabled) {
           console.error("User account is suspended");
           await supabase.auth.signOut();
           throw new Error("Your account has been suspended. Please contact an administrator.");
         }
-
-        // Wait for role to be fetched
+        
+        // Only proceed if the role has been fetched
         if (!isRoleFetched) {
           console.log("Waiting for role to be fetched...");
           return;
         }
+
+        console.log("Role fetched:", userRole);
         
-        let dashboardPath = '/';
+        // Determine redirect path based on user role
+        const dashboardPath = getDashboardPathForRole(userRole);
+        console.log("Redirecting to dashboard:", dashboardPath);
         
-        if (userRole) {
-          dashboardPath = getDashboardPathForRole(userRole);
-          console.log("Redirecting to dashboard:", dashboardPath);
-        } else {
-          console.log("No role found, redirecting to home page");
-        }
-        
+        // Complete the authentication flow
         toast.success('Login successful');
         setIsProcessing(false);
-        
         navigate(dashboardPath, { replace: true });
       } catch (error: any) {
         console.error('Error during authentication callback:', error);
         setError(error.message);
         toast.error(`Authentication failed: ${error.message}`);
         setIsProcessing(false);
-        navigate('/');  // Navigate to home page on error instead of login
+        navigate('/', { replace: true });
       }
     };
 
     if (isProcessing) {
       handleAuthCallback();
     }
-  }, [navigate, userRole, isRoleFetched, isProcessing]);
+  }, [navigate, user, userRole, isRoleFetched, isProcessing]);
 
   if (error) {
     return (
@@ -88,19 +74,15 @@ const AuthCallback: React.FC = () => {
   }
 
   // Show loading state while waiting for role
-  if (isProcessing || !isRoleFetched) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-lg">Completing authentication...</p>
-          <p className="text-sm text-muted-foreground mt-2">You will be redirected shortly</p>
-        </div>
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p className="text-lg">Completing authentication...</p>
+        <p className="text-sm text-muted-foreground mt-2">You will be redirected shortly</p>
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 };
 
 export default AuthCallback;

@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const LogoutPage: React.FC = () => {
   const { signOut } = useAuth();

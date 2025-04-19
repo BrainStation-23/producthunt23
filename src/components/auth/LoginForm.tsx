@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -32,6 +31,7 @@ const LoginForm: React.FC = () => {
   const [isGithubLoading, setIsGithubLoading] = useState(false);
   const [isLinkedInLoading, setIsLinkedInLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -45,7 +45,7 @@ const LoginForm: React.FC = () => {
     try {
       setIsLoading(true);
       await signIn(data.email, data.password);
-      navigate('/dashboard');
+      // Auth callback will handle the redirect
     } catch (error) {
       console.error('Login error:', error);
       // Error handling is done in AuthContext
@@ -60,7 +60,6 @@ const LoginForm: React.FC = () => {
       await signInWithGithub();
     } catch (error) {
       console.error('GitHub login error:', error);
-      // Error handling is done in AuthContext
     } finally {
       setIsGithubLoading(false);
     }
@@ -72,7 +71,6 @@ const LoginForm: React.FC = () => {
       await signInWithLinkedIn();
     } catch (error) {
       console.error('LinkedIn login error:', error);
-      // Error handling is done in AuthContext
     } finally {
       setIsLinkedInLoading(false);
     }

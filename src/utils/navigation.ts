@@ -2,6 +2,10 @@
 import { UserRole } from '@/contexts/auth/types';
 
 export const getDashboardPathForRole = (role: UserRole): string => {
+  if (!role) {
+    return '/';
+  }
+  
   switch (role) {
     case 'admin':
       return '/admin';
