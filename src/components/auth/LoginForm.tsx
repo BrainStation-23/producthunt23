@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -31,7 +31,6 @@ const LoginForm: React.FC = () => {
   const [isGithubLoading, setIsGithubLoading] = useState(false);
   const [isLinkedInLoading, setIsLinkedInLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -45,7 +44,8 @@ const LoginForm: React.FC = () => {
     try {
       setIsLoading(true);
       await signIn(data.email, data.password);
-      // Auth callback will handle the redirect
+      // After successful sign in, redirect to auth callback
+      navigate('/auth/callback', { replace: true });
     } catch (error) {
       console.error('Login error:', error);
       // Error handling is done in AuthContext
