@@ -4,14 +4,10 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
-interface MainLayoutProps {
-  isLoggedIn?: boolean;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({ isLoggedIn = false }) => {
+const MainLayout: React.FC = () => {
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar isLoggedIn={isLoggedIn} />
+      <Navbar />
       <main className="flex-1">
         <div className="animate-fade-in">
           <Outlet />
