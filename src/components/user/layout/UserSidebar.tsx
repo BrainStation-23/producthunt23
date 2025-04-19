@@ -7,7 +7,6 @@ import {
   Heart, 
   Settings, 
   LogOut,
-  MessageSquare,
   User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -71,14 +70,6 @@ const UserSidebar: React.FC<UserSidebarProps> = ({ onLogout }) => {
                   <Link to="/user/saved">
                     <Heart className="h-4 w-4" />
                     <span>Saved</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/user/messages">
-                    <MessageSquare className="h-4 w-4" />
-                    <span>Messages</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

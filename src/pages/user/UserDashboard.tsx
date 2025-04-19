@@ -23,7 +23,6 @@ const UserDashboard: React.FC = () => {
           products: data.products.count,
           savedProducts: data.savedProducts.count,
           activity: data.activity.count,
-          messages: data.messages.count
         }} 
       />
       
