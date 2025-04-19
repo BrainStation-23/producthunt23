@@ -147,6 +147,7 @@ function App() {
               <Route index element={<UserDashboard />} />
               <Route path="profile" element={<UserProfile />} />
               <Route path="products" element={<UserProducts />} />
+              <Route path="products/submit" element={<SubmitProductPage />} />
               <Route path="settings" element={<UserSettings />} />
               <Route path="saved" element={<SavedProductsPage />} />
             </Route>

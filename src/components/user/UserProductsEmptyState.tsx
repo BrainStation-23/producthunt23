@@ -15,7 +15,7 @@ const UserProductsEmptyState: React.FC = () => {
         You haven't submitted any products yet. Get started by creating your first product listing.
       </p>
       <Button asChild>
-        <Link to="/products/submit">
+        <Link to="/user/products/submit">
           <Plus className="mr-2 h-4 w-4" />
           Submit a Product
         </Link>

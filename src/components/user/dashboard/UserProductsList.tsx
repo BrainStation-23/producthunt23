@@ -57,7 +57,7 @@ const UserProductsList: React.FC<UserProductsListProps> = ({ isLoading, products
       </CardContent>
       <CardFooter>
         <Button asChild>
-          <Link to="/products/submit">Submit a product</Link>
+          <Link to="/user/products/submit">Submit a product</Link>
         </Button>
       </CardFooter>
     </Card>
