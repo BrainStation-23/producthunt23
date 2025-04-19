@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,6 +40,8 @@ const AuthCallback: React.FC = () => {
         // Complete the authentication flow
         toast.success('Login successful');
         setIsProcessing(false);
+        
+        // Use replace to prevent back navigation to the auth callback
         navigate(dashboardPath, { replace: true });
       } catch (error: any) {
         console.error('Error during authentication callback:', error);
@@ -51,7 +52,8 @@ const AuthCallback: React.FC = () => {
       }
     };
 
-    if (isProcessing) {
+    // Only run the callback once when we have the user and role information
+    if (isProcessing && user && isRoleFetched) {
       handleAuthCallback();
     }
   }, [navigate, user, userRole, isRoleFetched, isProcessing]);

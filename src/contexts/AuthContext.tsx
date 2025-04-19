@@ -29,6 +29,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Auth event:', event, 'User:', newSession?.user?.email || 'No user');
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        
+        // Clear role cache on sign out
+        if (event === 'SIGNED_OUT') {
+          localStorage.removeItem('cached_user_role');
+          localStorage.removeItem('cached_user_id');
+        }
       }
     );
 
