@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,8 +8,9 @@ import { getDashboardPathForRole } from '@/utils/navigation';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
-  const { userRole } = useAuth();
+  const { userRole, isRoleFetched } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -36,27 +38,35 @@ const AuthCallback: React.FC = () => {
           await supabase.auth.signOut();
           throw new Error("Your account has been suspended. Please contact an administrator.");
         }
+
+        // Wait for role to be fetched
+        if (!isRoleFetched) {
+          console.log("Waiting for role to be fetched...");
+          return;
+        }
         
         // Get the appropriate dashboard path based on user role
         const dashboardPath = getDashboardPathForRole(userRole);
+        console.log("Redirecting to dashboard:", dashboardPath);
         
         // We've successfully authenticated, redirect to the role-specific dashboard
         toast.success('Login successful');
+        setIsProcessing(false);
         
-        // Use setTimeout to ensure the redirect happens after state updates
-        setTimeout(() => {
-          navigate(dashboardPath, { replace: true });
-        }, 100);
+        navigate(dashboardPath, { replace: true });
       } catch (error: any) {
         console.error('Error during authentication callback:', error);
         setError(error.message);
         toast.error(`Authentication failed: ${error.message}`);
+        setIsProcessing(false);
         navigate('/login');
       }
     };
 
-    handleAuthCallback();
-  }, [navigate, userRole]);
+    if (isProcessing) {
+      handleAuthCallback();
+    }
+  }, [navigate, userRole, isRoleFetched, isProcessing]);
 
   if (error) {
     return (
@@ -75,15 +85,20 @@ const AuthCallback: React.FC = () => {
     );
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-lg">Completing authentication...</p>
-        <p className="text-sm text-muted-foreground mt-2">You will be redirected shortly</p>
+  // Show loading state while waiting for role
+  if (isProcessing || !isRoleFetched) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-lg">Completing authentication...</p>
+          <p className="text-sm text-muted-foreground mt-2">You will be redirected shortly</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 };
 
 export default AuthCallback;
