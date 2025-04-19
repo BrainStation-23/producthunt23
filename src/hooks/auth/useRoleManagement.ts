@@ -13,8 +13,10 @@ export const useRoleManagement = (user: User | null) => {
 
     const fetchAndSetUserRole = async () => {
       if (!user) {
-        setUserRole(null);
-        setIsRoleFetched(true);
+        if (mounted) {
+          setUserRole(null);
+          setIsRoleFetched(true);
+        }
         return;
       }
 
@@ -22,21 +24,20 @@ export const useRoleManagement = (user: User | null) => {
         console.log('Fetching role for:', user.id);
         const role = await fetchUserRole(user.id);
         if (mounted) {
-          console.log('Setting user role:', role);
           setUserRole(role);
           setIsRoleFetched(true);
         }
       } catch (error) {
         console.error('Error fetching user role:', error);
         if (mounted) {
-          setUserRole('user');
+          setUserRole('user'); // Default to user role on error
           setIsRoleFetched(true);
         }
       }
     };
 
-    // Only fetch the role when the user changes
-    if (!isRoleFetched || user?.id !== userRole) {
+    // Only fetch if role isn't fetched yet or user has changed
+    if (!isRoleFetched || user?.id) {
       setIsRoleFetched(false);
       fetchAndSetUserRole();
     }
@@ -44,7 +45,7 @@ export const useRoleManagement = (user: User | null) => {
     return () => {
       mounted = false;
     };
-  }, [user]);  // Only depend on the user object
+  }, [user]); // Only depend on user changes
 
   return {
     userRole,

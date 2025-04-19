@@ -10,6 +10,6 @@ export const getDashboardPathForRole = (role: UserRole): string => {
     case 'user':
       return '/user';
     default:
-      return '/login';
+      return '/';  // Return home page as fallback
   }
 };

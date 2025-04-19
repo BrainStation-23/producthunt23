@@ -17,7 +17,6 @@ const AuthCallback: React.FC = () => {
       try {
         console.log("Auth callback started");
         
-        // Get the current session
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -32,7 +31,6 @@ const AuthCallback: React.FC = () => {
         
         console.log("Session obtained, user:", sessionData.session.user.email);
         
-        // Check if user is disabled
         if (sessionData.session.user.app_metadata?.disabled) {
           console.error("User account is suspended");
           await supabase.auth.signOut();
@@ -45,11 +43,15 @@ const AuthCallback: React.FC = () => {
           return;
         }
         
-        // Get the appropriate dashboard path based on user role
-        const dashboardPath = getDashboardPathForRole(userRole);
-        console.log("Redirecting to dashboard:", dashboardPath);
+        let dashboardPath = '/';
         
-        // We've successfully authenticated, redirect to the role-specific dashboard
+        if (userRole) {
+          dashboardPath = getDashboardPathForRole(userRole);
+          console.log("Redirecting to dashboard:", dashboardPath);
+        } else {
+          console.log("No role found, redirecting to home page");
+        }
+        
         toast.success('Login successful');
         setIsProcessing(false);
         
@@ -59,7 +61,7 @@ const AuthCallback: React.FC = () => {
         setError(error.message);
         toast.error(`Authentication failed: ${error.message}`);
         setIsProcessing(false);
-        navigate('/login');
+        navigate('/');  // Navigate to home page on error instead of login
       }
     };
 
