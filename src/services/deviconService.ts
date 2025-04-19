@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 
 export interface DeviconItem {
@@ -27,9 +28,25 @@ export const fetchDeviconData = async (): Promise<DeviconItem[]> => {
       throw new Error('Failed to fetch devicon data');
     }
     
-    const data: DeviconItem[] = await response.json();
-    cachedDeviconData = data;
-    return data;
+    const data = await response.json();
+    
+    // Ensure aliases and tags are always string arrays
+    const validatedData: DeviconItem[] = data.map((item: any) => ({
+      name: item.name || '',
+      aliases: Array.isArray(item.aliases) 
+        ? item.aliases.filter((alias: any) => typeof alias === 'string')
+        : [],
+      tags: Array.isArray(item.tags) 
+        ? item.tags.filter((tag: any) => typeof tag === 'string')
+        : [],
+      versions: {
+        svg: Array.isArray(item.versions?.svg) ? item.versions.svg : [],
+        font: Array.isArray(item.versions?.font) ? item.versions.font : []
+      }
+    }));
+    
+    cachedDeviconData = validatedData;
+    return validatedData;
   } catch (error) {
     console.error('Error fetching devicon data:', error);
     return [];
@@ -147,15 +164,19 @@ export const getRelatedTechnologies = (techName: string, allTechs: DeviconItem[]
   if (relationships[techLower]) {
     // Filter to make sure we only return technologies that exist in our dataset
     return relationships[techLower].filter(tech => 
-      allTechs.some(t => t.name === tech || t.aliases.includes(tech) || t.tags.includes(tech))
+      allTechs.some(t => 
+        t.name === tech || 
+        (Array.isArray(t.aliases) && t.aliases.some(a => typeof a === 'string' && a === tech)) || 
+        (Array.isArray(t.tags) && t.tags.some(tag => typeof tag === 'string' && tag === tech))
+      )
     );
   }
   
   // Otherwise, find technologies with similar tags
   const tech = allTechs.find(t => 
     t.name === techLower || 
-    t.aliases.includes(techLower) || 
-    t.tags.includes(techLower)
+    (Array.isArray(t.aliases) && t.aliases.some(a => typeof a === 'string' && a === techLower)) || 
+    (Array.isArray(t.tags) && t.tags.some(tag => typeof tag === 'string' && tag === techLower))
   );
   
   if (tech) {
@@ -163,8 +184,14 @@ export const getRelatedTechnologies = (techName: string, allTechs: DeviconItem[]
     return allTechs
       .filter(t => 
         t.name !== tech.name && // Don't include the original tech
-        (t.tags.some(tag => tech.tags.includes(tag)) || // Has common tags
-         tech.tags.some(tag => t.tags.includes(tag)))   // Has common tags
+        (
+          // Safely check for shared tags
+          Array.isArray(t.tags) && Array.isArray(tech.tags) &&
+          (
+            t.tags.some(tag => typeof tag === 'string' && tech.tags.includes(tag)) ||
+            tech.tags.some(tag => typeof tag === 'string' && t.tags.includes(tag))
+          )
+        )
       )
       .slice(0, 5) // Limit to 5 related technologies
       .map(t => t.name);

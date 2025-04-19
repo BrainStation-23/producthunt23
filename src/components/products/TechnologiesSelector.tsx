@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -76,8 +75,12 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
     const searchLower = searchTerm.toLowerCase();
     return deviconData.filter(tech => 
       tech.name.toLowerCase().includes(searchLower) || 
-      tech.aliases.some(alias => alias.toLowerCase().includes(searchLower)) ||
-      tech.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      tech.aliases && Array.isArray(tech.aliases) && tech.aliases.some(alias => 
+        typeof alias === 'string' && alias.toLowerCase().includes(searchLower)
+      ) || 
+      tech.tags && Array.isArray(tech.tags) && tech.tags.some(tag => 
+        typeof tag === 'string' && tag.toLowerCase().includes(searchLower)
+      )
     );
   }, [deviconData, searchTerm, activeTab, categorizedTechs]);
   
