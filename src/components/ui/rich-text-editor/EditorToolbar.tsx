@@ -130,7 +130,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         
         <button
           type="button"
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const previousUrl = editor.getAttributes('link').href;
             setIsLinkDialogOpen(true);
           }}

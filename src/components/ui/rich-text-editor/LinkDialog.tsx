@@ -22,6 +22,7 @@ const LinkDialog: React.FC<LinkDialogProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent event from bubbling up to parent forms
     onSubmit(url);
     onClose();
   };
@@ -48,7 +49,9 @@ const LinkDialog: React.FC<LinkDialogProps> = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">Add Link</Button>
+            <Button type="submit" onClick={(e) => e.stopPropagation()}>
+              Add Link
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

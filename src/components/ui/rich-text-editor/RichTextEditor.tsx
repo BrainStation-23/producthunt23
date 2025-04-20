@@ -1,13 +1,12 @@
+
 import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import CharacterCount from '@tiptap/extension-character-count';
-import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
 import { EditorProps } from './types';
 import EditorToolbar from './EditorToolbar';
-import EditorBubbleMenu from './EditorBubbleMenu';
 import EditorFooter from './EditorFooter';
 
 const RichTextEditor: React.FC<EditorProps> = ({
@@ -26,7 +25,6 @@ const RichTextEditor: React.FC<EditorProps> = ({
       CharacterCount.configure({
         limit: maxLength,
       }),
-      BubbleMenuExtension,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -71,7 +69,6 @@ const RichTextEditor: React.FC<EditorProps> = ({
 
   return (
     <div className={`border rounded-md relative ${className}`}>
-      <EditorBubbleMenu editor={editor} />
       <EditorToolbar editor={editor} />
       <EditorContent editor={editor} className="overflow-y-auto" />
       <EditorFooter editor={editor} maxLength={maxLength} />
