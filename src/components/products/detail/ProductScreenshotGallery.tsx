@@ -83,7 +83,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
               </Button>
             </div>
             
-            <Carousel className="w-full h-full">
+            <Carousel className="w-full h-full" defaultIndex={currentImageIndex}>
               <CarouselContent>
                 {screenshots.map((screenshot, index) => (
                   <CarouselItem key={screenshot.id} className="h-full flex items-center justify-center">
