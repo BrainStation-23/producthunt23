@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { ProductFormValues } from '@/types/product';
@@ -64,7 +63,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ form }) => {
             label="Description*"
             placeholder="Describe your product in detail"
             description="A comprehensive description of your product, its features, and benefits."
-            maxLength={2000}
+            maxLength={10000}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

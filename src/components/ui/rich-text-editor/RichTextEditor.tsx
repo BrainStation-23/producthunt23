@@ -1,10 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import CharacterCount from '@tiptap/extension-character-count';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
+import Link from '@tiptap/extension-link';
 import { EditorProps } from './types';
 import EditorToolbar from './EditorToolbar';
 import EditorBubbleMenu from './EditorBubbleMenu';
@@ -13,7 +13,7 @@ import EditorFooter from './EditorFooter';
 const RichTextEditor: React.FC<EditorProps> = ({
   value,
   onChange,
-  maxLength = 2000,
+  maxLength = 10000,
   placeholder = 'Start typing...',
   className,
 }) => {
@@ -29,6 +29,12 @@ const RichTextEditor: React.FC<EditorProps> = ({
       BubbleMenuExtension,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-primary underline underline-offset-4 hover:text-primary/80',
+        },
       }),
     ],
     content: value,
