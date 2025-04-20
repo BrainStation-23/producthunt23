@@ -57,6 +57,15 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
     }, 100);
   };
 
+  // Function to handle delete click that first closes the dropdown
+  const onDeleteClick = (productId: string) => {
+    setIsDropdownOpen(false);
+    // Add a small delay to ensure dropdown is closed before opening delete dialog
+    setTimeout(() => {
+      handleDeleteClick(productId);
+    }, 100);
+  };
+
   // Reset feedback when dialog is closed
   const handleDialogClose = (open: boolean) => {
     if (!open) {
@@ -86,7 +95,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = ({
             isOpen={isDropdownOpen}
             setIsOpen={setIsDropdownOpen}
             onEditClick={handleEditProduct}
-            onDeleteClick={handleDeleteClick}
+            onDeleteClick={onDeleteClick}
             onStatusChange={handleStatusChange}
             openRejectDialog={openRejectDialog}
           />
