@@ -7,13 +7,22 @@ import { useEvaluationSubmissions } from './hooks/useEvaluationSubmissions';
 interface EvaluationCriteriaFormProps {
   productId: string;
   criteria: JudgingCriteria[];
+  onHasChangesUpdate?: (hasChanges: boolean) => void;
 }
 
 const EvaluationCriteriaForm: React.FC<EvaluationCriteriaFormProps> = ({
   productId,
-  criteria
+  criteria,
+  onHasChangesUpdate
 }) => {
-  const { formValues, handleChange, isLoading } = useEvaluationSubmissions(productId);
+  const { formValues, handleChange, isLoading, hasChanges } = useEvaluationSubmissions(productId);
+
+  // Pass hasChanges to parent component when it changes
+  React.useEffect(() => {
+    if (onHasChangesUpdate) {
+      onHasChangesUpdate(hasChanges);
+    }
+  }, [hasChanges, onHasChangesUpdate]);
 
   if (isLoading) {
     return (

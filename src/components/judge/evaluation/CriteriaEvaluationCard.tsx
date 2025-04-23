@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import EvaluationCriteriaForm from './EvaluationCriteriaForm';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ interface CriteriaEvaluationCardProps {
   onSubmit: () => Promise<void>;
   isSaving: boolean;
   isCompleted: boolean;
-  hasChanges: boolean;
+  hasChanges?: boolean;
 }
 
 const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
@@ -22,8 +22,13 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
   onSubmit,
   isSaving,
   isCompleted,
-  hasChanges
+  hasChanges: externalHasChanges
 }) => {
+  const [internalHasChanges, setInternalHasChanges] = useState(false);
+  
+  // Use either the external hasChanges prop or the internal state
+  const hasChanges = externalHasChanges !== undefined ? externalHasChanges : internalHasChanges;
+
   return (
     <Card>
       <CardHeader>
@@ -33,6 +38,7 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
         <EvaluationCriteriaForm 
           productId={productId} 
           criteria={criteria}
+          onHasChangesUpdate={setInternalHasChanges}
         />
         
         <Separator className="my-6" />

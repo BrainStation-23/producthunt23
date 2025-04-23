@@ -70,7 +70,6 @@ const ProductEvaluation: React.FC = () => {
             onSubmit={handleCompleteEvaluation}
             isSaving={isSaving}
             isCompleted={status === 'completed'}
-            hasChanges={true}
           />
         </div>
       </div>
