@@ -7,13 +7,11 @@ import { CheckCircle } from 'lucide-react';
 interface CompleteEvaluationSectionProps {
   onComplete: () => Promise<void>;
   isSaving: boolean;
-  isCompleted: boolean;
 }
 
 const CompleteEvaluationSection: React.FC<CompleteEvaluationSectionProps> = ({
   onComplete,
-  isSaving,
-  isCompleted
+  isSaving
 }) => {
   return (
     <>
@@ -22,7 +20,7 @@ const CompleteEvaluationSection: React.FC<CompleteEvaluationSectionProps> = ({
         <Button 
           size="lg" 
           onClick={onComplete}
-          disabled={isSaving || isCompleted}
+          disabled={isSaving}
           className="bg-green-600 hover:bg-green-700"
         >
           <CheckCircle className="mr-2 h-5 w-5" />

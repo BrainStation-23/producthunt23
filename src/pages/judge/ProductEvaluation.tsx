@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useProductDetail } from '@/hooks/useProductDetail';
@@ -69,7 +68,6 @@ const ProductEvaluation: React.FC = () => {
             criteria={criteria}
             onComplete={handleCompleteEvaluation}
             isSaving={isSaving}
-            isCompleted={status === 'completed'}
           />
         </div>
       </div>

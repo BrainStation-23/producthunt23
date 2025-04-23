@@ -10,15 +10,13 @@ interface CriteriaEvaluationCardProps {
   criteria: JudgingCriteria[];
   onComplete: () => Promise<void>;
   isSaving: boolean;
-  isCompleted: boolean;
 }
 
 const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
   productId,
   criteria,
   onComplete,
-  isSaving,
-  isCompleted
+  isSaving
 }) => {
   return (
     <Card>
@@ -34,7 +32,6 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
         <CompleteEvaluationSection 
           onComplete={onComplete}
           isSaving={isSaving}
-          isCompleted={isCompleted}
         />
       </CardContent>
     </Card>
