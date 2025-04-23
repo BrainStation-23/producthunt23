@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import EvaluationCriteriaForm from './EvaluationCriteriaForm';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,6 @@ interface CriteriaEvaluationCardProps {
   onSubmit: () => Promise<void>;
   isSaving: boolean;
   isCompleted: boolean;
-  hasChanges?: boolean;
 }
 
 const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
@@ -21,14 +20,8 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
   criteria,
   onSubmit,
   isSaving,
-  isCompleted,
-  hasChanges: externalHasChanges
+  isCompleted
 }) => {
-  const [internalHasChanges, setInternalHasChanges] = useState(false);
-  
-  // Use either the external hasChanges prop or the internal state
-  const hasChanges = externalHasChanges !== undefined ? externalHasChanges : internalHasChanges;
-
   return (
     <Card>
       <CardHeader>
@@ -38,7 +31,6 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
         <EvaluationCriteriaForm 
           productId={productId} 
           criteria={criteria}
-          onHasChangesUpdate={setInternalHasChanges}
         />
         
         <Separator className="my-6" />
@@ -46,7 +38,7 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
           <Button 
             size="lg" 
             onClick={onSubmit}
-            disabled={isSaving || isCompleted || !hasChanges}
+            disabled={isSaving || isCompleted}
             className="bg-green-600 hover:bg-green-700"
           >
             <CheckCircle className="mr-2 h-5 w-5" />
