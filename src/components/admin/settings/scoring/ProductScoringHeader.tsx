@@ -2,40 +2,33 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue 
-} from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 
 interface ProductScoringHeaderProps {
   selectedProduct: string | null;
-  onProductSelect: (productId: string) => void;
 }
 
 export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
-  selectedProduct,
-  onProductSelect,
+  selectedProduct
 }) => {
   const { toast } = useToast();
   
-  const { data: products, isLoading, error } = useQuery({
-    queryKey: ['products-with-evaluations'],
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ['product-detail', selectedProduct],
     queryFn: async () => {
+      if (!selectedProduct) return null;
+      
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('id, name')
-          .eq('status', 'approved')
-          .order('name');
+          .select('id, name, tagline, image_url')
+          .eq('id', selectedProduct)
+          .single();
           
         if (error) {
           toast({
-            title: "Error loading products",
+            title: "Error loading product details",
             description: error.message,
             variant: "destructive",
           });
@@ -43,51 +36,46 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
         }
         return data;
       } catch (err) {
-        console.error("Error fetching products:", err);
+        console.error("Error fetching product details:", err);
         throw err;
       }
     },
-    meta: {
-      onError: (err: Error) => {
-        console.error("Products query error:", err);
-      }
-    }
+    enabled: !!selectedProduct
   });
 
-  if (error) {
+  if (isLoading) {
     return (
-      <div className="mb-6 text-destructive">
-        Error loading products. Please try again.
+      <div className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Loading product details...</span>
       </div>
     );
   }
 
+  if (error || !product) {
+    return null;
+  }
+
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-4">
-        <Select 
-          value={selectedProduct || ''} 
-          onValueChange={onProductSelect}
-          disabled={isLoading}
-        >
-          <SelectTrigger className="w-[300px]">
-            {isLoading ? (
-              <div className="flex items-center">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                <span>Loading products...</span>
-              </div>
-            ) : (
-              <SelectValue placeholder="Select a product to view scores" />
-            )}
-          </SelectTrigger>
-          <SelectContent>
-            {products?.map((product) => (
-              <SelectItem key={product.id} value={product.id}>
-                {product.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <div className="flex items-start gap-4">
+      {product.image_url ? (
+        <div className="h-16 w-16 rounded overflow-hidden shrink-0">
+          <img 
+            src={product.image_url} 
+            alt={product.name}
+            className="h-full w-full object-cover" 
+          />
+        </div>
+      ) : (
+        <div className="h-16 w-16 rounded bg-muted flex items-center justify-center shrink-0">
+          <span className="text-lg font-medium text-muted-foreground">
+            {product.name.substring(0, 2).toUpperCase()}
+          </span>
+        </div>
+      )}
+      <div>
+        <h2 className="text-2xl font-bold">{product.name}</h2>
+        <p className="text-muted-foreground">{product.tagline}</p>
       </div>
     </div>
   );
