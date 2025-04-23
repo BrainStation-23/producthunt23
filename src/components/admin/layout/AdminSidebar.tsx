@@ -8,7 +8,8 @@ import {
   LogOut,
   UserCircle,
   Award,
-  Star
+  Star,
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -87,6 +88,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onLogout }) => {
                   <Link to="/admin/scoring">
                     <Star className="h-4 w-4" />
                     <span>Scoring</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/admin/leaderboard">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Leaderboard</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

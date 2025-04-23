@@ -788,6 +788,18 @@ export type Database = {
           weight: number
         }[]
       }
+      get_product_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          product_id: string
+          product_name: string
+          product_image: string
+          total_score: number
+          avg_rating: number
+          judges_count: number
+          rank: number
+        }[]
+      }
       get_recent_error_logs: {
         Args: { limit_count?: number }
         Returns: {
