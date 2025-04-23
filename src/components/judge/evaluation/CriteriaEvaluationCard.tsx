@@ -20,7 +20,6 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
   criteria,
   onSubmit,
   isSaving,
-  isCompleted
 }) => {
   return (
     <Card>
@@ -38,7 +37,7 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
           <Button 
             size="lg" 
             onClick={onSubmit}
-            disabled={isSaving || isCompleted}
+            disabled={isSaving}
             className="bg-green-600 hover:bg-green-700"
           >
             <CheckCircle className="mr-2 h-5 w-5" />

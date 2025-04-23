@@ -1,14 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { useJudgeAssignments } from '@/hooks/useJudgeAssignments';
 import { useEvaluationNotes } from './useEvaluationNotes';
 import { useEvaluationStatus } from './useEvaluationStatus';
-import { AssignedProduct } from '@/components/admin/settings/judging/types';
 
 export const useEvaluationState = (productId: string | undefined) => {
-  const navigate = useNavigate();
   const { assignedProducts } = useJudgeAssignments();
   const currentProduct = assignedProducts.find(p => p.id === productId);
   
@@ -25,7 +21,7 @@ export const useEvaluationState = (productId: string | undefined) => {
   const {
     handleCompleteEvaluation,
     isSaving: isStatusSaving
-  } = useEvaluationStatus(productId, notes, priority, navigate);
+  } = useEvaluationStatus(productId, notes, priority);
 
   const isSaving = isNoteSaving || isStatusSaving;
 
