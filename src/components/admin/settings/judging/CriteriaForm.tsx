@@ -79,19 +79,24 @@ const CriteriaForm: React.FC<CriteriaFormProps> = ({
 
   const onSubmit = async (data: CriteriaFormValues) => {
     try {
-      if (data.type !== 'rating') {
-        data.min_value = null;
-        data.max_value = null;
-      }
+      // Make sure required fields are not undefined in the submission data
+      const submissionData = {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        min_value: data.type === 'rating' ? data.min_value : null,
+        max_value: data.type === 'rating' ? data.max_value : null,
+        weight: data.weight,
+      };
 
       const { error } = isEditing 
         ? await supabase
             .from('judging_criteria')
-            .update(data)
+            .update(submissionData)
             .eq('id', criteria.id)
         : await supabase
             .from('judging_criteria')
-            .insert([data]);
+            .insert([submissionData]);
 
       if (error) throw error;
       
