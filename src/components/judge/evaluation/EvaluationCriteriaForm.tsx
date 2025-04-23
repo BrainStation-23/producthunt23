@@ -8,14 +8,16 @@ interface EvaluationCriteriaFormProps {
   productId: string;
   criteria: JudgingCriteria[];
   onHasChangesUpdate?: (hasChanges: boolean) => void;
+  onSaveSubmissionsReady?: (saveFunc: () => Promise<any>) => void;
 }
 
 const EvaluationCriteriaForm: React.FC<EvaluationCriteriaFormProps> = ({
   productId,
   criteria,
-  onHasChangesUpdate
+  onHasChangesUpdate,
+  onSaveSubmissionsReady
 }) => {
-  const { formValues, handleChange, isLoading, hasChanges } = useEvaluationSubmissions(productId);
+  const { formValues, handleChange, isLoading, saveSubmissions, hasChanges } = useEvaluationSubmissions(productId);
 
   // Pass hasChanges to parent component when it changes
   React.useEffect(() => {
@@ -23,6 +25,13 @@ const EvaluationCriteriaForm: React.FC<EvaluationCriteriaFormProps> = ({
       onHasChangesUpdate(hasChanges);
     }
   }, [hasChanges, onHasChangesUpdate]);
+
+  // Expose the saveSubmissions function to the parent component
+  React.useEffect(() => {
+    if (onSaveSubmissionsReady) {
+      onSaveSubmissionsReady(saveSubmissions.mutateAsync);
+    }
+  }, [saveSubmissions.mutateAsync, onSaveSubmissionsReady]);
 
   if (isLoading) {
     return (
