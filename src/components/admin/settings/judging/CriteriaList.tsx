@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +19,7 @@ interface JudgingCriteria {
   max_value: number | null;
   created_at: string;
   updated_at: string;
+  weight: number;
 }
 
 const CriteriaList: React.FC = () => {
@@ -31,7 +31,6 @@ const CriteriaList: React.FC = () => {
   const { data: criteria, isLoading, refetch } = useQuery({
     queryKey: ['judgingCriteria'],
     queryFn: async () => {
-      // Use type assertion to work around TypeScript limitations
       const { data, error } = await (supabase
         .from('judging_criteria' as any)
         .select('*')
@@ -110,6 +109,7 @@ const CriteriaList: React.FC = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Weight</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -121,6 +121,7 @@ const CriteriaList: React.FC = () => {
                     {item.description || "-"}
                   </TableCell>
                   <TableCell>{renderTypeData(item)}</TableCell>
+                  <TableCell>{item.weight}x</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button size="icon" variant="ghost" onClick={() => handleEdit(item)}>

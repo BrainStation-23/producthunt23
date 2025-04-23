@@ -1,4 +1,3 @@
-
 export interface Judge {
   id: string;
   username: string | null;
@@ -32,6 +31,7 @@ export interface JudgingCriteria {
   type: 'rating' | 'boolean' | 'text';
   min_value?: number;
   max_value?: number;
+  weight: number;
 }
 
 export interface EvaluationSubmission {

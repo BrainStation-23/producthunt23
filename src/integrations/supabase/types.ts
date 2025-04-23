@@ -156,6 +156,7 @@ export type Database = {
           name: string
           type: string
           updated_at: string
+          weight: number
         }
         Insert: {
           created_at?: string
@@ -166,6 +167,7 @@ export type Database = {
           name: string
           type: string
           updated_at?: string
+          weight?: number
         }
         Update: {
           created_at?: string
@@ -176,6 +178,7 @@ export type Database = {
           name?: string
           type?: string
           updated_at?: string
+          weight?: number
         }
         Relationships: []
       }
@@ -782,6 +785,7 @@ export type Database = {
           count_judges: number
           count_true: number
           count_false: number
+          weight: number
         }[]
       }
       get_recent_error_logs: {

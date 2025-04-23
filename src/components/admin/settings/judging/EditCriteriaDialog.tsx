@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,11 +35,11 @@ const criteriaSchema = z.object({
   type: z.enum(["rating", "boolean", "text"]),
   min_value: z.number().nullable().optional(),
   max_value: z.number().nullable().optional(),
+  weight: z.number().min(0.1).max(10),
 }).refine((data) => {
-  // For rating type, require both min and max values
   if (data.type === "rating") {
     return data.min_value !== null && data.max_value !== null && 
-           data.min_value !== undefined && data.max_value !== undefined &&
+           data.min_value !== undefined && data.max_value !== undefined && 
            data.min_value < data.max_value;
   }
   return true;
@@ -65,13 +64,13 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
       type: criteria.type,
       min_value: criteria.min_value,
       max_value: criteria.max_value,
+      weight: 1,
     }
   });
 
   const { reset, watch, setValue } = form;
   const criteriaType = watch('type');
 
-  // Update form values when criteria changes
   useEffect(() => {
     reset({
       name: criteria.name,
@@ -79,18 +78,17 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
       type: criteria.type,
       min_value: criteria.min_value,
       max_value: criteria.max_value,
+      weight: 1,
     });
   }, [criteria, reset]);
 
   const onSubmit = async (data: CriteriaFormValues) => {
     try {
-      // For non-rating types, set min/max to null
       if (data.type !== 'rating') {
         data.min_value = null;
         data.max_value = null;
       }
 
-      // Use type assertion to work around TypeScript limitations
       const { error } = await (supabase
         .from('judging_criteria' as any)
         .update(data)
@@ -225,6 +223,27 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
                 />
               </div>
             )}
+            
+            <FormField
+              control={form.control}
+              name="weight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Weight (1 = 100%)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      step="0.1"
+                      min="0.1"
+                      max="10"
+                      {...field}
+                      onChange={e => field.onChange(parseFloat(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <DialogFooter>
               <Button 

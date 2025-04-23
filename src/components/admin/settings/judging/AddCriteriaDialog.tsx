@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,8 +23,8 @@ const criteriaSchema = z.object({
   type: z.enum(["rating", "boolean", "text"]),
   min_value: z.number().nullable().optional(),
   max_value: z.number().nullable().optional(),
+  weight: z.number().min(0.1).max(10).default(1),
 }).refine((data) => {
-  // For rating type, require both min and max values
   if (data.type === "rating") {
     return data.min_value !== null && data.max_value !== null && 
            data.min_value !== undefined && data.max_value !== undefined && 
@@ -52,6 +51,7 @@ const AddCriteriaDialog: React.FC<AddCriteriaDialogProps> = ({
       type: 'rating',
       min_value: 1,
       max_value: 10,
+      weight: 1,
     }
   });
 
@@ -60,13 +60,11 @@ const AddCriteriaDialog: React.FC<AddCriteriaDialogProps> = ({
 
   const onSubmit = async (data: CriteriaFormValues) => {
     try {
-      // For non-rating types, set min/max to null
       if (data.type !== 'rating') {
         data.min_value = null;
         data.max_value = null;
       }
 
-      // Use type assertion to work around TypeScript limitations
       const { error } = await (supabase
         .from('judging_criteria' as any)
         .insert([data]) as any);
@@ -201,6 +199,27 @@ const AddCriteriaDialog: React.FC<AddCriteriaDialogProps> = ({
                 />
               </div>
             )}
+            
+            <FormField
+              control={form.control}
+              name="weight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Weight (1 = 100%)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      step="0.1"
+                      min="0.1"
+                      max="10"
+                      {...field}
+                      onChange={e => field.onChange(parseFloat(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <DialogFooter>
               <Button 
