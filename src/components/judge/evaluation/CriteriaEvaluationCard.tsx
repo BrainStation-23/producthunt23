@@ -2,23 +2,27 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import EvaluationCriteriaForm from './EvaluationCriteriaForm';
-import CompleteEvaluationSection from './CompleteEvaluationSection';
+import { Button } from '@/components/ui/button';
+import { CheckCircle } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import { JudgingCriteria } from '@/components/admin/settings/judging/types';
 
 interface CriteriaEvaluationCardProps {
   productId: string;
   criteria: JudgingCriteria[];
-  onComplete: () => Promise<void>;
+  onSubmit: () => Promise<void>;
   isSaving: boolean;
   isCompleted: boolean;
+  hasChanges: boolean;
 }
 
 const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
   productId,
   criteria,
-  onComplete,
+  onSubmit,
   isSaving,
-  isCompleted
+  isCompleted,
+  hasChanges
 }) => {
   return (
     <Card>
@@ -31,11 +35,18 @@ const CriteriaEvaluationCard: React.FC<CriteriaEvaluationCardProps> = ({
           criteria={criteria}
         />
         
-        <CompleteEvaluationSection 
-          onComplete={onComplete}
-          isSaving={isSaving}
-          isCompleted={isCompleted}
-        />
+        <Separator className="my-6" />
+        <div className="flex justify-end">
+          <Button 
+            size="lg" 
+            onClick={onSubmit}
+            disabled={isSaving || isCompleted || !hasChanges}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <CheckCircle className="mr-2 h-5 w-5" />
+            Submit Evaluation
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

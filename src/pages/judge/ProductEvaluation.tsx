@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useProductDetail } from '@/hooks/useProductDetail';
@@ -24,7 +23,7 @@ const ProductEvaluation: React.FC = () => {
     status,
     priority,
     handleSaveNotes,
-    handleCompleteEvaluation,
+    handleSubmitEvaluation,
     currentProduct
   } = useEvaluationState(productId);
 
@@ -67,9 +66,10 @@ const ProductEvaluation: React.FC = () => {
           <CriteriaEvaluationCard
             productId={productId!}
             criteria={criteria}
-            onComplete={handleCompleteEvaluation}
+            onSubmit={handleSubmitEvaluation}
             isSaving={isSaving}
             isCompleted={status === 'completed'}
+            hasChanges={true}
           />
         </div>
       </div>
