@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -8,7 +7,8 @@ import {
   Settings, 
   LogOut,
   UserCircle,
-  Award
+  Award,
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -79,6 +79,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onLogout }) => {
                   <Link to="/admin/judging">
                     <Award className="h-4 w-4" />
                     <span>Judging</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/admin/scoring">
+                    <Star className="h-4 w-4" />
+                    <span>Scoring</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

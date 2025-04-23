@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { RoleProvider } from './contexts/RoleContext';
@@ -36,6 +35,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminProfile from './pages/admin/AdminProfile';
 import AdminJudging from './pages/admin/AdminJudging';
+import AdminScoring from './pages/admin/AdminScoring';
 
 // User Pages
 import UserDashboard from './pages/user/UserDashboard';
@@ -95,6 +95,7 @@ function App() {
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="profile" element={<AdminProfile />} />
                   <Route path="judging" element={<AdminJudging />} />
+                  <Route path="scoring" element={<AdminScoring />} />
                 </Route>
               </Route>
 
