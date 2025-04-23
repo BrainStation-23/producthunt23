@@ -7,31 +7,13 @@ import { useEvaluationSubmissions } from './hooks/useEvaluationSubmissions';
 interface EvaluationCriteriaFormProps {
   productId: string;
   criteria: JudgingCriteria[];
-  onHasChangesUpdate?: (hasChanges: boolean) => void;
-  onSaveSubmissionsReady?: (saveFunc: () => Promise<any>) => void;
 }
 
 const EvaluationCriteriaForm: React.FC<EvaluationCriteriaFormProps> = ({
   productId,
-  criteria,
-  onHasChangesUpdate,
-  onSaveSubmissionsReady
+  criteria
 }) => {
-  const { formValues, handleChange, isLoading, saveSubmissions, hasChanges } = useEvaluationSubmissions(productId);
-
-  // Pass hasChanges to parent component when it changes
-  React.useEffect(() => {
-    if (onHasChangesUpdate) {
-      onHasChangesUpdate(hasChanges);
-    }
-  }, [hasChanges, onHasChangesUpdate]);
-
-  // Expose the saveSubmissions function to the parent component
-  React.useEffect(() => {
-    if (onSaveSubmissionsReady) {
-      onSaveSubmissionsReady(saveSubmissions.mutateAsync);
-    }
-  }, [saveSubmissions.mutateAsync, onSaveSubmissionsReady]);
+  const { formValues, handleChange, isLoading } = useEvaluationSubmissions(productId);
 
   if (isLoading) {
     return (

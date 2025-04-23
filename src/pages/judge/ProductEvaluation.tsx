@@ -67,7 +67,7 @@ const ProductEvaluation: React.FC = () => {
           <CriteriaEvaluationCard
             productId={productId!}
             criteria={criteria}
-            onSubmit={handleCompleteEvaluation}
+            onComplete={handleCompleteEvaluation}
             isSaving={isSaving}
             isCompleted={status === 'completed'}
           />
