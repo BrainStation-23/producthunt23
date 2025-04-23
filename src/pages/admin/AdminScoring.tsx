@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { ProductScoringTable } from '@/components/admin/settings/scoring/ProductScoringTable';
 import { ProductScoringHeader } from '@/components/admin/settings/scoring/ProductScoringHeader';
+import { Toaster } from '@/components/ui/toaster';
 
 const AdminScoring = () => {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -24,6 +25,7 @@ const AdminScoring = () => {
         
         <ProductScoringTable productId={selectedProduct} />
       </Card>
+      <Toaster />
     </div>
   );
 };
