@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,7 +58,6 @@ export const useEvaluationSubmissions = (productId: string) => {
         throw new Error('No authenticated user found');
       }
 
-      // Check if submission exists
       const { data: existing } = await supabase
         .from('judging_submissions')
         .select('*')

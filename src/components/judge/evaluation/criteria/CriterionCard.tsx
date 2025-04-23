@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { JudgingCriteria } from '@/components/admin/settings/judging/types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -35,7 +34,7 @@ const CriterionCard: React.FC<CriterionCardProps> = ({
             onChange={(value) => onChangeValue(criterion.id, 'rating_value', value)}
           />
         )}
-
+        
         {criterion.type === 'boolean' && (
           <BooleanCriterion
             criterion={criterion}
