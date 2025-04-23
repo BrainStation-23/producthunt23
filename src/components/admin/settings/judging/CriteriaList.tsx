@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,22 +6,35 @@ import { toast } from 'sonner';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Edit, Trash2 } from 'lucide-react';
-import CriteriaForm from './CriteriaForm';
+import AddCriteriaDialog from './AddCriteriaDialog';
+import EditCriteriaDialog from './EditCriteriaDialog';
 import DeleteCriteriaDialog from './DeleteCriteriaDialog';
-import type { JudgingCriteria } from './types';
+
+interface JudgingCriteria {
+  id: string;
+  name: string;
+  description: string | null;
+  type: 'rating' | 'boolean' | 'text';
+  min_value: number | null;
+  max_value: number | null;
+  created_at: string;
+  updated_at: string;
+  weight: number;
+}
 
 const CriteriaList: React.FC = () => {
-  const [formOpen, setFormOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedCriteria, setSelectedCriteria] = useState<JudgingCriteria | undefined>();
+  const [selectedCriteria, setSelectedCriteria] = useState<JudgingCriteria | null>(null);
 
   const { data: criteria, isLoading, refetch } = useQuery({
     queryKey: ['judgingCriteria'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('judging_criteria')
+      const { data, error } = await (supabase
+        .from('judging_criteria' as any)
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any);
 
       if (error) {
         toast.error(`Failed to load criteria: ${error.message}`);
@@ -35,17 +47,12 @@ const CriteriaList: React.FC = () => {
 
   const handleEdit = (criteria: JudgingCriteria) => {
     setSelectedCriteria(criteria);
-    setFormOpen(true);
+    setEditDialogOpen(true);
   };
 
   const handleDelete = (criteria: JudgingCriteria) => {
     setSelectedCriteria(criteria);
     setDeleteDialogOpen(true);
-  };
-
-  const handleAddNew = () => {
-    setSelectedCriteria(undefined);
-    setFormOpen(true);
   };
 
   const renderTypeData = (criteria: JudgingCriteria) => {
@@ -88,7 +95,7 @@ const CriteriaList: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Judging Criteria</h3>
-        <Button onClick={handleAddNew}>
+        <Button onClick={() => setAddDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Criteria
         </Button>
@@ -133,30 +140,44 @@ const CriteriaList: React.FC = () => {
       ) : (
         <div className="border rounded-md p-8 text-center">
           <p className="text-muted-foreground">No judging criteria defined yet. Create one to get started.</p>
-          <Button className="mt-4" onClick={handleAddNew}>
+          <Button className="mt-4" onClick={() => setAddDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add First Criteria
           </Button>
         </div>
       )}
 
-      <CriteriaForm 
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSuccess={refetch}
-        criteria={selectedCriteria}
+      <AddCriteriaDialog 
+        open={addDialogOpen} 
+        onOpenChange={setAddDialogOpen} 
+        onCriteriaAdded={() => {
+          refetch();
+          toast.success("Criteria added successfully");
+        }} 
       />
 
       {selectedCriteria && (
-        <DeleteCriteriaDialog
-          open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
-          criteria={selectedCriteria}
-          onCriteriaDeleted={() => {
-            refetch();
-            toast.success("Criteria deleted successfully");
-          }}
-        />
+        <>
+          <EditCriteriaDialog
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            criteria={selectedCriteria}
+            onCriteriaUpdated={() => {
+              refetch();
+              toast.success("Criteria updated successfully");
+            }}
+          />
+
+          <DeleteCriteriaDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            criteria={selectedCriteria}
+            onCriteriaDeleted={() => {
+              refetch();
+              toast.success("Criteria deleted successfully");
+            }}
+          />
+        </>
       )}
     </div>
   );
