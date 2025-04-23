@@ -19,16 +19,28 @@ const UnassignedProducts: React.FC = () => {
     queryKey: ['unassignedProducts'],
     queryFn: async () => {
       try {
-        // This query gets products that don't have judge assignments
-        const { data, error } = await supabase
+        // First, get already assigned product IDs
+        const { data: assignedData, error: assignedError } = await supabase
+          .from('judge_assignments')
+          .select('product_id');
+
+        if (assignedError) throw assignedError;
+
+        // Extract product IDs from assigned data
+        const assignedProductIds = assignedData.map(item => item.product_id);
+
+        // Then fetch approved products that aren't in the assigned list
+        const query = supabase
           .from('products')
           .select('id, name, tagline, image_url, status, created_at')
-          .eq('status', 'approved')
-          .not('id', 'in', 
-            supabase.from('judge_assignments')
-              .select('product_id')
-          )
-          .order('created_at', { ascending: false });
+          .eq('status', 'approved');
+          
+        // Only filter by not-in if we have assigned products
+        if (assignedProductIds.length > 0) {
+          query.not('id', 'in', `(${assignedProductIds.join(',')})`);
+        }
+        
+        const { data, error } = await query.order('created_at', { ascending: false });
 
         if (error) throw error;
         return data as UnassignedProduct[];
