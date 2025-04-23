@@ -8,6 +8,17 @@ import { Card } from '@/components/ui/card';
 import LeaderboardTable from '@/components/admin/settings/scoring/LeaderboardTable';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 
+// Define the correct type for leaderboard items
+interface LeaderboardItem {
+  product_id: string;
+  product_name: string;
+  product_image: string | null;
+  total_score: number;
+  avg_rating: number;
+  judges_count: number;
+  rank: number | bigint;
+}
+
 const AdminLeaderboard = () => {
   const { toast } = useToast();
   useDocumentTitle('Product Leaderboard | Admin');
@@ -27,7 +38,15 @@ const AdminLeaderboard = () => {
           });
           throw error;
         }
-        return data;
+        
+        // Ensure the data is in the correct format
+        const formattedData = data?.map((item: any) => ({
+          ...item,
+          // Ensure rank is properly converted if needed
+          rank: typeof item.rank === 'bigint' ? Number(item.rank) : item.rank
+        }));
+        
+        return formattedData;
       } catch (err) {
         console.error("Error fetching leaderboard:", err);
         throw err;
