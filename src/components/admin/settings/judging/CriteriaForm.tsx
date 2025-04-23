@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,23 +11,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import type { JudgingCriteria } from './types';
 
-interface JudgingCriteria {
-  id: string;
-  name: string;
-  description: string | null;
-  type: 'rating' | 'boolean' | 'text';
-  min_value: number | null;
-  max_value: number | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface EditCriteriaDialogProps {
+interface CriteriaFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  criteria: JudgingCriteria;
-  onCriteriaUpdated: () => void;
+  onSuccess: () => void;
+  criteria?: JudgingCriteria;
 }
 
 const criteriaSchema = z.object({
@@ -35,7 +26,7 @@ const criteriaSchema = z.object({
   type: z.enum(["rating", "boolean", "text"]),
   min_value: z.number().nullable().optional(),
   max_value: z.number().nullable().optional(),
-  weight: z.number().min(0.1).max(10),
+  weight: z.number().min(0.1).max(10).default(1),
 }).refine((data) => {
   if (data.type === "rating") {
     return data.min_value !== null && data.max_value !== null && 
@@ -50,36 +41,40 @@ const criteriaSchema = z.object({
 
 type CriteriaFormValues = z.infer<typeof criteriaSchema>;
 
-const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({ 
+const CriteriaForm: React.FC<CriteriaFormProps> = ({ 
   open, 
   onOpenChange,
-  criteria,
-  onCriteriaUpdated 
+  onSuccess,
+  criteria 
 }) => {
+  const isEditing = !!criteria;
+  
   const form = useForm<CriteriaFormValues>({
     resolver: zodResolver(criteriaSchema),
     defaultValues: {
-      name: criteria.name,
-      description: criteria.description || '',
-      type: criteria.type,
-      min_value: criteria.min_value,
-      max_value: criteria.max_value,
-      weight: 1,
+      name: criteria?.name ?? '',
+      description: criteria?.description ?? '',
+      type: criteria?.type ?? 'rating',
+      min_value: criteria?.min_value ?? 1,
+      max_value: criteria?.max_value ?? 10,
+      weight: criteria?.weight ?? 1,
     }
   });
 
   const { reset, watch, setValue } = form;
   const criteriaType = watch('type');
 
-  useEffect(() => {
-    reset({
-      name: criteria.name,
-      description: criteria.description || '',
-      type: criteria.type,
-      min_value: criteria.min_value,
-      max_value: criteria.max_value,
-      weight: 1,
-    });
+  React.useEffect(() => {
+    if (criteria) {
+      reset({
+        name: criteria.name,
+        description: criteria.description ?? '',
+        type: criteria.type,
+        min_value: criteria.min_value,
+        max_value: criteria.max_value,
+        weight: criteria.weight,
+      });
+    }
   }, [criteria, reset]);
 
   const onSubmit = async (data: CriteriaFormValues) => {
@@ -89,17 +84,25 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
         data.max_value = null;
       }
 
-      const { error } = await (supabase
-        .from('judging_criteria' as any)
-        .update(data)
-        .eq('id', criteria.id) as any);
+      const { error } = isEditing 
+        ? await supabase
+            .from('judging_criteria')
+            .update(data)
+            .eq('id', criteria.id)
+        : await supabase
+            .from('judging_criteria')
+            .insert([data]);
 
       if (error) throw error;
       
-      onCriteriaUpdated();
+      onSuccess();
       onOpenChange(false);
+      if (!isEditing) {
+        reset();
+      }
+      toast.success(isEditing ? "Criteria updated successfully" : "Criteria added successfully");
     } catch (error: any) {
-      toast.error(`Failed to update criteria: ${error.message}`);
+      toast.error(`Failed to ${isEditing ? 'update' : 'add'} criteria: ${error.message}`);
     }
   };
 
@@ -107,8 +110,8 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
     setValue('type', type as 'rating' | 'boolean' | 'text');
     
     if (type === 'rating') {
-      setValue('min_value', criteria.min_value !== null ? criteria.min_value : 1);
-      setValue('max_value', criteria.max_value !== null ? criteria.max_value : 10);
+      setValue('min_value', criteria?.min_value ?? 1);
+      setValue('max_value', criteria?.max_value ?? 10);
     } else {
       setValue('min_value', null);
       setValue('max_value', null);
@@ -119,7 +122,7 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Judging Criteria</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit' : 'Add'} Judging Criteria</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -131,7 +134,7 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="e.g., Design Quality" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,6 +149,7 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Textarea 
+                      placeholder="Explain what judges should evaluate for this criteria" 
                       {...field} 
                       value={field.value || ''}
                     />
@@ -249,11 +253,14 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
               <Button 
                 type="button" 
                 variant="secondary" 
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  if (!isEditing) reset();
+                  onOpenChange(false);
+                }}
               >
                 Cancel
               </Button>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit">{isEditing ? 'Save Changes' : 'Add Criteria'}</Button>
             </DialogFooter>
           </form>
         </Form>
@@ -262,4 +269,4 @@ const EditCriteriaDialog: React.FC<EditCriteriaDialogProps> = ({
   );
 };
 
-export default EditCriteriaDialog;
+export default CriteriaForm;
