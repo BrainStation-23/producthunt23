@@ -77,16 +77,25 @@ export function useProductAssignment(judgeId: string, onAssignmentAdded: () => v
     );
   };
 
+  // Select all visible products
+  const selectAllProducts = () => {
+    if (selectedProducts.length === availableProducts.length) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(availableProducts.map(product => product.id));
+    }
+  };
+
   // Assign selected products to judge
   const handleAssignProducts = async () => {
     if (selectedProducts.length === 0) {
       toast.error('Please select at least one product');
-      return;
+      return false;
     }
 
     if (!currentUserId) {
       toast.error('Could not determine current user. Please try again.');
-      return;
+      return false;
     }
 
     try {
@@ -132,6 +141,7 @@ export function useProductAssignment(judgeId: string, onAssignmentAdded: () => v
     availableProducts,
     isLoading,
     toggleProductSelection,
+    selectAllProducts,
     handleAssignProducts
   };
 }

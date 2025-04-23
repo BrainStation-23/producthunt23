@@ -1,9 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { UserPlus } from 'lucide-react';
+import AssignJudgeDialog from '../AssignJudgeDialog';
+import { toast } from 'sonner';
 
 interface UnassignedProduct {
   id: string;
@@ -15,7 +19,10 @@ interface UnassignedProduct {
 }
 
 const UnassignedProducts: React.FC = () => {
-  const { data: products, isLoading } = useQuery({
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+
+  const { data: products, isLoading, refetch } = useQuery({
     queryKey: ['unassignedProducts'],
     queryFn: async () => {
       try {
@@ -51,6 +58,16 @@ const UnassignedProducts: React.FC = () => {
     }
   });
 
+  const handleAssignJudge = (productId: string) => {
+    setSelectedProductId(productId);
+    setAssignDialogOpen(true);
+  };
+
+  const handleAssignmentComplete = () => {
+    toast.success('Judge assigned successfully');
+    refetch();
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -83,26 +100,37 @@ const UnassignedProducts: React.FC = () => {
         {products && products.length > 0 ? (
           <div className="space-y-3">
             {products.map((product) => (
-              <div key={product.id} className="flex items-center gap-3">
-                <div className="h-12 w-12 bg-muted rounded-md overflow-hidden flex-shrink-0">
-                  {product.image_url ? (
-                    <img 
-                      src={product.image_url} 
-                      alt={product.name} 
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
-                      No img
-                    </div>
-                  )}
+              <div key={product.id} className="flex items-center justify-between gap-3 p-2 hover:bg-muted/30 rounded-md">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 bg-muted rounded-md overflow-hidden flex-shrink-0">
+                    {product.image_url ? (
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name} 
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
+                        No img
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium">{product.name}</h4>
+                    <p className="text-xs text-muted-foreground truncate max-w-60">
+                      {product.tagline}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-medium">{product.name}</h4>
-                  <p className="text-xs text-muted-foreground truncate max-w-60">
-                    {product.tagline}
-                  </p>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ml-auto"
+                  onClick={() => handleAssignJudge(product.id)}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Assign Judge
+                </Button>
               </div>
             ))}
           </div>
@@ -112,6 +140,15 @@ const UnassignedProducts: React.FC = () => {
           </p>
         )}
       </CardContent>
+
+      {selectedProductId && (
+        <AssignJudgeDialog
+          open={assignDialogOpen}
+          onOpenChange={setAssignDialogOpen}
+          productId={selectedProductId}
+          onAssignmentAdded={handleAssignmentComplete}
+        />
+      )}
     </Card>
   );
 };

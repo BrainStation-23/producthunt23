@@ -22,16 +22,35 @@ export const ProductAssignListItem: React.FC<ProductAssignListItemProps> = ({
 }) => {
   return (
     <div 
-      key={product.id} 
-      className="flex items-center space-x-3 p-2 hover:bg-accent rounded"
+      className={`flex items-center gap-3 p-2 rounded-md hover:bg-muted/40 ${
+        isSelected ? 'bg-muted/40' : ''
+      }`}
+      onClick={() => onToggleSelect(product.id)}
     >
-      <Checkbox
-        checked={isSelected}
+      <Checkbox 
+        checked={isSelected} 
         onCheckedChange={() => onToggleSelect(product.id)}
+        className="flex-shrink-0"
+        onClick={(e) => e.stopPropagation()}
       />
-      <div className="flex-1">
-        <div className="font-medium">{product.name}</div>
-        <div className="text-sm text-muted-foreground">{product.tagline}</div>
+      <div className="h-10 w-10 bg-muted rounded-md overflow-hidden flex-shrink-0">
+        {product.image_url ? (
+          <img 
+            src={product.image_url} 
+            alt={product.name} 
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
+            No img
+          </div>
+        )}
+      </div>
+      <div className="overflow-hidden">
+        <h4 className="text-sm font-medium truncate">{product.name}</h4>
+        <p className="text-xs text-muted-foreground truncate">
+          {product.tagline}
+        </p>
       </div>
     </div>
   );

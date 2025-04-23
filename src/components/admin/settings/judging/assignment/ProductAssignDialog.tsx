@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useProductAssignment } from './hooks/useProductAssignment';
 import { ProductAssignListItem } from './ProductAssignListItem';
 import { ProductAssignEmptyState } from './ProductAssignEmptyState';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ProductAssignDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
     availableProducts,
     isLoading,
     toggleProductSelection,
+    selectAllProducts,
     handleAssignProducts
   } = useProductAssignment(judgeId, onAssignmentAdded);
 
@@ -37,6 +39,10 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
       onOpenChange(false);
     }
   };
+
+  const areAllSelected = 
+    availableProducts.length > 0 && 
+    selectedProducts.length === availableProducts.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -55,6 +61,22 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        
+        {availableProducts.length > 0 && (
+          <div className="flex items-center mb-2">
+            <Checkbox 
+              id="select-all" 
+              checked={areAllSelected}
+              onCheckedChange={selectAllProducts}
+            />
+            <label 
+              htmlFor="select-all" 
+              className="ml-2 text-sm cursor-pointer"
+            >
+              Select all ({availableProducts.length})
+            </label>
+          </div>
+        )}
         
         <ScrollArea className="h-[300px] w-full">
           <div className="space-y-2">
@@ -91,3 +113,5 @@ export const ProductAssignDialog: React.FC<ProductAssignDialogProps> = ({
     </Dialog>
   );
 };
+
+export default ProductAssignDialog;
