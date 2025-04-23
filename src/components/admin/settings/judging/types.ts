@@ -28,7 +28,7 @@ export interface AssignedProduct {
 export interface JudgingCriteria {
   id: string;
   name: string;
-  description?: string;
+  description?: string | null;
   type: 'rating' | 'boolean' | 'text';
   min_value?: number | null;
   max_value?: number | null;
