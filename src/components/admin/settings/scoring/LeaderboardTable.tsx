@@ -17,7 +17,7 @@ interface LeaderboardItem {
   total_score: number;
   avg_rating: number;
   judges_count: number;
-  rank: number;
+  rank: number | bigint; // Updated to accept bigint as well
 }
 
 interface LeaderboardTableProps {
@@ -41,7 +41,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ data }) => {
           <TableRow key={item.product_id} className="group">
             <TableCell className="font-mono">
               {item.rank === 1 && <TrendingUp className="h-4 w-4 text-primary inline mr-1" />}
-              #{item.rank}
+              #{item.rank.toString()}
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-3">
