@@ -11,16 +11,9 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { SearchableMultiJudgeSelect } from './assignment/SearchableMultiJudgeSelect';
 
 interface AssignJudgeDialogProps {
   open: boolean;
@@ -42,7 +35,7 @@ const AssignJudgeDialog: React.FC<AssignJudgeDialogProps> = ({
   productId,
   onAssignmentAdded,
 }) => {
-  const [selectedJudge, setSelectedJudge] = useState<string | null>(null);
+  const [selectedJudges, setSelectedJudges] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch available judges (judges who aren't already assigned to this product)
@@ -105,42 +98,53 @@ const AssignJudgeDialog: React.FC<AssignJudgeDialogProps> = ({
   });
 
   const handleSubmit = async () => {
-    if (!selectedJudge) {
-      toast.error("Please select a judge");
+    if (selectedJudges.length === 0) {
+      toast.error("Please select at least one judge");
       return;
     }
 
     try {
       setIsSubmitting(true);
 
+      const assignments = selectedJudges.map(judgeId => ({
+        judge_id: judgeId,
+        product_id: productId,
+      }));
+
       const { error } = await supabase
         .from('judge_assignments')
-        .insert({
-          judge_id: selectedJudge,
-          product_id: productId,
-        });
+        .insert(assignments);
 
       if (error) throw error;
 
       onAssignmentAdded();
       onOpenChange(false);
-      setSelectedJudge(null);
+      setSelectedJudges([]);
+      toast.success(`Successfully assigned ${selectedJudges.length} judge${selectedJudges.length > 1 ? 's' : ''}`);
     } catch (error: any) {
-      toast.error(`Failed to assign judge: ${error.message}`);
+      toast.error(`Failed to assign judges: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleJudgeToggle = (judgeId: string) => {
+    setSelectedJudges(prev => 
+      prev.includes(judgeId)
+        ? prev.filter(id => id !== judgeId)
+        : [...prev, judgeId]
+    );
   };
 
   const hasAvailableJudges = judges && judges.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Assign Judge</DialogTitle>
+          <DialogTitle>Assign Judges</DialogTitle>
           <DialogDescription>
-            Select a judge to assign to this product for evaluation.
+            Select judges to assign to this product for evaluation.
           </DialogDescription>
         </DialogHeader>
 
@@ -149,25 +153,11 @@ const AssignJudgeDialog: React.FC<AssignJudgeDialogProps> = ({
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : hasAvailableJudges ? (
-          <div className="py-4">
-            <Select 
-              value={selectedJudge || ''} 
-              onValueChange={setSelectedJudge}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a judge" />
-              </SelectTrigger>
-              <SelectContent>
-                <ScrollArea className="h-60">
-                  {judges.map((judge: Judge) => (
-                    <SelectItem key={judge.id} value={judge.id}>
-                      {judge.username || judge.email}
-                    </SelectItem>
-                  ))}
-                </ScrollArea>
-              </SelectContent>
-            </Select>
-          </div>
+          <SearchableMultiJudgeSelect
+            judges={judges}
+            selectedJudges={selectedJudges}
+            onJudgeToggle={handleJudgeToggle}
+          />
         ) : (
           <div className="py-6 text-center">
             <p className="text-muted-foreground">
@@ -185,9 +175,8 @@ const AssignJudgeDialog: React.FC<AssignJudgeDialogProps> = ({
             Cancel
           </Button>
           <Button 
-            type="button" 
             onClick={handleSubmit} 
-            disabled={isSubmitting || !selectedJudge || !hasAvailableJudges}
+            disabled={isSubmitting || !hasAvailableJudges || selectedJudges.length === 0}
           >
             {isSubmitting ? (
               <>
@@ -195,7 +184,7 @@ const AssignJudgeDialog: React.FC<AssignJudgeDialogProps> = ({
                 Assigning...
               </>
             ) : (
-              'Assign Judge'
+              `Assign ${selectedJudges.length} Judge${selectedJudges.length !== 1 ? 's' : ''}`
             )}
           </Button>
         </DialogFooter>
