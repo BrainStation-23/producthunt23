@@ -7,6 +7,7 @@ import AuthCallback from './pages/auth/AuthCallback';
 import LogoutPage from './pages/auth/LogoutPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminLeaderboard from './pages/admin/AdminLeaderboard';
+import AdminActivity from './pages/admin/AdminActivity';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -98,6 +99,7 @@ function App() {
                   <Route path="judging" element={<AdminJudging />} />
                   <Route path="scoring" element={<AdminScoring />} />
                   <Route path="leaderboard" element={<AdminLeaderboard />} />
+                  <Route path="activity" element={<AdminActivity />} />
                 </Route>
               </Route>
 

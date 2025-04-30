@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Activity, Users, Package, TrendingUp, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 // Function to fetch dashboard stats
 const fetchDashboardStats = async () => {
@@ -300,7 +300,9 @@ const AdminDashboard: React.FC = () => {
             )}
           </CardContent>
           <CardFooter>
-            <Button variant="outline" size="sm">View all activity</Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/admin/activity">View all activity</Link>
+            </Button>
           </CardFooter>
         </Card>
         
