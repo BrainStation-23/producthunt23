@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GeneralSettings from '@/components/admin/settings/GeneralSettings';
 import CategoriesSettings from '@/components/admin/settings/CategoriesSettings';
 import FeaturedContentSettings from '@/components/admin/settings/FeaturedContentSettings';
-import JudgingSettings from '@/components/admin/settings/judging/JudgingSettings';
 import SystemHealthDashboard from '@/components/admin/settings/SystemHealthDashboard';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
@@ -31,7 +30,6 @@ const AdminSettings: React.FC = () => {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="featured">Featured Content</TabsTrigger>
-          <TabsTrigger value="judging">Judging</TabsTrigger>
           <TabsTrigger value="health">System Health</TabsTrigger>
         </TabsList>
         
@@ -45,10 +43,6 @@ const AdminSettings: React.FC = () => {
         
         <TabsContent value="featured" className="space-y-4">
           <FeaturedContentSettings />
-        </TabsContent>
-        
-        <TabsContent value="judging" className="space-y-4">
-          <JudgingSettings />
         </TabsContent>
         
         <TabsContent value="health" className="space-y-4">
