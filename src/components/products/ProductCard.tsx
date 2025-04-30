@@ -46,7 +46,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </CardHeader>
         
         <CardContent className="p-4 space-y-2 flex-grow">
-          <div className="line-clamp-2 text-sm">{product.description}</div>
           <ProductCategories categories={product.categoryNames} />
           <ProductTechnologies technologies={product.productTechnologies} />
         </CardContent>
