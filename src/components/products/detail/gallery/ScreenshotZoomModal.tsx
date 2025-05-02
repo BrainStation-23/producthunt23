@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/carousel";
 import { ProductScreenshot } from '@/types/product';
 import ZoomControls from './ZoomControls';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 interface ScreenshotZoomModalProps {
   screenshots: ProductScreenshot[];
@@ -81,8 +83,37 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10" />
-              <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10" />
+              
+              {/* Bottom Navigation Controls for Modal */}
+              <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-6 z-10">
+                <CarouselPrevious 
+                  className="relative static transform-none h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </CarouselPrevious>
+                
+                {/* Dot Indicators */}
+                <div className="flex gap-2 items-center px-4 py-2 rounded-full bg-background/50 backdrop-blur-sm">
+                  {screenshots.map((_, index) => (
+                    <button
+                      key={index}
+                      className={cn(
+                        "w-2 h-2 rounded-full transition-all",
+                        currentIndex === index 
+                          ? "bg-primary w-3 h-3" 
+                          : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                      )}
+                      aria-label={`Go to screenshot ${index + 1}`}
+                    />
+                  ))}
+                </div>
+                
+                <CarouselNext 
+                  className="relative static transform-none h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </CarouselNext>
+              </div>
             </Carousel>
           </div>
         </div>

@@ -13,6 +13,8 @@ import ThumbnailGallery from './gallery/ThumbnailGallery';
 import ImageCounter from './gallery/ImageCounter';
 import ImageCaption from './gallery/ImageCaption';
 import ScreenshotZoomModal from './gallery/ScreenshotZoomModal';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 interface ProductScreenshotGalleryProps {
   screenshots: ProductScreenshot[];
@@ -56,7 +58,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
 
   return (
     <div className="relative w-full space-y-4">
-      <div className="relative">
+      <div className="relative rounded-lg overflow-hidden">
         <Carousel 
           className="w-full max-w-full"
           setApi={setApi}
@@ -79,12 +81,45 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+          
+          {/* Bottom Navigation Controls */}
+          <div className="flex items-center justify-center gap-4 mt-4">
+            <CarouselPrevious 
+              className="relative static transform-none h-9 w-9 rounded-full"
+              variant="outline"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </CarouselPrevious>
+            
+            {/* Dot Indicators */}
+            <div className="flex gap-2 items-center">
+              {screenshots.map((_, index) => (
+                <button
+                  key={index}
+                  className={cn(
+                    "w-2 h-2 rounded-full transition-all",
+                    currentImageIndex === index 
+                      ? "bg-primary w-3 h-3" 
+                      : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                  )}
+                  onClick={() => {
+                    api?.scrollTo(index);
+                    setCurrentImageIndex(index);
+                  }}
+                  aria-label={`Go to screenshot ${index + 1}`}
+                />
+              ))}
+            </div>
+            
+            <CarouselNext 
+              className="relative static transform-none h-9 w-9 rounded-full" 
+              variant="outline"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </CarouselNext>
+          </div>
         </Carousel>
       </div>
-
-      <ImageCounter current={currentImageIndex} total={screenshots.length} />
 
       <ThumbnailGallery
         items={screenshots}
