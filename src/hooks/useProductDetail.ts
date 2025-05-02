@@ -84,7 +84,7 @@ export const useProductDetail = (productId: string | undefined) => {
           
         if (videosError) throw videosError;
         
-        // Fetch makers
+        // Fetch makers with extended profile information
         const { data: makersData, error: makersError } = await supabase
           .from('product_makers')
           .select(`
@@ -95,7 +95,12 @@ export const useProductDetail = (productId: string | undefined) => {
             profile:profiles (
               username,
               avatar_url,
-              email
+              email,
+              bio,
+              website,
+              twitter,
+              linkedin,
+              github
             )
           `)
           .eq('product_id', productId);

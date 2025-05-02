@@ -41,7 +41,7 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({
           <ProductMainContent product={product} />
           <ProductMediaTabs screenshots={screenshots} videos={videos} />
           
-          {makers && makers.length > 0 && (
+          {isMobile && makers && makers.length > 0 && (
             <div className="mt-6">
               <ProductMakers makers={makers} creatorId={product.created_by} />
             </div>

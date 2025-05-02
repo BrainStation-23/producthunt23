@@ -59,6 +59,11 @@ export interface ProductMaker {
     username: string | null;
     avatar_url: string | null;
     email: string | null;
+    bio?: string | null;
+    website?: string | null;
+    twitter?: string | null;
+    linkedin?: string | null;
+    github?: string | null;
   };
 }
 
