@@ -152,9 +152,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
               <CarouselContent>
                 {screenshots.map((screenshot, index) => (
                   <CarouselItem key={screenshot.id} className="h-full flex items-center justify-center">
-                    <div 
-                      className="relative w-full h-full flex flex-col items-center"
-                    >
+                    <div className="relative w-full h-full flex flex-col items-center justify-between py-8">
                       <div 
                         className="flex items-center justify-center transition-transform duration-200 flex-1"
                         style={{ transform: `scale(${scale})` }}
