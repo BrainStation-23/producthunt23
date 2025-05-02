@@ -37,30 +37,68 @@ export const ProductsList: React.FC<ProductsListProps> = ({
     queryKey: ['products-for-scoring', searchQuery],
     queryFn: async () => {
       try {
-        let query = supabase
-          .rpc('get_scored_products_list');
-
-        const { data, error } = await query;
+        // Get all products
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('id, name, tagline, image_url')
+          .order('name');
           
-        if (error) {
-          toast({
-            title: "Error loading products",
-            description: error.message,
-            variant: "destructive",
-          });
-          throw error;
+        if (productsError) {
+          throw productsError;
         }
         
+        // Get evaluation data for these products
+        const { data: evalData, error: evalError } = await supabase
+          .from('judging_submissions')
+          .select('product_id, judge_id, rating_value');
+          
+        if (evalError) {
+          throw evalError;
+        }
+        
+        // Process and enrich product data
+        const enrichedProducts = productsData.map((product: any) => {
+          const productEvals = evalData.filter((eval: any) => eval.product_id === product.id);
+          
+          // Count unique judges
+          const judges = new Set(productEvals.map((eval: any) => eval.judge_id));
+          
+          // Calculate average score
+          const validRatings = productEvals
+            .filter((eval: any) => eval.rating_value !== null)
+            .map((eval: any) => eval.rating_value);
+            
+          const avgScore = validRatings.length > 0
+            ? validRatings.reduce((sum: number, val: number) => sum + val, 0) / validRatings.length
+            : null;
+            
+          // Calculate evaluation progress (mock for now)
+          const evaluationProgress = judges.size > 0 ? Math.min(judges.size / 5, 1) : 0;
+            
+          return {
+            ...product,
+            avg_score: avgScore,
+            judges_count: judges.size,
+            evaluation_progress: evaluationProgress
+          };
+        });
+        
         // Filter by search query client-side
-        if (searchQuery && data) {
-          return data.filter(p => 
-            p.name.toLowerCase().includes(searchQuery.toLowerCase())
+        if (searchQuery) {
+          return enrichedProducts.filter((p: Product) => 
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.tagline.toLowerCase().includes(searchQuery.toLowerCase())
           );
         }
         
-        return data as Product[];
+        return enrichedProducts;
       } catch (err) {
         console.error("Error fetching products:", err);
+        toast({
+          title: "Error loading products",
+          description: "Failed to load the product list",
+          variant: "destructive",
+        });
         throw err;
       }
     },
@@ -100,7 +138,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
   return (
     <div className={cn("overflow-y-auto", className)}>
       <ul className="divide-y divide-border">
-        {products.map((product) => (
+        {products.map((product: Product) => (
           <li 
             key={product.id}
             onClick={() => onProductSelect(product.id)}

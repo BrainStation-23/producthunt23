@@ -20,6 +20,18 @@ interface ProductScoringTableProps {
   productId: string | null;
 }
 
+interface ScoringData {
+  criteria_id: string;
+  criteria_name: string;
+  criteria_type: string;
+  description?: string;
+  avg_rating: number;
+  count_judges: number;
+  count_true: number;
+  count_false: number;
+  weight: number;
+}
+
 export const ProductScoringTable: React.FC<ProductScoringTableProps> = ({ productId }) => {
   const { toast } = useToast();
   
@@ -29,31 +41,85 @@ export const ProductScoringTable: React.FC<ProductScoringTableProps> = ({ produc
       if (!productId) return null;
       
       try {
-        const { data, error } = await supabase
-          .rpc('get_product_judging_summary', {
-            product_uuid: productId
-          });
+        // First get evaluation data
+        const { data: evaluationData, error: evalError } = await supabase
+          .from('judging_submissions')
+          .select('criteria_id, judge_id, rating_value, boolean_value')
+          .eq('product_id', productId);
           
-        if (error) {
-          toast({
-            title: "Error fetching scoring data",
-            description: error.message,
-            variant: "destructive",
-          });
-          throw error;
+        if (evalError) {
+          throw evalError;
         }
-        return data;
+        
+        // Then get criteria data
+        const { data: criteriaData, error: criteriaError } = await supabase
+          .from('judging_criteria')
+          .select('id, name, type, description, weight');
+          
+        if (criteriaError) {
+          throw criteriaError;
+        }
+        
+        // Process and summarize the data
+        const summary = criteriaData.map((criteria: any) => {
+          const criteriaSubmissions = evaluationData.filter((sub: any) => 
+            sub.criteria_id === criteria.id
+          );
+          
+          const judges = new Set(criteriaSubmissions.map((sub: any) => sub.judge_id)).size;
+          
+          // Calculate stats based on criteria type
+          if (criteria.type === 'boolean') {
+            const trueCount = criteriaSubmissions.filter((sub: any) => sub.boolean_value === true).length;
+            const falseCount = criteriaSubmissions.filter((sub: any) => sub.boolean_value === false).length;
+            
+            return {
+              criteria_id: criteria.id,
+              criteria_name: criteria.name,
+              criteria_type: criteria.type,
+              description: criteria.description,
+              avg_rating: null,
+              count_judges: judges,
+              count_true: trueCount,
+              count_false: falseCount,
+              weight: criteria.weight
+            };
+          } else {
+            // Handle rating type criteria
+            const validRatings = criteriaSubmissions
+              .filter((sub: any) => sub.rating_value !== null)
+              .map((sub: any) => sub.rating_value);
+              
+            const avgRating = validRatings.length > 0 
+              ? validRatings.reduce((sum: number, val: number) => sum + val, 0) / validRatings.length
+              : null;
+              
+            return {
+              criteria_id: criteria.id,
+              criteria_name: criteria.name,
+              criteria_type: criteria.type,
+              description: criteria.description,
+              avg_rating: avgRating,
+              count_judges: judges,
+              count_true: 0,
+              count_false: 0,
+              weight: criteria.weight
+            };
+          }
+        });
+        
+        return summary;
       } catch (err) {
         console.error("Error in scoring data fetch:", err);
+        toast({
+          title: "Error fetching scoring data",
+          description: "Unable to load product evaluation data",
+          variant: "destructive",
+        });
         throw err;
       }
     },
-    enabled: !!productId,
-    meta: {
-      onError: (err: Error) => {
-        console.error("Query error:", err);
-      }
-    }
+    enabled: !!productId
   });
 
   if (!productId) {
@@ -109,7 +175,7 @@ export const ProductScoringTable: React.FC<ProductScoringTableProps> = ({ produc
           </TableRow>
         </TableHeader>
         <TableBody>
-          {scoringSummary.map((score) => (
+          {scoringSummary.map((score: ScoringData) => (
             <TableRow key={score.criteria_id}>
               <TableCell className="font-medium">
                 <div className="flex items-center gap-2">
@@ -121,14 +187,14 @@ export const ProductScoringTable: React.FC<ProductScoringTableProps> = ({ produc
                         <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent side="right" className="max-w-xs">
-                        <p>{score.criteria_description || "No description available"}</p>
+                        <p>{score.description || "No description available"}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                {score.criteria_description && (
+                {score.description && (
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                    {score.criteria_description}
+                    {score.description}
                   </p>
                 )}
               </TableCell>

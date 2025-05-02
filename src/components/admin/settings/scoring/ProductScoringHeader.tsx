@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Star, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ProductScoringHeaderProps {
   selectedProduct: string | null;
@@ -37,6 +38,7 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
         }
         
         // Get category names
+        let categoryNames: string[] = [];
         if (data.categories && data.categories.length > 0) {
           const { data: categoryData, error: categoryError } = await supabase
             .from('categories')
@@ -44,16 +46,19 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
             .in('id', data.categories);
             
           if (!categoryError && categoryData) {
-            const categoryMap = categoryData.reduce((acc, cat) => {
+            const categoryMap = categoryData.reduce((acc: Record<string, string>, cat: any) => {
               acc[cat.id] = cat.name;
               return acc;
-            }, {} as Record<string, string>);
+            }, {});
             
-            data.categoryNames = data.categories.map((id: string) => categoryMap[id] || id);
+            categoryNames = data.categories.map((id: string) => categoryMap[id] || id);
           }
         }
         
-        return data;
+        return {
+          ...data,
+          categoryNames
+        };
       } catch (err) {
         console.error("Error fetching product details:", err);
         throw err;
@@ -69,13 +74,28 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
       if (!selectedProduct) return null;
       
       try {
+        // Custom query since the function may not exist
         const { data, error } = await supabase
-          .rpc('get_product_score_summary', {
-            product_uuid: selectedProduct
-          });
+          .from('judging_submissions')
+          .select('rating_value')
+          .eq('product_id', selectedProduct);
           
         if (error) throw error;
-        return data || { avg_score: null, judges_count: 0 };
+        
+        // Calculate average score and judge count
+        if (data && data.length > 0) {
+          const validRatings = data.filter(d => d.rating_value !== null).map(d => d.rating_value);
+          const avgScore = validRatings.length > 0 ? 
+            validRatings.reduce((sum: number, val: number) => sum + val, 0) / validRatings.length : 
+            null;
+          
+          return { 
+            avg_score: avgScore, 
+            judges_count: new Set(data.map((d: any) => d.judge_id)).size 
+          };
+        }
+        
+        return { avg_score: null, judges_count: 0 };
       } catch (err) {
         console.error("Error fetching score summary:", err);
         return { avg_score: null, judges_count: 0 };

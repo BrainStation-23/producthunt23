@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import { ChartContainer } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Cell, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ProductScoreChartProps {
@@ -89,6 +89,21 @@ export const ProductScoreChart: React.FC<ProductScoreChartProps> = ({ productId 
   const booleanCriteria = scoringSummary
     .filter((item: any) => item.criteria_type === 'boolean');
   
+  // Custom tooltip content component
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-background p-2 border rounded-md shadow-md text-xs">
+          <p className="font-medium">{data.name}</p>
+          <p>Score: {data.value.toFixed(1)}/10</p>
+          <p>{data.judges} judge(s)</p>
+        </div>
+      );
+    }
+    return null;
+  };
+  
   return (
     <div className="space-y-6">
       <div className="h-80 w-full">
@@ -108,13 +123,7 @@ export const ProductScoreChart: React.FC<ProductScoreChartProps> = ({ productId 
                 tick={{ fontSize: 12 }}
                 width={80}
               />
-              <ChartTooltip
-                content={(props) => (
-                  <ChartTooltipContent {...props} formatter={(value, name) => {
-                    return [`Score: ${value}/10 • ${props.payload?.[0]?.payload?.judges || 0} judge(s)`, ''];
-                  }} />
-                )}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={getScoreColor(entry.value)} />
