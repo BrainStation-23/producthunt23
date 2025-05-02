@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import TechnologiesSelector from '@/components/products/TechnologiesSelector';
+import TechnologiesSelector from '@/components/products/technologies-selector/TechnologiesSelector';
 import { Code } from 'lucide-react';
 
 interface TechnologiesSectionProps {
