@@ -85,9 +85,10 @@ export const ProductsList: React.FC<ProductsListProps> = ({
         
         // Filter by search query client-side
         if (searchQuery) {
+          const lowercaseQuery = searchQuery.toLowerCase();
           return enrichedProducts.filter((p: Product) => 
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.tagline.toLowerCase().includes(searchQuery.toLowerCase())
+            p.name.toLowerCase().includes(lowercaseQuery) ||
+            p.tagline.toLowerCase().includes(lowercaseQuery)
           );
         }
         

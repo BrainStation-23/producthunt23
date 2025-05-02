@@ -143,7 +143,7 @@ export const ProductScoreChart: React.FC<ProductScoreChartProps> = ({ productId 
   const booleanCriteria = scoringSummary
     .filter((item: any) => item.criteria_type === 'boolean');
   
-  // Custom tooltip content
+  // Custom tooltip component
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -177,7 +177,7 @@ export const ProductScoreChart: React.FC<ProductScoreChartProps> = ({ productId 
                 tick={{ fontSize: 12 }}
                 width={80}
               />
-              <Tooltip content={CustomTooltip} />
+              <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={getScoreColor(entry.value)} />

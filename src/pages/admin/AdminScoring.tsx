@@ -166,22 +166,25 @@ const AdminScoring = () => {
             {selectedProduct ? (
               <div className="space-y-6">
                 <ProductScoringHeader selectedProduct={selectedProduct} />
+                
+                {/* Mobile tabs - visible on mobile devices */}
                 <Tabs value={view} onValueChange={(v) => setView(v as 'table' | 'visual')} className="md:hidden">
-                  <TabsList>
-                    <TabsTrigger value="table">Table</TabsTrigger>
-                    <TabsTrigger value="visual">Visual</TabsTrigger>
+                  <TabsList className="w-full">
+                    <TabsTrigger value="table" className="flex-1">Table</TabsTrigger>
+                    <TabsTrigger value="visual" className="flex-1">Visual</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 
-                <TabsContent value="table" className="mt-6">
-                  <div className="rounded-md border">
-                    <ProductScoringTable productId={selectedProduct} />
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="visual" className="mt-6">
-                  <ProductScoreChart productId={selectedProduct} />
-                </TabsContent>
+                {/* Fixed: Using proper conditional rendering instead of TabsContent outside Tabs */}
+                <div className="mt-6">
+                  {view === 'table' ? (
+                    <div className="rounded-md border">
+                      <ProductScoringTable productId={selectedProduct} />
+                    </div>
+                  ) : (
+                    <ProductScoreChart productId={selectedProduct} />
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">

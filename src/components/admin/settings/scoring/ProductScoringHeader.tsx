@@ -77,7 +77,7 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
         // Custom query since the function may not exist
         const { data, error } = await supabase
           .from('judging_submissions')
-          .select('rating_value')
+          .select('rating_value, judge_id')
           .eq('product_id', selectedProduct);
           
         if (error) throw error;
@@ -161,7 +161,9 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
               )}>
                 <Star className="h-4 w-4 mr-1" />
                 <span className="text-sm font-semibold">
-                  {scoreSummary?.avg_score ? scoreSummary.avg_score.toFixed(1) : "No score"}
+                  {scoreSummary?.avg_score !== null && scoreSummary?.avg_score !== undefined
+                    ? scoreSummary.avg_score.toFixed(1)
+                    : "No score"}
                 </span>
               </div>
             </div>
@@ -170,7 +172,7 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
           <p className="text-muted-foreground mt-1">{product.tagline}</p>
           
           <div className="flex flex-wrap gap-2 mt-2">
-            {product.categoryNames?.map((category: string, i: number) => (
+            {product.categoryNames && product.categoryNames.map((category: string, i: number) => (
               <Badge key={i} variant="secondary">
                 {category}
               </Badge>
