@@ -181,16 +181,18 @@ export const ProductScoringTable: React.FC<ProductScoringTableProps> = ({ produc
                 <div className="flex items-center gap-2">
                   <span className="truncate">{score.criteria_name}</span>
                   
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-xs">
-                        <p>{score.description || "No description available"}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {score.description && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs">
+                          <p>{score.description}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
                 {score.description && (
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-1">

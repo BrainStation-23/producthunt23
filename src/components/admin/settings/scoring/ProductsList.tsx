@@ -48,7 +48,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
         }
         
         // Get evaluation data for these products
-        const { data: evalData, error: evalError } = await supabase
+        const { data: evaluationData, error: evalError } = await supabase
           .from('judging_submissions')
           .select('product_id, judge_id, rating_value');
           
@@ -58,15 +58,15 @@ export const ProductsList: React.FC<ProductsListProps> = ({
         
         // Process and enrich product data
         const enrichedProducts = productsData.map((product: any) => {
-          const productEvals = evalData.filter((eval: any) => eval.product_id === product.id);
+          const productEvaluations = evaluationData.filter((item: any) => item.product_id === product.id);
           
           // Count unique judges
-          const judges = new Set(productEvals.map((eval: any) => eval.judge_id));
+          const judges = new Set(productEvaluations.map((item: any) => item.judge_id));
           
           // Calculate average score
-          const validRatings = productEvals
-            .filter((eval: any) => eval.rating_value !== null)
-            .map((eval: any) => eval.rating_value);
+          const validRatings = productEvaluations
+            .filter((item: any) => item.rating_value !== null)
+            .map((item: any) => item.rating_value);
             
           const avgScore = validRatings.length > 0
             ? validRatings.reduce((sum: number, val: number) => sum + val, 0) / validRatings.length

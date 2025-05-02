@@ -21,24 +21,78 @@ export const ProductScoreChart: React.FC<ProductScoreChartProps> = ({ productId 
       if (!productId) return null;
       
       try {
-        const { data, error } = await supabase
-          .rpc('get_product_judging_summary', {
-            product_uuid: productId
-          });
+        // Get criteria
+        const { data: criteriaData, error: criteriaError } = await supabase
+          .from('judging_criteria')
+          .select('id, name, type, description');
+        
+        if (criteriaError) throw criteriaError;
+        
+        // Get submissions for this product
+        const { data: submissionsData, error: submissionsError } = await supabase
+          .from('judging_submissions')
+          .select('criteria_id, judge_id, rating_value, boolean_value')
+          .eq('product_id', productId);
+        
+        if (submissionsError) throw submissionsError;
+        
+        // Process the data to get the summary
+        const summary = criteriaData.map((criteria: any) => {
+          // Get all submissions for this criteria
+          const criteriaSubmissions = submissionsData.filter((sub: any) => 
+            sub.criteria_id === criteria.id
+          );
           
-        if (error) {
-          toast({
-            title: "Error fetching scoring data",
-            description: error.message,
-            variant: "destructive",
-          });
-          throw error;
-        }
+          // Count judges
+          const judgeCount = new Set(criteriaSubmissions.map((sub: any) => sub.judge_id)).size;
+          
+          if (criteria.type === 'boolean') {
+            // For boolean criteria, count true/false values
+            const trueCount = criteriaSubmissions.filter((sub: any) => sub.boolean_value === true).length;
+            const falseCount = criteriaSubmissions.filter((sub: any) => sub.boolean_value === false).length;
+            
+            return {
+              criteria_id: criteria.id,
+              criteria_name: criteria.name,
+              criteria_type: criteria.type,
+              description: criteria.description,
+              avg_rating: null,
+              count_judges: judgeCount,
+              count_true: trueCount,
+              count_false: falseCount
+            };
+          } else {
+            // For rating criteria, calculate average
+            const validRatings = criteriaSubmissions
+              .filter((sub: any) => sub.rating_value !== null)
+              .map((sub: any) => sub.rating_value);
+              
+            const avgRating = validRatings.length > 0
+              ? validRatings.reduce((sum: number, val: number) => sum + val, 0) / validRatings.length
+              : null;
+              
+            return {
+              criteria_id: criteria.id,
+              criteria_name: criteria.name,
+              criteria_type: criteria.type,
+              description: criteria.description,
+              avg_rating: avgRating,
+              count_judges: judgeCount,
+              count_true: 0,
+              count_false: 0
+            };
+          }
+        });
         
         // Filter out boolean criteria for the chart
-        return data.filter((item: any) => item.criteria_type !== 'boolean');
+        return summary.filter((item: any) => item.criteria_type !== 'boolean');
       } catch (err) {
         console.error("Error in scoring data fetch:", err);
+        toast({
+          title: "Error fetching scoring data",
+          description: "Failed to load evaluation data",
+          variant: "destructive",
+        });
         throw err;
       }
     },
@@ -89,7 +143,7 @@ export const ProductScoreChart: React.FC<ProductScoreChartProps> = ({ productId 
   const booleanCriteria = scoringSummary
     .filter((item: any) => item.criteria_type === 'boolean');
   
-  // Custom tooltip content component
+  // Custom tooltip content
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -123,7 +177,7 @@ export const ProductScoreChart: React.FC<ProductScoreChartProps> = ({ productId 
                 tick={{ fontSize: 12 }}
                 width={80}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={CustomTooltip} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={getScoreColor(entry.value)} />

@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
 import { Search, Filter, ChevronRight } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
@@ -29,23 +28,61 @@ const AdminScoring = () => {
     queryKey: ['scoring-metrics'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .rpc('get_judging_summary_metrics');
+        // Calculate metrics manually since the RPC function doesn't exist
+        const { data: products, error: productsError } = await supabase
+          .from('products')
+          .select('id');
           
-        if (error) {
-          toast({
-            title: "Error loading metrics",
-            description: error.message,
-            variant: "destructive",
-          });
-          throw error;
-        }
-        return data || {
-          total_products: 0,
-          average_score: 0,
-          high_scoring_count: 0,
-          low_scoring_count: 0,
-          evaluation_completion: 0
+        if (productsError) throw productsError;
+        
+        const { data: submissions, error: submissionsError } = await supabase
+          .from('judging_submissions')
+          .select('product_id, judge_id, rating_value');
+          
+        if (submissionsError) throw submissionsError;
+        
+        // Calculate metrics
+        const totalProducts = products?.length || 0;
+        
+        // Group submissions by product
+        const productScores: Record<string, number[]> = {};
+        submissions?.forEach((sub: any) => {
+          if (sub.rating_value !== null) {
+            if (!productScores[sub.product_id]) {
+              productScores[sub.product_id] = [];
+            }
+            productScores[sub.product_id].push(sub.rating_value);
+          }
+        });
+        
+        // Calculate average scores
+        const productAvgScores = Object.entries(productScores).map(([id, scores]) => {
+          return {
+            id,
+            avgScore: scores.reduce((sum, score) => sum + score, 0) / scores.length
+          };
+        });
+        
+        // Calculate overall metrics
+        const averageScore = productAvgScores.length > 0 
+          ? productAvgScores.reduce((sum, item) => sum + item.avgScore, 0) / productAvgScores.length
+          : 0;
+          
+        const highScoringCount = productAvgScores.filter(p => p.avgScore >= 8).length;
+        const lowScoringCount = productAvgScores.filter(p => p.avgScore < 6).length;
+        
+        // Calculate evaluation progress
+        const productsWithEvals = Object.keys(productScores).length;
+        const evaluationCompletion = totalProducts > 0 
+          ? (productsWithEvals / totalProducts) * 100
+          : 0;
+        
+        return {
+          total_products: totalProducts,
+          average_score: averageScore,
+          high_scoring_count: highScoringCount,
+          low_scoring_count: lowScoringCount,
+          evaluation_completion: evaluationCompletion
         };
       } catch (err) {
         console.error("Error fetching metrics:", err);
