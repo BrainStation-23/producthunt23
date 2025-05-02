@@ -84,8 +84,8 @@ export const ProductsList: React.FC<ProductsListProps> = ({
   }
 
   return (
-    <div className="overflow-y-auto flex-1 -mx-4 px-4">
-      <ul className="space-y-2">
+    <div className="overflow-y-auto h-full">
+      <ul className="space-y-2 pr-1">
         {products.map((product) => (
           <li 
             key={product.id}

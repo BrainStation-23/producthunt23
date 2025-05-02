@@ -14,7 +14,7 @@ const AdminScoring = () => {
   const [searchQuery, setSearchQuery] = useState('');
   
   return (
-    <div className="space-y-6 h-full flex flex-col">
+    <div className="space-y-6 h-full flex flex-col max-w-full">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Product Scoring</h1>
         <p className="text-muted-foreground mb-6">
@@ -22,10 +22,10 @@ const AdminScoring = () => {
         </p>
       </div>
       
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 max-w-full">
         <ResizablePanelGroup 
           direction="horizontal" 
-          className="h-full border rounded-lg overflow-hidden"
+          className="h-full border rounded-lg max-w-full"
         >
           <ResizablePanel defaultSize={30} minSize={25} className="overflow-hidden">
             <div className="h-full p-4 flex flex-col">
@@ -39,7 +39,7 @@ const AdminScoring = () => {
                   className="pl-8"
                 />
               </div>
-              <div className="flex-1 min-h-0 overflow-hidden">
+              <div className="flex-1 min-h-0 overflow-auto">
                 <ProductsList 
                   selectedProduct={selectedProduct}
                   onProductSelect={setSelectedProduct}
@@ -52,12 +52,12 @@ const AdminScoring = () => {
           <ResizableHandle withHandle />
           
           <ResizablePanel defaultSize={70} className="overflow-hidden">
-            <div className="h-full flex flex-col overflow-hidden">
+            <div className="h-full flex flex-col">
               {selectedProduct ? (
                 <div className="p-4 flex-1 overflow-auto">
                   <ProductScoringHeader selectedProduct={selectedProduct} />
                   <div className="mt-4">
-                    <Card className="p-4">
+                    <Card className="p-4 max-w-full">
                       <ProductScoringTable productId={selectedProduct} />
                     </Card>
                   </div>

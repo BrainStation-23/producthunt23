@@ -88,31 +88,33 @@ export const ProductScoringTable: React.FC<ProductScoringTableProps> = ({ produc
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Criteria</TableHead>
-          <TableHead className="text-right">Judges</TableHead>
-          <TableHead className="text-right">Average Rating</TableHead>
-          <TableHead className="text-right">Yes/No Responses</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {scoringSummary.map((score) => (
-          <TableRow key={score.criteria_id}>
-            <TableCell className="font-medium">{score.criteria_name}</TableCell>
-            <TableCell className="text-right">{score.count_judges}</TableCell>
-            <TableCell className="text-right">
-              {score.avg_rating ? score.avg_rating.toFixed(1) : '-'}
-            </TableCell>
-            <TableCell className="text-right">
-              {score.count_true || score.count_false ? (
-                `${score.count_true || 0} Yes / ${score.count_false || 0} No`
-              ) : '-'}
-            </TableCell>
+    <div className="w-full overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Criteria</TableHead>
+            <TableHead className="text-right">Judges</TableHead>
+            <TableHead className="text-right">Average Rating</TableHead>
+            <TableHead className="text-right">Yes/No Responses</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {scoringSummary.map((score) => (
+            <TableRow key={score.criteria_id}>
+              <TableCell className="font-medium">{score.criteria_name}</TableCell>
+              <TableCell className="text-right">{score.count_judges}</TableCell>
+              <TableCell className="text-right">
+                {score.avg_rating ? score.avg_rating.toFixed(1) : '-'}
+              </TableCell>
+              <TableCell className="text-right">
+                {score.count_true || score.count_false ? (
+                  `${score.count_true || 0} Yes / ${score.count_false || 0} No`
+                ) : '-'}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
