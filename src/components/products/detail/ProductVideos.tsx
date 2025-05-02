@@ -12,6 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProductVideosProps {
   videos: ProductVideo[];
@@ -58,13 +59,18 @@ const ProductVideos: React.FC<ProductVideosProps> = ({ videos }) => {
     setTimeout(checkScrollability, 300);
   };
 
+  // Handle the carousel slide change
+  const handleCarouselSelect = (index: number) => {
+    setCurrentIndex(index);
+  };
+
   if (videos.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-4">
-      <Carousel className="w-full" onSelect={index => setCurrentIndex(index)}>
+      <Carousel className="w-full" onSelect={handleCarouselSelect}>
         <CarouselContent>
           {videos.map((video, index) => (
             <CarouselItem key={video.id} className="basis-full">
@@ -120,33 +126,41 @@ const ProductVideos: React.FC<ProductVideosProps> = ({ videos }) => {
               {videos.map((video, index) => {
                 const videoInfo = getVideoInfo(video.video_url);
                 return (
-                  <div 
-                    key={video.id}
-                    className={`relative flex-shrink-0 w-20 h-20 overflow-hidden rounded border-2 cursor-pointer
-                      ${currentIndex === index ? 'border-primary' : 'border-transparent hover:border-primary/50'}`}
-                    onClick={() => {
-                      setCurrentIndex(index);
-                      const carousel = document.querySelector('[data-radix-carousel-viewport]');
-                      if (carousel) {
-                        carousel.scrollTo({
-                          left: index * carousel.clientWidth,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                  >
-                    {videoInfo.thumbnail ? (
-                      <img
-                        src={videoInfo.thumbnail}
-                        alt={video.title || `Video ${index + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full w-full bg-gray-100">
-                        <span className="text-xs text-gray-500">Video {index + 1}</span>
-                      </div>
-                    )}
-                  </div>
+                  <TooltipProvider key={video.id}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div 
+                          className={`relative flex-shrink-0 w-20 h-20 overflow-hidden rounded border-2 cursor-pointer
+                            ${currentIndex === index ? 'border-primary' : 'border-transparent hover:border-primary/50'}`}
+                          onClick={() => {
+                            setCurrentIndex(index);
+                            const carousel = document.querySelector('[data-radix-carousel-viewport]');
+                            if (carousel) {
+                              carousel.scrollTo({
+                                left: index * carousel.clientWidth,
+                                behavior: 'smooth'
+                              });
+                            }
+                          }}
+                        >
+                          {videoInfo.thumbnail ? (
+                            <img
+                              src={videoInfo.thumbnail}
+                              alt={video.title || `Video ${index + 1}`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full w-full bg-gray-100">
+                              <span className="text-xs text-gray-500">Video {index + 1}</span>
+                            </div>
+                          )}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {video.title || `Video ${index + 1}`}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 );
               })}
             </div>
