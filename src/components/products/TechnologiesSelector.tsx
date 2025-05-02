@@ -220,7 +220,7 @@ const TechnologiesSelector: React.FC<TechnologiesSelectorProps> = ({ selected, o
                   )}
                 </div>
                 
-                <ScrollArea className="flex-1 pr-4">
+                <ScrollArea className="flex-1 pr-4 max-h-[500px]">
                   {selected.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center p-6">
                       <div className="bg-muted/50 rounded-full p-3 mb-3">
