@@ -22,7 +22,7 @@ const ProductMainContent: React.FC<ProductMainContentProps> = ({ product }) => {
         </div>
       )}
 
-      <div className="prose max-w-none">
+      <div className="prose prose-sm sm:prose dark:prose-invert max-w-none">
         <h2 className="text-2xl font-semibold mb-4">About</h2>
         <div dangerouslySetInnerHTML={{ __html: product?.description }} />
       </div>
