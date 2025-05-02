@@ -35,12 +35,6 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
-  // Handle carousel button clicks - only prevent form submission but allow carousel functionality
-  const handleNavigationClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    // Note: We're not stopping propagation to allow the carousel to work
-  };
-
   if (screenshots.length === 0) {
     return <ScreenshotEmptyState type="gallery" onAddClick={onAddClick} />;
   }
@@ -67,13 +61,11 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({
             </CarouselContent>
             <CarouselPrevious 
               className="left-2" 
-              onClick={handleNavigationClick} 
-              type="button" 
+              type="button"
             />
             <CarouselNext 
               className="right-2" 
-              onClick={handleNavigationClick} 
-              type="button" 
+              type="button"
             />
           </Carousel>
 
