@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Code, Search, Loader2, X } from 'lucide-react';
-import { useDeviconData, getRelatedTechnologies, techCategories, categorizeTechnology } from '@/services/deviconService';
+import { useDeviconData, getRelatedTechnologies, techCategories, categorizeTechnology, getDeviconClass } from '@/services/deviconService';
 import TechnologyGrid from './technologies/TechnologyGrid';
 import TechnologyTabs from './technologies/TechnologyTabs';
 import SelectedTechnologies from './technologies/SelectedTechnologies';
