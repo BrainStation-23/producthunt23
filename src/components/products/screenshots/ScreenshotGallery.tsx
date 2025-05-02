@@ -1,6 +1,5 @@
 
-import React, { useRef } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import React, { useRef, useState, useEffect } from 'react';
 import { Screenshot } from '@/types/product';
 import ScreenshotThumbnail from './ScreenshotThumbnail';
 import ScreenshotDetails from './ScreenshotDetails';
@@ -37,17 +36,42 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const thumbnailScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Check if scrolling is possible
+  const checkScrollability = () => {
+    if (!thumbnailScrollRef.current) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = thumbnailScrollRef.current;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5); // 5px buffer
+  };
+
+  // Effect to check scrollability on mount and when screenshots change
+  useEffect(() => {
+    checkScrollability();
+    // Add resize observer to check scrollability when window resizes
+    const resizeObserver = new ResizeObserver(checkScrollability);
+    if (thumbnailScrollRef.current) {
+      resizeObserver.observe(thumbnailScrollRef.current);
+    }
+    return () => resizeObserver.disconnect();
+  }, [screenshots]);
 
   const scrollThumbnails = (direction: 'left' | 'right') => {
     if (!thumbnailScrollRef.current) return;
     
-    const scrollAmount = 100; // Adjust scroll amount as needed
+    const scrollAmount = 250; // Increased scroll amount for better navigation
     const currentScroll = thumbnailScrollRef.current.scrollLeft;
     
     thumbnailScrollRef.current.scrollTo({
       left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
       behavior: 'smooth'
     });
+    
+    // Update scroll buttons state after scrolling
+    setTimeout(checkScrollability, 300);
   };
 
   if (screenshots.length === 0) {
@@ -98,19 +122,23 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({
             <Button
               variant="outline"
               size="icon"
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+              className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm transition-opacity ${!canScrollLeft ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
               onClick={() => scrollThumbnails('left')}
+              disabled={!canScrollLeft}
               type="button"
+              aria-label="Scroll thumbnails left"
             >
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Scroll left</span>
             </Button>
 
-            <ScrollArea className="w-full">
+            {/* Native scrollable container replacing ScrollArea */}
+            <div className="relative px-10 overflow-hidden">
               <div 
                 ref={thumbnailScrollRef}
-                className="flex gap-2 pb-4 px-10 overflow-x-auto scrollbar-hide"
+                className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide"
                 style={{ scrollBehavior: 'smooth' }}
+                onScroll={checkScrollability}
               >
                 {screenshots.map((screenshot, index) => (
                   <div 
@@ -127,14 +155,16 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+            </div>
 
             <Button
               variant="outline"
               size="icon"
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+              className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm transition-opacity ${!canScrollRight ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
               onClick={() => scrollThumbnails('right')}
+              disabled={!canScrollRight}
               type="button"
+              aria-label="Scroll thumbnails right"
             >
               <ChevronRight className="h-4 w-4" />
               <span className="sr-only">Scroll right</span>
