@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Video } from '@/types/product';
-import { getEmbedUrl } from '@/utils/videoUtils';
 import { 
   Tooltip,
   TooltipContent,
@@ -90,17 +89,6 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({
         </div>
       </CardHeader>
       <CardContent className="py-4 space-y-4">
-        <div className="relative aspect-video rounded-md overflow-hidden bg-gray-100 border">
-          <iframe
-            src={getEmbedUrl(video.video_url)}
-            title={video.title || `Video ${index + 1}`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full"
-          />
-        </div>
-
         <div>
           <Label htmlFor={`video-${index}-title`}>Title (Optional)</Label>
           <Input
