@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Video } from '@/types/product';
 import VideoDetails from './VideoDetails';
 import VideoEmptyState from './VideoEmptyState';
@@ -45,9 +45,17 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({
         
         {/* Thumbnails strip with navigation */}
         <ThumbnailStrip
-          videos={videos}
-          selectedVideoIndex={selectedVideoIndex}
-          onSelectVideo={onSelectVideo}
+          items={videos.map((video, index) => {
+            const videoInfo = getVideoInfo(video.video_url);
+            return {
+              id: index.toString(),
+              url: videoInfo.thumbnail || '/placeholder.svg',
+              title: video.title || `Video ${index + 1}`,
+              subtitle: videoInfo.platform || 'Video',
+            };
+          })}
+          selectedItemIndex={selectedVideoIndex}
+          onSelectItem={onSelectVideo}
         />
       </div>
 
@@ -73,5 +81,8 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({
     </div>
   );
 };
+
+// Import getVideoInfo at the top
+import { getVideoInfo } from '@/utils/videoUtils';
 
 export default VideoGallery;

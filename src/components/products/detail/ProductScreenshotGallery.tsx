@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -40,14 +40,14 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
     setScale(1);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api || !modalApi) return;
 
     api.scrollTo(currentImageIndex);
     modalApi.scrollTo(currentImageIndex);
   }, [api, modalApi, currentImageIndex]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api) return;
     
     api.on("select", () => {

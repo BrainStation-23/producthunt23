@@ -1,20 +1,25 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Video } from '@/types/product';
-import VideoThumbnail from './VideoThumbnail';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface ThumbnailItem {
+  id: string;
+  url: string;
+  title: string;
+  subtitle?: string;
+}
+
 interface ThumbnailStripProps {
-  videos: Video[];
-  selectedVideoIndex: number | null;
-  onSelectVideo: (index: number) => void;
+  items: ThumbnailItem[];
+  selectedItemIndex: number | null;
+  onSelectItem: (index: number) => void;
 }
 
 const ThumbnailStrip: React.FC<ThumbnailStripProps> = ({
-  videos,
-  selectedVideoIndex,
-  onSelectVideo
+  items,
+  selectedItemIndex,
+  onSelectItem
 }) => {
   const thumbnailScrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -29,7 +34,7 @@ const ThumbnailStrip: React.FC<ThumbnailStripProps> = ({
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5); // 5px buffer
   };
 
-  // Effect to check scrollability on mount and when videos change
+  // Effect to check scrollability on mount and when items change
   useEffect(() => {
     checkScrollability();
     // Add resize observer to check scrollability when window resizes
@@ -38,7 +43,7 @@ const ThumbnailStrip: React.FC<ThumbnailStripProps> = ({
       resizeObserver.observe(thumbnailScrollRef.current);
     }
     return () => resizeObserver.disconnect();
-  }, [videos]);
+  }, [items]);
 
   const scrollThumbnails = (direction: 'left' | 'right') => {
     if (!thumbnailScrollRef.current) return;
@@ -77,14 +82,34 @@ const ThumbnailStrip: React.FC<ThumbnailStripProps> = ({
           style={{ scrollBehavior: 'smooth' }}
           onScroll={checkScrollability}
         >
-          {videos.map((video, index) => (
-            <VideoThumbnail
-              key={index}
-              video={video}
-              index={index}
-              isSelected={selectedVideoIndex === index}
-              onClick={() => onSelectVideo(index)}
-            />
+          {items.map((item, index) => (
+            <div
+              key={item.id}
+              className={`relative flex-shrink-0 w-32 cursor-pointer overflow-hidden transition-all rounded-md border-2
+                ${selectedItemIndex === index ? "border-primary" : "border-transparent hover:border-primary/50"}`}
+              onClick={() => onSelectItem(index)}
+            >
+              <div className="aspect-video">
+                <img
+                  src={item.url}
+                  alt={item.title}
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.svg';
+                  }}
+                />
+              </div>
+              <div className="p-2">
+                <p className="text-xs font-medium truncate">
+                  {item.title}
+                </p>
+                {item.subtitle && (
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {item.subtitle}
+                  </p>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       </div>
