@@ -21,7 +21,7 @@ const ScreenshotThumbnail: React.FC<ScreenshotThumbnailProps> = ({
     <Card 
       className={cn(
         "mb-2 cursor-pointer overflow-hidden transition-all", 
-        isSelected ? "ring-2 ring-primary" : ""
+        isSelected ? "ring-2 ring-primary" : "hover:ring-1 hover:ring-primary/50"
       )}
       onClick={onClick}
     >

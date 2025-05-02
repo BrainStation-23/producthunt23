@@ -16,7 +16,9 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
   const [newScreenshotTitle, setNewScreenshotTitle] = useState('');
   const [newScreenshotDescription, setNewScreenshotDescription] = useState('');
   const [activeTab, setActiveTab] = useState<'gallery' | 'add'>('gallery');
-  const [selectedScreenshotIndex, setSelectedScreenshotIndex] = useState<number | null>(null);
+  const [selectedScreenshotIndex, setSelectedScreenshotIndex] = useState<number | null>(
+    screenshots.length > 0 ? 0 : null
+  );
 
   const addScreenshot = () => {
     if (!newScreenshotUrl) return;
@@ -27,24 +29,39 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
       description: newScreenshotDescription || undefined,
     };
 
-    onChange([...screenshots, newScreenshot]);
+    const updatedScreenshots = [...screenshots, newScreenshot];
+    onChange(updatedScreenshots);
     setNewScreenshotUrl('');
     setNewScreenshotTitle('');
     setNewScreenshotDescription('');
     setActiveTab('gallery');
+    setSelectedScreenshotIndex(updatedScreenshots.length - 1);
   };
 
   const handleImageUploaded = (screenshot: Screenshot) => {
-    onChange([...screenshots, screenshot]);
+    const updatedScreenshots = [...screenshots, screenshot];
+    onChange(updatedScreenshots);
     setActiveTab('gallery');
+    setSelectedScreenshotIndex(updatedScreenshots.length - 1);
   };
 
   const removeScreenshot = (index: number) => {
     const updatedScreenshots = [...screenshots];
     updatedScreenshots.splice(index, 1);
     onChange(updatedScreenshots);
+    
+    // Update selected index after removing
     if (selectedScreenshotIndex === index) {
-      setSelectedScreenshotIndex(null);
+      if (updatedScreenshots.length > 0) {
+        // Select previous image, or first if we removed the first image
+        const newIndex = index > 0 ? index - 1 : 0;
+        setSelectedScreenshotIndex(newIndex);
+      } else {
+        setSelectedScreenshotIndex(null);
+      }
+    } else if (selectedScreenshotIndex !== null && selectedScreenshotIndex > index) {
+      // If we removed an image before the selected one, decrement the index
+      setSelectedScreenshotIndex(selectedScreenshotIndex - 1);
     }
   };
 
@@ -82,7 +99,7 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
   };
 
   const selectScreenshot = (index: number) => {
-    setSelectedScreenshotIndex(index === selectedScreenshotIndex ? null : index);
+    setSelectedScreenshotIndex(index);
   };
 
   return (
@@ -100,10 +117,7 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
         <Button
           type="button"
           variant={activeTab === 'add' ? "default" : "outline"}
-          onClick={() => {
-            setActiveTab('add');
-            setSelectedScreenshotIndex(null);
-          }}
+          onClick={() => setActiveTab('add')}
           className="flex-1"
         >
           <ImagePlus className="mr-2 h-4 w-4" />
