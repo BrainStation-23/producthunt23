@@ -35,6 +35,12 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
+  // Prevent buttons from submitting forms
+  const handleNavigationClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   if (screenshots.length === 0) {
     return <ScreenshotEmptyState type="gallery" onAddClick={onAddClick} />;
   }
