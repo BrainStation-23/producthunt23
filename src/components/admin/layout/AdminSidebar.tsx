@@ -87,6 +87,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onLogout }) => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
+                  <Link to="/admin/judging">
+                    <Award className="h-4 w-4" />
+                    <span>Judging</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
                   <Link to="/admin/scoring">
                     <Star className="h-4 w-4" />
                     <span>Scoring</span>
