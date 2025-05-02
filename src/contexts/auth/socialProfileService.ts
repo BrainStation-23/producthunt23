@@ -1,4 +1,3 @@
-
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -24,12 +23,14 @@ export const updateSocialProfileLinks = async (user: User): Promise<void> => {
       }
     } else if (provider === 'linkedin_oidc') {
       const identity = identities.find(id => id.provider === 'linkedin_oidc');
-      if (identity?.identity_data?.sub) {
-        // LinkedIn doesn't provide the username directly in the identity data
-        // We'll use the sub as a unique identifier
-        socialData.linkedin = `https://linkedin.com/in/${identity.identity_data.preferred_username || 'profile'}`;
+      // Only set LinkedIn URL and mark as verified if we have a valid username
+      // We avoid setting generic URLs like "profile"
+      if (identity?.identity_data?.preferred_username && 
+          identity.identity_data.preferred_username !== 'profile') {
+        socialData.linkedin = `https://linkedin.com/in/${identity.identity_data.preferred_username}`;
         verifiedSocials.push('linkedin');
       }
+      // Otherwise, we don't set the URL at all and don't mark it as verified
     } else if (provider === 'twitter') {
       const identity = identities.find(id => id.provider === 'twitter');
       if (identity?.identity_data) {
@@ -43,12 +44,31 @@ export const updateSocialProfileLinks = async (user: User): Promise<void> => {
     
     if (Object.keys(socialData).length === 0) return;
     
+    // Fetch current user profile to handle verified socials properly
+    const { data: currentProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('verified_socials')
+      .eq('id', user.id)
+      .single();
+      
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError);
+      return;
+    }
+    
+    // Merge new verified socials with existing ones
+    const existingVerifiedSocials = currentProfile?.verified_socials || [];
+    // Only include social networks that we're updating
+    const updatedVerifiedSocials = existingVerifiedSocials.filter(
+      social => !['github', 'linkedin', 'twitter'].includes(social) || verifiedSocials.includes(social)
+    ).concat(verifiedSocials);
+    
     // Update the profile with the social links and mark them as verified
     const { error } = await supabase
       .from('profiles')
       .update({
         ...socialData,
-        verified_socials: verifiedSocials
+        verified_socials: updatedVerifiedSocials
       })
       .eq('id', user.id);
     

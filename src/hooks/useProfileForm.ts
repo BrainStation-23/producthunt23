@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -72,11 +71,6 @@ export function useProfileForm(user: User | null) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
-    if (formData.verified_socials?.includes(name)) {
-      return;
-    }
-    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -86,6 +80,15 @@ export function useProfileForm(user: User | null) {
     try {
       setIsSaving(true);
       
+      // Check if the LinkedIn URL is the generic one - if so, remove it from verified socials
+      const isGenericLinkedIn = formData.linkedin === 'https://linkedin.com/in/profile';
+      let verified_socials = [...(formData.verified_socials || [])];
+      
+      if (isGenericLinkedIn && verified_socials.includes('linkedin')) {
+        // Remove 'linkedin' from verified socials
+        verified_socials = verified_socials.filter(social => social !== 'linkedin');
+      }
+      
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -94,11 +97,18 @@ export function useProfileForm(user: User | null) {
           website: formData.website,
           twitter: formData.twitter,
           linkedin: formData.linkedin,
-          github: formData.github
+          github: formData.github,
+          verified_socials: verified_socials
         })
         .eq('id', user.id);
 
       if (error) throw error;
+      
+      // Update the local formData with the possibly modified verified_socials
+      setFormData(prev => ({
+        ...prev,
+        verified_socials: verified_socials
+      }));
       
       toast.success('Profile updated successfully');
     } catch (error: any) {

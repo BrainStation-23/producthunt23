@@ -9,7 +9,8 @@ import { User } from '@supabase/supabase-js';
 import { GitHubLogoIcon, LinkedInLogoIcon, TwitterLogoIcon } from '@radix-ui/react-icons';
 import { ProfileData } from '@/hooks/useProfileForm';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProfileFormProps {
   user: User | null;
@@ -18,6 +19,22 @@ interface ProfileFormProps {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSave: () => Promise<void>;
 }
+
+// Helper function to check if a social URL appears to be generic
+const isGenericUrl = (type: string, url: string | null): boolean => {
+  if (!url) return false;
+  
+  switch (type) {
+    case 'linkedin':
+      return url === 'https://linkedin.com/in/profile';
+    case 'github':
+      return url.endsWith('/undefined') || url.endsWith('/null');
+    case 'twitter':
+      return url.endsWith('/undefined') || url.endsWith('/null');
+    default:
+      return false;
+  }
+};
 
 const ProfileForm: React.FC<ProfileFormProps> = ({ 
   user, 
@@ -28,9 +45,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
 }) => {
   // Check which social profiles are verified
   const verifiedSocials = formData.verified_socials || [];
-  const isGithubVerified = verifiedSocials.includes('github');
-  const isLinkedinVerified = verifiedSocials.includes('linkedin');
-  const isTwitterVerified = verifiedSocials.includes('twitter');
+  const isGithubVerified = verifiedSocials.includes('github') && !isGenericUrl('github', formData.github);
+  const isLinkedinVerified = verifiedSocials.includes('linkedin') && !isGenericUrl('linkedin', formData.linkedin);
+  const isTwitterVerified = verifiedSocials.includes('twitter') && !isGenericUrl('twitter', formData.twitter);
 
   return (
     <Card>
@@ -104,10 +121,23 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <Label htmlFor="twitter" className="flex items-center gap-2">
                   <TwitterLogoIcon className="h-4 w-4" />
                   Twitter
-                  {isTwitterVerified && (
+                  {isTwitterVerified ? (
                     <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200 flex items-center">
                       <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
                     </Badge>
+                  ) : verifiedSocials.includes('twitter') && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-700 border-amber-200 flex items-center">
+                            <AlertCircle className="h-3 w-3 mr-1" /> Incomplete
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>We couldn't retrieve your Twitter profile URL.<br />Please enter it manually.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </Label>
                 <Input 
@@ -117,24 +147,30 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   value={formData.twitter || ''}
                   onChange={onInputChange}
                   placeholder="https://twitter.com/username" 
-                  readOnly={isTwitterVerified}
-                  className={isTwitterVerified ? "bg-gray-50" : ""}
                 />
-                {isTwitterVerified && (
-                  <p className="text-xs text-muted-foreground">
-                    Your Twitter profile is verified and cannot be changed.
-                  </p>
-                )}
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="linkedin" className="flex items-center gap-2">
                   <LinkedInLogoIcon className="h-4 w-4" />
                   LinkedIn
-                  {isLinkedinVerified && (
+                  {isLinkedinVerified ? (
                     <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200 flex items-center">
                       <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
                     </Badge>
+                  ) : verifiedSocials.includes('linkedin') && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-700 border-amber-200 flex items-center">
+                            <AlertCircle className="h-3 w-3 mr-1" /> Incomplete
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>We couldn't retrieve your LinkedIn profile URL.<br />Please enter it manually.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </Label>
                 <Input 
@@ -144,12 +180,10 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   value={formData.linkedin || ''}
                   onChange={onInputChange}
                   placeholder="https://linkedin.com/in/username" 
-                  readOnly={isLinkedinVerified}
-                  className={isLinkedinVerified ? "bg-gray-50" : ""}
                 />
                 {isLinkedinVerified && (
-                  <p className="text-xs text-muted-foreground">
-                    Your LinkedIn profile is verified and cannot be changed.
+                  <p className="text-xs text-green-600">
+                    Your LinkedIn profile has been verified.
                   </p>
                 )}
               </div>
@@ -158,10 +192,23 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <Label htmlFor="github" className="flex items-center gap-2">
                   <GitHubLogoIcon className="h-4 w-4" />
                   GitHub
-                  {isGithubVerified && (
+                  {isGithubVerified ? (
                     <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200 flex items-center">
                       <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
                     </Badge>
+                  ) : verifiedSocials.includes('github') && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-700 border-amber-200 flex items-center">
+                            <AlertCircle className="h-3 w-3 mr-1" /> Incomplete
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>We couldn't retrieve your GitHub profile URL.<br />Please enter it manually.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </Label>
                 <Input 
@@ -171,12 +218,10 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   value={formData.github || ''}
                   onChange={onInputChange}
                   placeholder="https://github.com/username" 
-                  readOnly={isGithubVerified}
-                  className={isGithubVerified ? "bg-gray-50" : ""}
                 />
                 {isGithubVerified && (
-                  <p className="text-xs text-muted-foreground">
-                    Your GitHub profile is verified and cannot be changed.
+                  <p className="text-xs text-green-600">
+                    Your GitHub profile has been verified.
                   </p>
                 )}
               </div>
