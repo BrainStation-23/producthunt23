@@ -1,6 +1,5 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Video } from '@/types/product';
 import VideoThumbnail from './VideoThumbnail';
 import VideoDetails from './VideoDetails';
@@ -101,9 +100,41 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({
   }
 
   return (
-    <div className={`min-h-[300px] ${isMobile ? 'flex flex-col gap-4' : 'grid grid-cols-1 md:grid-cols-3 gap-4'}`}>
-      <div className={isMobile ? 'order-2' : 'col-span-1 md:col-span-1 h-fit'}>
-        {/* Horizontal thumbnail navigation */}
+    <div className="min-h-[400px] space-y-6">
+      {/* Main video carousel - full width */}
+      <div className="space-y-4">
+        <Carousel 
+          className="w-full"
+          setApi={setApi}
+        >
+          <CarouselContent>
+            {videos.map((video, index) => (
+              <CarouselItem key={index}>
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                  <iframe
+                    src={getEmbedUrl(video.video_url)}
+                    title={video.title || `Video ${index + 1}`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+        </Carousel>
+
+        {/* Video Counter */}
+        <div className="text-center text-sm text-muted-foreground">
+          {selectedVideoIndex !== null && videos.length > 0 ? 
+            `${selectedVideoIndex + 1} of ${videos.length}` : 
+            `${videos.length} videos`}
+        </div>
+
+        {/* Thumbnails strip with navigation */}
         <div className="relative">
           <Button
             variant="outline"
@@ -118,7 +149,6 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({
             <span className="sr-only">Scroll left</span>
           </Button>
 
-          {/* Native scrollable container replacing ScrollArea */}
           <div className="relative px-10">
             <div 
               ref={thumbnailScrollRef}
@@ -153,50 +183,18 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({
         </div>
       </div>
 
-      <div className={isMobile ? 'order-1' : 'col-span-1 md:col-span-2'}>
+      {/* Video Details Form - full width at bottom */}
+      <div className="w-full">
         {selectedVideoIndex !== null ? (
           videos.length > 0 ? (
-            <div className="space-y-4">
-              {/* Video Carousel */}
-              <Carousel 
-                className="w-full max-w-full"
-                setApi={setApi}
-              >
-                <CarouselContent>
-                  {videos.map((video, index) => (
-                    <CarouselItem key={index}>
-                      <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                        <iframe
-                          src={getEmbedUrl(video.video_url)}
-                          title={video.title || `Video ${index + 1}`}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          className="absolute inset-0 h-full w-full"
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
-                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
-              </Carousel>
-
-              {/* Video Counter */}
-              <div className="text-center text-sm text-muted-foreground">
-                {selectedVideoIndex + 1} of {videos.length}
-              </div>
-
-              {/* Video Details Form */}
-              <VideoDetails
-                video={videos[selectedVideoIndex]}
-                index={selectedVideoIndex}
-                totalVideos={videos.length}
-                onUpdateField={(field, value) => onUpdateVideoField(selectedVideoIndex, field, value)}
-                onMoveVideo={(direction) => onMoveVideo(selectedVideoIndex, direction)}
-                onRemoveVideo={() => onRemoveVideo(selectedVideoIndex)}
-              />
-            </div>
+            <VideoDetails
+              video={videos[selectedVideoIndex]}
+              index={selectedVideoIndex}
+              totalVideos={videos.length}
+              onUpdateField={(field, value) => onUpdateVideoField(selectedVideoIndex, field, value)}
+              onMoveVideo={(direction) => onMoveVideo(selectedVideoIndex, direction)}
+              onRemoveVideo={() => onRemoveVideo(selectedVideoIndex)}
+            />
           ) : (
             <VideoEmptyState type="details" />
           )

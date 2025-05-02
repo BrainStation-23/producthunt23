@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { FileVideo, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getVideoInfo } from '@/utils/videoUtils';
@@ -24,7 +23,7 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
   return (
     <div 
       className={cn(
-        "relative flex-shrink-0 w-36 cursor-pointer overflow-hidden transition-all rounded-md border-2",
+        "relative flex-shrink-0 w-32 cursor-pointer overflow-hidden transition-all rounded-md border-2",
         isSelected ? "border-primary" : "border-transparent hover:border-primary/50"
       )}
       onClick={onClick}
@@ -41,12 +40,12 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
               }}
             />
             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-              <Play className="h-8 w-8 text-white" />
+              <Play className="h-6 w-6 text-white" />
             </div>
           </>
         ) : (
           <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-            <FileVideo className="h-8 w-8 text-gray-500" />
+            <FileVideo className="h-6 w-6 text-gray-500" />
           </div>
         )}
       </div>
