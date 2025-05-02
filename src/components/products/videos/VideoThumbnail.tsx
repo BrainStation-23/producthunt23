@@ -22,20 +22,20 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
   const videoInfo = getVideoInfo(video.video_url);
 
   return (
-    <Card 
+    <div 
       className={cn(
-        "mb-2 cursor-pointer overflow-hidden transition-all",
-        isSelected ? "ring-2 ring-primary" : ""
+        "relative flex-shrink-0 w-36 cursor-pointer overflow-hidden transition-all rounded-md border-2",
+        isSelected ? "border-primary" : "border-transparent hover:border-primary/50"
       )}
       onClick={onClick}
     >
-      <div className="relative aspect-video group">
+      <div className="aspect-video group">
         {videoInfo.thumbnail ? (
           <>
             <img
               src={videoInfo.thumbnail}
               alt={video.title || `Video ${index + 1}`}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="h-full w-full object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = '/placeholder.svg';
               }}
@@ -50,15 +50,15 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
           </div>
         )}
       </div>
-      <CardContent className="p-2">
+      <div className="p-2">
         <p className="text-xs font-medium truncate">
           {video.title || `Video ${index + 1}`}
         </p>
         <p className="text-xs text-muted-foreground capitalize">
           {videoInfo.platform || 'Video'}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
