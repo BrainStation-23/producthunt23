@@ -56,6 +56,14 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
     });
   }, [api]);
 
+  const handlePrevious = () => {
+    api?.scrollPrev();
+  };
+
+  const handleNext = () => {
+    api?.scrollNext();
+  };
+
   return (
     <div className="relative w-full space-y-4">
       <div className="relative rounded-lg overflow-hidden">
@@ -84,12 +92,13 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
           
           {/* Bottom Navigation Controls */}
           <div className="flex items-center justify-center gap-4 mt-4">
-            <CarouselPrevious 
-              className="relative static transform-none h-9 w-9 rounded-full"
-              variant="outline"
+            <button 
+              className="p-2 rounded-full border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 flex items-center justify-center"
+              onClick={handlePrevious}
+              aria-label="Previous screenshot"
             >
               <ChevronLeft className="h-5 w-5" />
-            </CarouselPrevious>
+            </button>
             
             {/* Dot Indicators */}
             <div className="flex gap-2 items-center">
@@ -111,14 +120,20 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
               ))}
             </div>
             
-            <CarouselNext 
-              className="relative static transform-none h-9 w-9 rounded-full" 
-              variant="outline"
+            <button 
+              className="p-2 rounded-full border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 flex items-center justify-center"
+              onClick={handleNext}
+              aria-label="Next screenshot"
             >
               <ChevronRight className="h-5 w-5" />
-            </CarouselNext>
+            </button>
           </div>
         </Carousel>
+
+        {/* Image Counter */}
+        <div className="absolute top-2 right-2 z-10">
+          <ImageCounter current={currentImageIndex} total={screenshots.length} />
+        </div>
       </div>
 
       <ThumbnailGallery

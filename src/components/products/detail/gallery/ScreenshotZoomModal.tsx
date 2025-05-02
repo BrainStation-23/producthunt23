@@ -35,6 +35,25 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
   onZoomOut,
   setCarouselApi
 }) => {
+  const [api, setApi] = React.useState<CarouselApi>();
+  
+  // Handle API reference
+  React.useEffect(() => {
+    if (!api) return;
+    setCarouselApi(api);
+    
+    // Sync with current index
+    api.scrollTo(currentIndex);
+  }, [api, setCarouselApi, currentIndex]);
+  
+  const handlePrevious = () => {
+    api?.scrollPrev();
+  };
+
+  const handleNext = () => {
+    api?.scrollNext();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-screen-lg w-full h-[90vh] p-0">
@@ -48,7 +67,7 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
           <div className="relative w-full h-full">
             <Carousel 
               className="w-full h-full" 
-              setApi={setCarouselApi}
+              setApi={setApi}
             >
               <CarouselContent>
                 {screenshots.map((screenshot, index) => (
@@ -86,11 +105,13 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
               
               {/* Bottom Navigation Controls for Modal */}
               <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-6 z-10">
-                <CarouselPrevious 
-                  className="relative static transform-none h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                <button
+                  className="relative h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80 flex items-center justify-center"
+                  onClick={handlePrevious}
                 >
                   <ChevronLeft className="h-5 w-5" />
-                </CarouselPrevious>
+                  <span className="sr-only">Previous slide</span>
+                </button>
                 
                 {/* Dot Indicators */}
                 <div className="flex gap-2 items-center px-4 py-2 rounded-full bg-background/50 backdrop-blur-sm">
@@ -103,16 +124,19 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
                           ? "bg-primary w-3 h-3" 
                           : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
                       )}
+                      onClick={() => api?.scrollTo(index)}
                       aria-label={`Go to screenshot ${index + 1}`}
                     />
                   ))}
                 </div>
                 
-                <CarouselNext 
-                  className="relative static transform-none h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                <button
+                  className="relative h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80 flex items-center justify-center"
+                  onClick={handleNext}
                 >
                   <ChevronRight className="h-5 w-5" />
-                </CarouselNext>
+                  <span className="sr-only">Next slide</span>
+                </button>
               </div>
             </Carousel>
           </div>
