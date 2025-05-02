@@ -51,7 +51,7 @@ const AdminScoring = () => {
           
           <ResizableHandle withHandle />
           
-          <ResizablePanel defaultSize={70} className="overflow-hidden">
+          <ResizablePanel defaultSize={70} className="">
             <div className="h-full flex flex-col">
               {selectedProduct ? (
                 <div className="p-4 flex-1 overflow-auto">
