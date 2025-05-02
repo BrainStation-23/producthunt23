@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Product, ProductScreenshot, ProductVideo } from '@/types/product';
+import { Product, ProductScreenshot, ProductVideo, ProductMaker } from '@/types/product';
 
 export const useProductDetail = (productId: string | undefined) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [screenshots, setScreenshots] = useState<ProductScreenshot[]>([]);
   const [videos, setVideos] = useState<ProductVideo[]>([]);
+  const [makers, setMakers] = useState<ProductMaker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [commentCount, setCommentCount] = useState(0);
 
@@ -83,6 +84,24 @@ export const useProductDetail = (productId: string | undefined) => {
           
         if (videosError) throw videosError;
         
+        // Fetch makers
+        const { data: makersData, error: makersError } = await supabase
+          .from('product_makers')
+          .select(`
+            id,
+            product_id,
+            profile_id,
+            created_at,
+            profile:profiles (
+              username,
+              avatar_url,
+              email
+            )
+          `)
+          .eq('product_id', productId);
+          
+        if (makersError) throw makersError;
+        
         // Fetch category names
         const categoryNames = [];
         if (productData.categories && productData.categories.length > 0) {
@@ -108,6 +127,7 @@ export const useProductDetail = (productId: string | undefined) => {
         setProduct(completeProductData);
         setScreenshots(screenshotsData || []);
         setVideos(videosData || []);
+        setMakers(makersData || []);
       } catch (error: any) {
         console.error('Error fetching product details:', error);
         toast.error('Failed to load product details');
@@ -186,6 +206,7 @@ export const useProductDetail = (productId: string | undefined) => {
     product,
     screenshots,
     videos,
+    makers,
     isLoading,
     commentCount
   };

@@ -8,7 +8,7 @@ import ProductNotFound from '@/components/products/detail/ProductNotFound';
 
 const ProductDetailPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
-  const { product, screenshots, videos, isLoading, commentCount } = useProductDetail(productId);
+  const { product, screenshots, videos, makers, isLoading, commentCount } = useProductDetail(productId);
 
   if (isLoading) {
     return <ProductLoadingSkeleton />;
@@ -23,6 +23,7 @@ const ProductDetailPage: React.FC = () => {
       product={product} 
       screenshots={screenshots} 
       videos={videos} 
+      makers={makers}
       commentCount={commentCount} 
     />
   );

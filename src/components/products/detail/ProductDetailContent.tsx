@@ -1,17 +1,19 @@
 
 import React from 'react';
-import { Product, ProductScreenshot, ProductVideo } from '@/types/product';
+import { Product, ProductScreenshot, ProductVideo, ProductMaker } from '@/types/product';
 import ProductHeader from '@/components/products/detail/ProductHeader';
 import ProductMainContent from '@/components/products/detail/ProductMainContent';
 import ProductInfoCard from '@/components/products/detail/ProductInfoCard';
 import ProductMediaTabs from '@/components/products/detail/ProductMediaTabs';
 import ProductComments from '@/components/products/comments/ProductComments';
+import ProductMakers from '@/components/products/detail/ProductMakers';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProductDetailContentProps {
   product: Product;
   screenshots: ProductScreenshot[];
   videos: ProductVideo[];
+  makers: ProductMaker[];
   commentCount: number;
 }
 
@@ -19,6 +21,7 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({
   product, 
   screenshots, 
   videos, 
+  makers,
   commentCount 
 }) => {
   const isMobile = useIsMobile();
@@ -38,6 +41,12 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({
           <ProductMainContent product={product} />
           <ProductMediaTabs screenshots={screenshots} videos={videos} />
           
+          {makers && makers.length > 0 && (
+            <div className="mt-6">
+              <ProductMakers makers={makers} creatorId={product.created_by} />
+            </div>
+          )}
+          
           <div className="mt-6 sm:mt-8">
             <ProductComments productId={product.id} />
           </div>
@@ -46,6 +55,9 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({
         {!isMobile && (
           <div className="space-y-6">
             <ProductInfoCard product={product} commentCount={commentCount} />
+            {makers && makers.length > 0 && (
+              <ProductMakers makers={makers} creatorId={product.created_by} />
+            )}
           </div>
         )}
       </div>
