@@ -39,12 +39,6 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({
     return <ScreenshotEmptyState type="gallery" onAddClick={onAddClick} />;
   }
 
-  // Function to handle navigation button clicks
-  const handleNavigationClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   return (
     <div className={`min-h-[400px] ${isMobile ? 'flex flex-col gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}`}>
       {/* Main carousel view */}
