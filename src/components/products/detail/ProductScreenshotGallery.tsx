@@ -9,7 +9,6 @@ import {
   type CarouselApi
 } from "@/components/ui/carousel";
 import { ProductScreenshot } from '@/types/product';
-import ThumbnailGallery from './gallery/ThumbnailGallery';
 import ImageCounter from './gallery/ImageCounter';
 import ImageCaption from './gallery/ImageCaption';
 import ScreenshotZoomModal from './gallery/ScreenshotZoomModal';
@@ -135,15 +134,6 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
           <ImageCounter current={currentImageIndex} total={screenshots.length} />
         </div>
       </div>
-
-      <ThumbnailGallery
-        items={screenshots}
-        currentIndex={currentImageIndex}
-        onSelectItem={(index) => {
-          setCurrentImageIndex(index);
-          api?.scrollTo(index);
-        }}
-      />
 
       <ScreenshotZoomModal
         screenshots={screenshots}
