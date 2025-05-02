@@ -56,31 +56,33 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
 
   return (
     <div className="relative w-full space-y-4">
-      <Carousel 
-        className="w-full max-w-full"
-        setApi={setApi}
-      >
-        <CarouselContent>
-          {screenshots.map((screenshot, index) => (
-            <CarouselItem key={screenshot.id}>
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                <img
-                  src={screenshot.image_url}
-                  alt={screenshot.title || `Screenshot ${index + 1}`}
-                  className="h-full w-full object-contain cursor-zoom-in"
-                  onClick={() => openZoomModal(index)}
+      <div className="relative">
+        <Carousel 
+          className="w-full max-w-full"
+          setApi={setApi}
+        >
+          <CarouselContent>
+            {screenshots.map((screenshot, index) => (
+              <CarouselItem key={screenshot.id}>
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                  <img
+                    src={screenshot.image_url}
+                    alt={screenshot.title || `Screenshot ${index + 1}`}
+                    className="h-full w-full object-contain cursor-zoom-in"
+                    onClick={() => openZoomModal(index)}
+                  />
+                </div>
+                <ImageCaption 
+                  title={screenshot.title} 
+                  description={screenshot.description} 
                 />
-              </div>
-              <ImageCaption 
-                title={screenshot.title} 
-                description={screenshot.description} 
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
-        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
-      </Carousel>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+        </Carousel>
+      </div>
 
       <ImageCounter current={currentImageIndex} total={screenshots.length} />
 

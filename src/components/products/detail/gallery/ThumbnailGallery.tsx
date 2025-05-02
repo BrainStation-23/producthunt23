@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -20,17 +20,19 @@ const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
 }) => {
   return (
     <ScrollArea className="w-full">
-      <div className="flex gap-2 pb-4">
+      <div className="flex gap-3 pb-4 px-1">
         {items.map((item, index) => (
           <button
             key={item.id}
             onClick={() => onSelectItem(index)}
             className={cn(
-              "relative flex-shrink-0 w-20 h-20 overflow-hidden rounded border-2 transition-all",
+              "relative flex-shrink-0 w-24 h-20 overflow-hidden rounded-md border-2 transition-all",
               currentIndex === index 
-                ? "border-primary" 
-                : "border-transparent hover:border-primary/50"
+                ? "border-primary ring-2 ring-primary ring-opacity-50" 
+                : "border-transparent hover:border-primary/70"
             )}
+            aria-label={item.title || `View screenshot ${index + 1}`}
+            aria-current={currentIndex === index ? "true" : "false"}
           >
             <img
               src={item.image_url}
