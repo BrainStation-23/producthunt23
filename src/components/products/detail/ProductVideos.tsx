@@ -59,9 +59,25 @@ const ProductVideos: React.FC<ProductVideosProps> = ({ videos }) => {
     setTimeout(checkScrollability, 300);
   };
 
-  // Handle the carousel slide change
-  const handleCarouselSelect = (index: number) => {
-    setCurrentIndex(index);
+  // Handle carousel changes - updated to match the expected type
+  const handleCarouselChange = (event: React.SyntheticEvent<HTMLDivElement>) => {
+    // Find the current slide index from the carousel
+    const carousel = event.currentTarget;
+    if (!carousel) return;
+    
+    // Get all slide elements
+    const slides = carousel.querySelectorAll('[role="group"]');
+    if (!slides.length) return;
+    
+    // Calculate the current index based on scroll position
+    const viewportWidth = carousel.clientWidth;
+    const scrollLeft = carousel.scrollLeft;
+    const newIndex = Math.round(scrollLeft / viewportWidth);
+    
+    // Update state if the index changed
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < videos.length) {
+      setCurrentIndex(newIndex);
+    }
   };
 
   if (videos.length === 0) {
@@ -70,7 +86,7 @@ const ProductVideos: React.FC<ProductVideosProps> = ({ videos }) => {
 
   return (
     <div className="space-y-4">
-      <Carousel className="w-full" onSelect={handleCarouselSelect}>
+      <Carousel className="w-full" onSelect={handleCarouselChange}>
         <CarouselContent>
           {videos.map((video, index) => (
             <CarouselItem key={video.id} className="basis-full">
