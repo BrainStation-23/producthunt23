@@ -25,7 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-interface LogError {
+export interface LogError {
   id: string;
   service: string;
   message: string;

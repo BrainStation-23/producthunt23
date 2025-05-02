@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-interface ServiceStatus {
+export interface ServiceStatus {
   name: string;
   status: 'operational' | 'degraded' | 'failed';
   lastChecked: string;

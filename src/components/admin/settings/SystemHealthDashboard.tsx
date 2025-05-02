@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { SystemLogsPanel } from './system-health/SystemLogsPanel';
-import { PerformanceMetrics } from './system-health/PerformanceMetrics';
-import { ServiceStatusCard } from './system-health/ServiceStatusCard';
+import SystemLogsPanel from './system-health/SystemLogsPanel';
+import PerformanceMetrics from './system-health/PerformanceMetrics';
+import ServiceStatusCard from './system-health/ServiceStatusCard';
 import StorageCleanupPanel from './system-health/StorageCleanupPanel';
 
 const SystemHealthDashboard: React.FC = () => {
@@ -18,22 +18,28 @@ const SystemHealthDashboard: React.FC = () => {
       {/* Service Status Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <ServiceStatusCard 
-          service="Database" 
-          status="operational" 
-          latency="45ms" 
-          uptime="99.99%" 
+          service={{
+            name: "Database",
+            status: "operational",
+            responseTime: 45,
+            lastChecked: new Date().toISOString()
+          }}
         />
         <ServiceStatusCard 
-          service="Storage" 
-          status="operational" 
-          latency="120ms" 
-          uptime="99.95%" 
+          service={{
+            name: "Storage",
+            status: "operational",
+            responseTime: 120,
+            lastChecked: new Date().toISOString()
+          }}
         />
         <ServiceStatusCard 
-          service="Authentication" 
-          status="operational" 
-          latency="85ms" 
-          uptime="99.97%" 
+          service={{
+            name: "Authentication",
+            status: "operational",
+            responseTime: 85,
+            lastChecked: new Date().toISOString()
+          }}
         />
       </div>
       

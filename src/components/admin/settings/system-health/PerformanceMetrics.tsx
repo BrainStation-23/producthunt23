@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -18,9 +17,8 @@ import {
   Legend
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
-interface PerformanceData {
+export interface PerformanceData {
   database?: {
     queryTime: number[];
     timestamps: string[];
