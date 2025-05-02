@@ -69,6 +69,50 @@ export const uploadImageToStorage = async (
   }
 };
 
+/**
+ * Delete a file from Supabase storage
+ * @param fileUrl The public URL of the file to delete
+ * @param bucketName The storage bucket name
+ * @returns True if deletion was successful, false otherwise
+ */
+export const deleteImageFromStorage = async (
+  fileUrl: string,
+  bucketName: string = 'product_screenshots'
+): Promise<boolean> => {
+  try {
+    // Check if this is a Supabase storage URL
+    if (!fileUrl.includes('storage.googleapis.com') && !fileUrl.includes('supabase.co/storage')) {
+      console.log('Not deleting external URL:', fileUrl);
+      return false; // Not a Supabase URL, so we don't try to delete it
+    }
+
+    // Extract the file path from the URL
+    const urlParts = fileUrl.split(`/storage/v1/object/public/${bucketName}/`);
+    if (urlParts.length !== 2) {
+      console.log('Could not parse file path from URL:', fileUrl);
+      return false;
+    }
+
+    const filePath = decodeURIComponent(urlParts[1]);
+    
+    // Delete the file
+    const { error } = await supabase.storage
+      .from(bucketName)
+      .remove([filePath]);
+      
+    if (error) {
+      console.error('Error deleting file from storage:', error);
+      return false;
+    }
+    
+    console.log('Successfully deleted file:', filePath);
+    return true;
+  } catch (error) {
+    console.error('Error deleting file from storage:', error);
+    return false;
+  }
+};
+
 export const createScreenshotFromUrl = (
   imageUrl: string, 
   title?: string, 

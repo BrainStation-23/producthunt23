@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ImagePlus, ImageIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { Screenshot } from '@/types/product';
 import ScreenshotGallery from './screenshots/ScreenshotGallery';
 import AddScreenshotForm from './screenshots/AddScreenshotForm';
+import { deleteImageFromStorage } from '@/utils/fileUploadUtils';
 
 interface ScreenshotsManagerProps {
   screenshots: Screenshot[];
@@ -45,7 +47,23 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
     setSelectedScreenshotIndex(updatedScreenshots.length - 1);
   };
 
-  const removeScreenshot = (index: number) => {
+  const removeScreenshot = async (index: number) => {
+    const screenshotToRemove = screenshots[index];
+    
+    // Try to delete the image from storage if it's a Supabase URL
+    if (screenshotToRemove.image_url) {
+      try {
+        const deleted = await deleteImageFromStorage(screenshotToRemove.image_url);
+        if (deleted) {
+          toast.success("Screenshot image was deleted from storage");
+        }
+      } catch (error) {
+        console.error("Failed to delete image from storage:", error);
+        // We continue with removing from the gallery even if storage deletion fails
+      }
+    }
+    
+    // Update the screenshots array
     const updatedScreenshots = [...screenshots];
     updatedScreenshots.splice(index, 1);
     onChange(updatedScreenshots);
