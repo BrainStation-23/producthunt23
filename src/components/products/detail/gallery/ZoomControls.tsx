@@ -11,22 +11,26 @@ interface ZoomControlsProps {
 
 const ZoomControls: React.FC<ZoomControlsProps> = ({ scale, onZoomIn, onZoomOut }) => {
   return (
-    <div className="absolute top-4 right-4 flex gap-2 z-10">
+    <div className="absolute top-4 left-4 flex gap-2 z-50">
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
         onClick={onZoomIn}
         disabled={scale >= 3}
+        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background/90"
       >
-        <ZoomIn className="h-4 w-4" />
+        <ZoomIn className="h-5 w-5" />
+        <span className="sr-only">Zoom in</span>
       </Button>
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
         onClick={onZoomOut}
         disabled={scale <= 1}
+        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background/90"
       >
-        <ZoomOut className="h-4 w-4" />
+        <ZoomOut className="h-5 w-5" />
+        <span className="sr-only">Zoom out</span>
       </Button>
     </div>
   );
