@@ -67,7 +67,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
                   <img
                     src={screenshot.image_url}
                     alt={screenshot.title || `Screenshot ${index + 1}`}
-                    className="h-full w-full object-contain cursor-zoom-in"
+                    className="h-full w-full object-contain cursor-zoom-in transition-transform hover:scale-105"
                     onClick={() => openZoomModal(index)}
                   />
                 </div>
@@ -125,6 +125,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
         </div>
       </div>
 
+      {/* Improved ZoomModal */}
       <ScreenshotZoomModal
         screenshots={screenshots}
         isOpen={isZoomModalOpen}
