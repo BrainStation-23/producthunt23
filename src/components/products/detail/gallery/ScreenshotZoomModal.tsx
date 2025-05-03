@@ -5,12 +5,9 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
   type CarouselApi
 } from "@/components/ui/carousel";
 import { ProductScreenshot } from '@/types/product';
-import ZoomControls from './ZoomControls';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
@@ -19,9 +16,6 @@ interface ScreenshotZoomModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   currentIndex: number;
-  scale: number;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
   setCarouselApi: (api: CarouselApi) => void;
 }
 
@@ -30,9 +24,6 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
   isOpen,
   onOpenChange,
   currentIndex,
-  scale,
-  onZoomIn,
-  onZoomOut,
   setCarouselApi
 }) => {
   const [api, setApi] = React.useState<CarouselApi>();
@@ -56,14 +47,8 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-screen-lg w-full h-[90vh] p-0">
-        <div className="relative w-full h-full flex items-center justify-center bg-background/95 p-4">
-          <ZoomControls 
-            scale={scale}
-            onZoomIn={onZoomIn}
-            onZoomOut={onZoomOut}
-          />
-          
+      <DialogContent className="max-w-screen-lg w-full h-[90vh] p-0 flex items-center justify-center">
+        <div className="relative w-full h-full flex items-center justify-center bg-background/95">
           <div className="relative w-full h-full">
             <Carousel 
               className="w-full h-full" 
@@ -72,15 +57,12 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
               <CarouselContent>
                 {screenshots.map((screenshot, index) => (
                   <CarouselItem key={screenshot.id} className="h-full flex items-center justify-center">
-                    <div className="relative w-full h-full flex flex-col items-center justify-between py-8">
-                      <div 
-                        className="flex items-center justify-center transition-transform duration-200 flex-1"
-                        style={{ transform: `scale(${scale})` }}
-                      >
+                    <div className="relative w-full h-full flex flex-col items-center justify-center py-8">
+                      <div className="flex items-center justify-center flex-1 max-h-full">
                         <img
                           src={screenshot.image_url}
                           alt={screenshot.title || `Screenshot ${index + 1}`}
-                          className="max-h-full max-w-full object-contain"
+                          className="max-h-[calc(100%-3rem)] max-w-[90%] object-contain"
                         />
                       </div>
                       
@@ -103,11 +85,12 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
                 ))}
               </CarouselContent>
               
-              {/* Bottom Navigation Controls for Modal */}
+              {/* Navigation Controls for Modal */}
               <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-6 z-10">
                 <button
                   className="relative h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80 flex items-center justify-center"
                   onClick={handlePrevious}
+                  aria-label="Previous slide"
                 >
                   <ChevronLeft className="h-5 w-5" />
                   <span className="sr-only">Previous slide</span>
@@ -133,6 +116,7 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
                 <button
                   className="relative h-9 w-9 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80 flex items-center justify-center"
                   onClick={handleNext}
+                  aria-label="Next slide"
                 >
                   <ChevronRight className="h-5 w-5" />
                   <span className="sr-only">Next slide</span>

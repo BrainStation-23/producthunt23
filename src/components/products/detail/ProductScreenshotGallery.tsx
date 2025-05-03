@@ -22,22 +22,12 @@ interface ProductScreenshotGalleryProps {
 const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ screenshots }) => {
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [scale, setScale] = useState(1);
   const [api, setApi] = useState<CarouselApi>();
   const [modalApi, setModalApi] = useState<CarouselApi>();
-
-  const handleZoomIn = () => {
-    setScale(prev => Math.min(prev + 0.5, 3));
-  };
-
-  const handleZoomOut = () => {
-    setScale(prev => Math.max(prev - 0.5, 1));
-  };
 
   const openZoomModal = (index: number) => {
     setCurrentImageIndex(index);
     setIsZoomModalOpen(true);
-    setScale(1);
   };
 
   useEffect(() => {
@@ -140,9 +130,6 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
         isOpen={isZoomModalOpen}
         onOpenChange={setIsZoomModalOpen}
         currentIndex={currentImageIndex}
-        scale={scale}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
         setCarouselApi={setModalApi}
       />
     </div>
