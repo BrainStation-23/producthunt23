@@ -8,8 +8,8 @@ interface ImageCounterProps {
 
 const ImageCounter: React.FC<ImageCounterProps> = ({ current, total }) => {
   return (
-    <div className="inline-flex items-center justify-center px-2 py-1 bg-background/80 backdrop-blur-sm text-xs font-medium rounded-md">
-      {current} / {total}
+    <div className="text-center text-sm font-medium bg-background/80 backdrop-blur-sm py-1.5 px-4 rounded-full border shadow-sm inline-block mx-auto">
+      {current + 1} of {total}
     </div>
   );
 };

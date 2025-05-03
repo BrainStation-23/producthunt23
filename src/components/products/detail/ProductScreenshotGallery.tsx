@@ -37,7 +37,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
   const openZoomModal = (index: number) => {
     setCurrentImageIndex(index);
     setIsZoomModalOpen(true);
-    setScale(1); // Reset scale when opening modal
+    setScale(1);
   };
 
   useEffect(() => {
@@ -72,12 +72,12 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
         >
           <CarouselContent>
             {screenshots.map((screenshot, index) => (
-              <CarouselItem key={screenshot.id || index}>
+              <CarouselItem key={screenshot.id}>
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg">
                   <img
                     src={screenshot.image_url}
                     alt={screenshot.title || `Screenshot ${index + 1}`}
-                    className="h-full w-full object-contain cursor-zoom-in transition-transform hover:scale-105"
+                    className="h-full w-full object-contain cursor-zoom-in"
                     onClick={() => openZoomModal(index)}
                   />
                 </div>
@@ -89,19 +89,38 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
             ))}
           </CarouselContent>
           
-          <div className="absolute inset-y-0 left-2 flex items-center">
+          {/* Bottom Navigation Controls */}
+          <div className="flex items-center justify-center gap-4 mt-4">
             <button 
-              className="p-2 rounded-full border border-input bg-background/80 hover:bg-accent hover:text-accent-foreground h-9 w-9 flex items-center justify-center backdrop-blur-sm"
+              className="p-2 rounded-full border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 flex items-center justify-center"
               onClick={handlePrevious}
               aria-label="Previous screenshot"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-          </div>
-          
-          <div className="absolute inset-y-0 right-2 flex items-center">
+            
+            {/* Dot Indicators */}
+            <div className="flex gap-2 items-center">
+              {screenshots.map((_, index) => (
+                <button
+                  key={index}
+                  className={cn(
+                    "w-2 h-2 rounded-full transition-all",
+                    currentImageIndex === index 
+                      ? "bg-primary w-3 h-3" 
+                      : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                  )}
+                  onClick={() => {
+                    api?.scrollTo(index);
+                    setCurrentImageIndex(index);
+                  }}
+                  aria-label={`Go to screenshot ${index + 1}`}
+                />
+              ))}
+            </div>
+            
             <button 
-              className="p-2 rounded-full border border-input bg-background/80 hover:bg-accent hover:text-accent-foreground h-9 w-9 flex items-center justify-center backdrop-blur-sm"
+              className="p-2 rounded-full border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 flex items-center justify-center"
               onClick={handleNext}
               aria-label="Next screenshot"
             >
@@ -112,28 +131,8 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
 
         {/* Image Counter */}
         <div className="absolute top-2 right-2 z-10">
-          <ImageCounter current={currentImageIndex + 1} total={screenshots.length} />
+          <ImageCounter current={currentImageIndex} total={screenshots.length} />
         </div>
-      </div>
-
-      {/* Bottom Dot Indicators */}
-      <div className="flex items-center justify-center gap-2">
-        {screenshots.map((_, index) => (
-          <button
-            key={index}
-            className={cn(
-              "w-2 h-2 rounded-full transition-all",
-              currentImageIndex === index 
-                ? "bg-primary w-3 h-3" 
-                : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-            )}
-            onClick={() => {
-              api?.scrollTo(index);
-              setCurrentImageIndex(index);
-            }}
-            aria-label={`Go to screenshot ${index + 1}`}
-          />
-        ))}
       </div>
 
       <ScreenshotZoomModal
