@@ -38,6 +38,7 @@ const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
       {items.length > 4 && (
         <button
           onClick={scrollLeft}
+          type="button" /* Added explicit button type */
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-background/80 border hover:bg-accent"
           aria-label="Scroll thumbnails left"
         >
@@ -53,6 +54,7 @@ const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
           {items.map((item, index) => (
             <button
               key={item.id}
+              type="button" /* Added explicit button type */
               onClick={() => onSelectItem(index)}
               className={cn(
                 "relative flex-shrink-0 w-28 h-20 overflow-hidden rounded-md border-2 transition-all",
@@ -79,6 +81,7 @@ const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
       {items.length > 4 && (
         <button
           onClick={scrollRight}
+          type="button" /* Added explicit button type */
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-background/80 border hover:bg-accent"
           aria-label="Scroll thumbnails right"
         >

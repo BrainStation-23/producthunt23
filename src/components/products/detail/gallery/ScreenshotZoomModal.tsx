@@ -87,6 +87,7 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
         {/* Close button with improved position and visibility */}
         <button 
           onClick={() => onOpenChange(false)} 
+          type="button" /* Added explicit button type */
           className="absolute right-4 top-4 z-50 rounded-full bg-background/70 hover:bg-background p-2 shadow-md transition-all"
           aria-label="Close dialog"
         >
@@ -132,6 +133,7 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
             {/* Improved navigation buttons on the sides */}
             <button
               onClick={handlePrevious}
+              type="button" /* Added explicit button type */
               className="absolute left-4 top-1/2 -translate-y-1/2 z-30 rounded-full bg-background/70 hover:bg-background p-3 shadow-md transition-all hidden md:flex"
               aria-label="Previous screenshot"
             >
@@ -140,6 +142,7 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
             
             <button
               onClick={handleNext}
+              type="button" /* Added explicit button type */
               className="absolute right-4 top-1/2 -translate-y-1/2 z-30 rounded-full bg-background/70 hover:bg-background p-3 shadow-md transition-all hidden md:flex"
               aria-label="Next screenshot"
             >
@@ -152,6 +155,7 @@ const ScreenshotZoomModal: React.FC<ScreenshotZoomModalProps> = ({
                 {screenshots.map((_, index) => (
                   <button
                     key={index}
+                    type="button" /* Added explicit button type */
                     className={cn(
                       "w-2 h-2 rounded-full transition-all",
                       currentScreenshot === index 

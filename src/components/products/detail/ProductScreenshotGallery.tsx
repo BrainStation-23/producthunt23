@@ -84,6 +84,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
             <button 
               className="p-2 rounded-full border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 flex items-center justify-center"
               onClick={handlePrevious}
+              type="button" /* Added explicit button type */
               aria-label="Previous screenshot"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -94,6 +95,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
               {screenshots.map((_, index) => (
                 <button
                   key={index}
+                  type="button" /* Added explicit button type */
                   className={cn(
                     "w-2 h-2 rounded-full transition-all",
                     currentImageIndex === index 
@@ -112,6 +114,7 @@ const ProductScreenshotGallery: React.FC<ProductScreenshotGalleryProps> = ({ scr
             <button 
               className="p-2 rounded-full border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 flex items-center justify-center"
               onClick={handleNext}
+              type="button" /* Added explicit button type */
               aria-label="Next screenshot"
             >
               <ChevronRight className="h-5 w-5" />

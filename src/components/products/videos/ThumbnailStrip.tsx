@@ -65,10 +65,10 @@ const ThumbnailStrip: React.FC<ThumbnailStripProps> = ({
       <Button
         variant="outline"
         size="icon"
+        type="button" /* Added explicit button type */
         className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm transition-opacity ${!canScrollLeft ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
         onClick={() => scrollThumbnails('left')}
         disabled={!canScrollLeft}
-        type="button"
         aria-label="Scroll thumbnails left"
       >
         <ChevronLeft className="h-4 w-4" />
@@ -117,10 +117,10 @@ const ThumbnailStrip: React.FC<ThumbnailStripProps> = ({
       <Button
         variant="outline"
         size="icon"
+        type="button" /* Added explicit button type */
         className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm transition-opacity ${!canScrollRight ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
         onClick={() => scrollThumbnails('right')}
         disabled={!canScrollRight}
-        type="button"
         aria-label="Scroll thumbnails right"
       >
         <ChevronRight className="h-4 w-4" />
