@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Tag, Code } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import TechnologyFilter from './TechnologyFilter';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Category {
   id: string;
@@ -165,7 +167,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           </Select>
         </div>
         
-        {/* Technology Filter - New */}
+        {/* Technology Filter */}
         <div className="md:col-span-2">
           <TechnologyFilter 
             selectedTechnology={selectedTechnology}
