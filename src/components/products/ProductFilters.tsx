@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, Tag, Code } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import TechnologyFilter from './TechnologyFilter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import TechnologiesDialog from './technologies-selector/TechnologiesDialog';
 
 interface Category {
   id: string;
@@ -41,6 +41,9 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   const [searchInput, setSearchInput] = useState(searchQuery);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Convert single technology to array format for the selector
+  const selectedTechnologies = selectedTechnology ? [selectedTechnology] : [];
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -91,11 +94,13 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     setSearchParams(params);
   };
   
-  const handleTechnologyChange = (technology: string) => {
+  const handleTechnologyChange = (technologies: string[]) => {
     const params = new URLSearchParams(searchParams);
     
-    if (technology && technology !== 'all') {
-      params.set('technology', technology);
+    if (technologies.length > 0) {
+      // For now, we'll only use the first selected technology for filtering
+      // Future enhancement could allow multiple technology filters
+      params.set('technology', technologies[0]);
     } else {
       params.delete('technology');
     }
@@ -167,11 +172,15 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           </Select>
         </div>
         
-        {/* Technology Filter */}
+        {/* Technology Filter - Using the TechnologiesDialog */}
         <div className="md:col-span-2">
-          <TechnologyFilter 
-            selectedTechnology={selectedTechnology}
-            onTechnologyChange={handleTechnologyChange}
+          <TechnologiesDialog
+            selectedTechnologies={selectedTechnologies}
+            onSelectionChange={handleTechnologyChange}
+            buttonVariant="outline"
+            buttonClassName="w-full"
+            placeholder={selectedTechnology || "All technologies"}
+            singleSelection={true}
           />
         </div>
         
