@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Code } from 'lucide-react';
 import TechnologiesDialogContent from './TechnologiesDialogContent';
-import { useDeviconData, getRelatedTechnologies, techCategories } from '@/services/deviconService';
+import { useDeviconData, getRelatedTechnologies, categorizeTechnology } from '@/services/deviconService';
 
 interface TechnologiesDialogProps {
   selectedTechnologies: string[];
@@ -29,7 +29,7 @@ const TechnologiesDialog: React.FC<TechnologiesDialogProps> = ({
   const { data: deviconData, isLoading } = useDeviconData();
 
   // Get related technologies for the currently selected technologies
-  const relatedTechSuggestions = React.useMemo(() => {
+  const relatedTechSuggestions = useMemo(() => {
     if (!deviconData || selectedTechnologies.length === 0) return [];
     
     const suggestions = new Set<string>();
@@ -45,38 +45,68 @@ const TechnologiesDialog: React.FC<TechnologiesDialogProps> = ({
     return Array.from(suggestions).slice(0, 5);
   }, [deviconData, selectedTechnologies]);
 
+  // Organize technologies by category
+  const categorizedTechs = useMemo(() => {
+    if (!deviconData) return {};
+    
+    const result: Record<string, any[]> = {
+      all: [],
+      popular: [],
+      frontend: [],
+      backend: [],
+      database: [],
+      devops: [],
+      languages: [],
+      mobile: [],
+      tools: [],
+    };
+    
+    // Popular technologies (hardcoded for now)
+    const popularTechs = [
+      'react', 'typescript', 'javascript', 'python', 'nodejs', 
+      'vue', 'angular', 'nextjs', 'mongodb', 'mysql', 
+      'postgresql', 'php', 'java', 'csharp', 'dotnetcore', 
+      'aws', 'docker', 'kubernetes', 'firebase', 'tailwindcss'
+    ];
+    
+    deviconData.forEach(tech => {
+      // Add to all
+      result.all.push(tech);
+      
+      // Add to popular if it's in the popular list
+      if (popularTechs.includes(tech.name)) {
+        result.popular.push(tech);
+      }
+      
+      // Add to category
+      const category = categorizeTechnology(tech);
+      if (result[category]) {
+        result[category].push(tech);
+      }
+    });
+    
+    return result;
+  }, [deviconData]);
+
   // Filter technologies based on search term and active tab
-  const filteredTechnologies = React.useMemo(() => {
-    if (!deviconData) return [];
+  const filteredTechnologies = useMemo(() => {
+    if (!deviconData || !categorizedTechs[activeTab]) return [];
     
-    // First filter by search term
-    let filtered = deviconData;
-    
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(tech => 
-        tech.name.toLowerCase().includes(searchLower) || 
-        tech.aliases && Array.isArray(tech.aliases) && tech.aliases.some(alias => 
-          typeof alias === 'string' && alias.toLowerCase().includes(searchLower)
-        ) || 
-        tech.tags && Array.isArray(tech.tags) && tech.tags.some(tag => 
-          typeof tag === 'string' && tag.toLowerCase().includes(searchLower)
-        )
-      );
+    if (!searchTerm) {
+      return categorizedTechs[activeTab];
     }
     
-    // Then filter by active tab
-    if (activeTab === 'all') {
-      return filtered;
-    } else if (activeTab === 'popular') {
-      return filtered.filter(tech => tech.tags && tech.tags.includes('popular'));
-    } else {
-      // Filter by category
-      return filtered.filter(tech => {
-        return tech.tags && tech.tags.includes(activeTab);
-      });
-    }
-  }, [deviconData, searchTerm, activeTab]);
+    const searchLower = searchTerm.toLowerCase();
+    return categorizedTechs[activeTab].filter(tech => 
+      tech.name.toLowerCase().includes(searchLower) || 
+      tech.aliases && Array.isArray(tech.aliases) && tech.aliases.some(alias => 
+        typeof alias === 'string' && alias.toLowerCase().includes(searchLower)
+      ) || 
+      tech.tags && Array.isArray(tech.tags) && tech.tags.some(tag => 
+        typeof tag === 'string' && tag.toLowerCase().includes(searchLower)
+      )
+    );
+  }, [deviconData, searchTerm, activeTab, categorizedTechs]);
 
   const toggleTechnology = (techId: string) => {
     let updatedTechnologies: string[];
@@ -101,6 +131,14 @@ const TechnologiesDialog: React.FC<TechnologiesDialogProps> = ({
   const clearAllTechnologies = () => {
     onSelectionChange([]);
   };
+
+  // Reset search when dialog is closed
+  useEffect(() => {
+    if (!isDialogOpen) {
+      setSearchTerm('');
+      setActiveTab('all');
+    }
+  }, [isDialogOpen]);
 
   // Get the display text for the button
   const getDisplayText = () => {
