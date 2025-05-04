@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Tag } from 'lucide-react';
+import { Search, Tag, Code } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import TechnologyFilter from './TechnologyFilter';
 
 interface Category {
   id: string;
@@ -23,6 +22,7 @@ const sortOptions = [
 interface ProductFiltersProps {
   searchQuery: string;
   selectedCategory: string;
+  selectedTechnology: string;
   sortBy: string;
   setSearchParams: (params: URLSearchParams) => void;
   searchParams: URLSearchParams;
@@ -30,7 +30,8 @@ interface ProductFiltersProps {
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({ 
   searchQuery, 
-  selectedCategory, 
+  selectedCategory,
+  selectedTechnology, 
   sortBy, 
   setSearchParams,
   searchParams 
@@ -88,13 +89,26 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     setSearchParams(params);
   };
   
+  const handleTechnologyChange = (technology: string) => {
+    const params = new URLSearchParams(searchParams);
+    
+    if (technology && technology !== 'all') {
+      params.set('technology', technology);
+    } else {
+      params.delete('technology');
+    }
+    
+    params.set('page', '1'); // Reset to first page on technology change
+    setSearchParams(params);
+  };
+  
   const handleSortChange = (sort: string) => {
     const params = new URLSearchParams(searchParams);
     params.set('sort', sort);
     setSearchParams(params);
   };
 
-  const clearFilter = (filterType: 'q' | 'category' | 'all') => {
+  const clearFilter = (filterType: 'q' | 'category' | 'technology' | 'all') => {
     const params = new URLSearchParams(searchParams);
     
     if (filterType === 'all') {
@@ -135,7 +149,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         </form>
         
         {/* Category Filter */}
-        <div className="md:col-span-3">
+        <div className="md:col-span-2">
           <Select value={selectedCategory} onValueChange={handleCategoryChange} disabled={isLoading}>
             <SelectTrigger>
               <SelectValue placeholder={isLoading ? "Loading..." : "All categories"} />
@@ -151,8 +165,16 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           </Select>
         </div>
         
+        {/* Technology Filter - New */}
+        <div className="md:col-span-2">
+          <TechnologyFilter 
+            selectedTechnology={selectedTechnology}
+            onTechnologyChange={handleTechnologyChange}
+          />
+        </div>
+        
         {/* Sort Options */}
-        <div className="md:col-span-3">
+        <div className="md:col-span-2">
           <Select value={sortBy} onValueChange={handleSortChange}>
             <SelectTrigger>
               <SelectValue placeholder="Sort by" />
@@ -169,7 +191,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
       </div>
       
       {/* Active Filters Display */}
-      {(searchQuery || selectedCategory) && (
+      {(searchQuery || selectedCategory || selectedTechnology) && (
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-sm font-medium">Active filters:</span>
           
@@ -193,6 +215,19 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
               <button 
                 className="ml-1 hover:bg-muted rounded" 
                 onClick={() => clearFilter('category')}
+              >
+                &times;
+              </button>
+            </Badge>
+          )}
+          
+          {selectedTechnology && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <Code className="h-3 w-3" />
+              {selectedTechnology}
+              <button 
+                className="ml-1 hover:bg-muted rounded" 
+                onClick={() => clearFilter('technology')}
               >
                 &times;
               </button>

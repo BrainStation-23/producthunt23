@@ -15,6 +15,7 @@ const ProductsPage: React.FC = () => {
   // Extract search parameters
   const searchQuery = searchParams.get('q') || '';
   const selectedCategory = searchParams.get('category') || '';
+  const selectedTechnology = searchParams.get('technology') || '';
   const currentPage = parseInt(searchParams.get('page') || '1');
   const sortBy = searchParams.get('sort') || 'newest';
   
@@ -39,10 +40,11 @@ const ProductsPage: React.FC = () => {
     try {
       const { sort_by, sort_direction } = getSortParams();
       
-      // Call the filter_products function
+      // Call the filter_products function with the technology parameter
       const { data, error } = await supabase.rpc('filter_products', {
         search_query: searchQuery,
         selected_category: selectedCategory || null,
+        selected_technology: selectedTechnology || null,
         sort_by,
         sort_direction,
         page_number: currentPage,
@@ -69,7 +71,7 @@ const ProductsPage: React.FC = () => {
   };
   
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory, currentPage, sortBy],
+    queryKey: ['products', searchQuery, selectedCategory, selectedTechnology, currentPage, sortBy],
     queryFn: fetchProducts
   });
   
@@ -97,6 +99,7 @@ const ProductsPage: React.FC = () => {
       <ProductFilters 
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
+        selectedTechnology={selectedTechnology}
         sortBy={sortBy}
         setSearchParams={setSearchParams}
         searchParams={searchParams}

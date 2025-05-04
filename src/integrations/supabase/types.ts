@@ -705,14 +705,24 @@ export type Database = {
         Returns: undefined
       }
       filter_products: {
-        Args: {
-          search_query?: string
-          selected_category?: string
-          sort_by?: string
-          sort_direction?: string
-          page_number?: number
-          page_size?: number
-        }
+        Args:
+          | {
+              search_query?: string
+              selected_category?: string
+              selected_technology?: string
+              sort_by?: string
+              sort_direction?: string
+              page_number?: number
+              page_size?: number
+            }
+          | {
+              search_query?: string
+              selected_category?: string
+              sort_by?: string
+              sort_direction?: string
+              page_number?: number
+              page_size?: number
+            }
         Returns: {
           id: string
           name: string
