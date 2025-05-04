@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Code } from 'lucide-react';
 import TechnologiesDialogContent from './TechnologiesDialogContent';
-import { useDeviconData, getRelatedTechnologies } from '@/services/deviconService';
+import { useDeviconData, getRelatedTechnologies, techCategories } from '@/services/deviconService';
 
 interface TechnologiesDialogProps {
   selectedTechnologies: string[];
@@ -48,21 +49,34 @@ const TechnologiesDialog: React.FC<TechnologiesDialogProps> = ({
   const filteredTechnologies = React.useMemo(() => {
     if (!deviconData) return [];
     
-    if (!searchTerm) {
-      return deviconData;
+    // First filter by search term
+    let filtered = deviconData;
+    
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(tech => 
+        tech.name.toLowerCase().includes(searchLower) || 
+        tech.aliases && Array.isArray(tech.aliases) && tech.aliases.some(alias => 
+          typeof alias === 'string' && alias.toLowerCase().includes(searchLower)
+        ) || 
+        tech.tags && Array.isArray(tech.tags) && tech.tags.some(tag => 
+          typeof tag === 'string' && tag.toLowerCase().includes(searchLower)
+        )
+      );
     }
     
-    const searchLower = searchTerm.toLowerCase();
-    return deviconData.filter(tech => 
-      tech.name.toLowerCase().includes(searchLower) || 
-      tech.aliases && Array.isArray(tech.aliases) && tech.aliases.some(alias => 
-        typeof alias === 'string' && alias.toLowerCase().includes(searchLower)
-      ) || 
-      tech.tags && Array.isArray(tech.tags) && tech.tags.some(tag => 
-        typeof tag === 'string' && tag.toLowerCase().includes(searchLower)
-      )
-    );
-  }, [deviconData, searchTerm]);
+    // Then filter by active tab
+    if (activeTab === 'all') {
+      return filtered;
+    } else if (activeTab === 'popular') {
+      return filtered.filter(tech => tech.tags && tech.tags.includes('popular'));
+    } else {
+      // Filter by category
+      return filtered.filter(tech => {
+        return tech.tags && tech.tags.includes(activeTab);
+      });
+    }
+  }, [deviconData, searchTerm, activeTab]);
 
   const toggleTechnology = (techId: string) => {
     let updatedTechnologies: string[];
