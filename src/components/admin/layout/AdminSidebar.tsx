@@ -11,7 +11,8 @@ import {
   Award,
   Star,
   TrendingUp,
-  Activity
+  Activity,
+  Bookmark
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,6 +67,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onLogout }) => {
                   <Link to="/admin/products">
                     <Package className="h-4 w-4" />
                     <span>Products</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/admin/saved">
+                    <Bookmark className="h-4 w-4" />
+                    <span>Saved Products</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

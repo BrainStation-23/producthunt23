@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { RoleProvider } from './contexts/RoleContext';
@@ -8,6 +9,7 @@ import LogoutPage from './pages/auth/LogoutPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminLeaderboard from './pages/admin/AdminLeaderboard';
 import AdminActivity from './pages/admin/AdminActivity';
+import AdminSavedProducts from './pages/admin/AdminSavedProducts';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -100,6 +102,7 @@ function App() {
                   <Route path="scoring" element={<AdminScoring />} />
                   <Route path="leaderboard" element={<AdminLeaderboard />} />
                   <Route path="activity" element={<AdminActivity />} />
+                  <Route path="saved" element={<AdminSavedProducts />} />
                 </Route>
               </Route>
 
