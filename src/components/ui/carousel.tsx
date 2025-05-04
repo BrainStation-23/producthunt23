@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
@@ -201,6 +202,7 @@ const CarouselPrevious = React.forwardRef<
   return (
     <Button
       ref={ref}
+      type="button" /* Added explicit button type to prevent form submission */
       variant={variant}
       size={size}
       className={cn(
@@ -230,6 +232,7 @@ const CarouselNext = React.forwardRef<
   return (
     <Button
       ref={ref}
+      type="button" /* Added explicit button type to prevent form submission */
       variant={variant}
       size={size}
       className={cn(
