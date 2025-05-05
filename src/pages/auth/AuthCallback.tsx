@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/contexts/RoleContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,6 +9,7 @@ import { getDashboardPathForRole } from '@/utils/navigation';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { userRole, isRoleFetched } = useRole();
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +19,14 @@ const AuthCallback: React.FC = () => {
     const handleAuthCallback = async () => {
       try {
         console.log("Auth callback started");
+        
+        // Check for magic link error in URL params
+        const errorParam = searchParams.get("error");
+        const errorDescription = searchParams.get("error_description");
+        
+        if (errorParam) {
+          throw new Error(errorDescription || "Authentication failed");
+        }
         
         // Check for suspended user
         if (user?.app_metadata?.disabled) {
@@ -56,7 +66,7 @@ const AuthCallback: React.FC = () => {
     if (isProcessing && user && isRoleFetched) {
       handleAuthCallback();
     }
-  }, [navigate, user, userRole, isRoleFetched, isProcessing]);
+  }, [navigate, user, userRole, isRoleFetched, isProcessing, searchParams]);
 
   if (error) {
     return (

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, Mail } from 'lucide-react';
 
 import {
   Form,
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -123,6 +124,17 @@ const LoginForm: React.FC = () => {
           </Button>
         </form>
       </Form>
+
+      <div className="text-center">
+        <Button 
+          variant="link" 
+          onClick={() => navigate('/magic-link')}
+          className="text-sm text-primary"
+        >
+          <Mail className="mr-2 h-4 w-4" />
+          Sign in with Magic Link
+        </Button>
+      </div>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">

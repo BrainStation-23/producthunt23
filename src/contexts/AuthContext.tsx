@@ -13,6 +13,7 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
   signInWithLinkedIn: () => Promise<void>;
+  signInWithMagicLink: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -140,6 +141,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // New function for magic link authentication
+  const signInWithMagicLink = async (email: string) => {
+    try {
+      console.log('Starting Magic Link sign in process');
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectTo,
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Magic link sent! Check your email to continue.');
+    } catch (error: any) {
+      console.error('Error sending magic link:', error);
+      toast.error(error.message || 'Error sending magic link');
+      throw error;
+    }
+  };
+
   const value = {
     session,
     user,
@@ -149,6 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     signInWithGithub,
     signInWithLinkedIn,
+    signInWithMagicLink,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
