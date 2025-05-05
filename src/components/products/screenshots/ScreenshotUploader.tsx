@@ -102,7 +102,7 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
   return (
     <div className="space-y-6">
       {isLimitReached && (
-        <Alert variant="warning">
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             You've reached the maximum limit of {50 - remainingScreenshots} screenshots. 

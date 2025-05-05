@@ -166,7 +166,7 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
       </div>
       
       {isLimitReached && (
-        <Alert variant="warning" className="mb-4">
+        <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Maximum limit of {MAX_SCREENSHOTS} screenshots reached. Please remove some screenshots before adding more.
