@@ -1,17 +1,21 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ImagePlus, ImageIcon } from 'lucide-react';
+import { ImagePlus, ImageIcon, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Screenshot } from '@/types/product';
 import ScreenshotGallery from './screenshots/ScreenshotGallery';
 import AddScreenshotForm from './screenshots/AddScreenshotForm';
 import { deleteImageFromStorage } from '@/utils/fileUploadUtils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 
 interface ScreenshotsManagerProps {
   screenshots: Screenshot[];
   onChange: (screenshots: Screenshot[]) => void;
 }
+
+const MAX_SCREENSHOTS = 50;
 
 const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, onChange }) => {
   const [newScreenshotUrl, setNewScreenshotUrl] = useState('');
@@ -22,8 +26,15 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
     screenshots.length > 0 ? 0 : null
   );
 
+  const isLimitReached = screenshots.length >= MAX_SCREENSHOTS;
+
   const addScreenshot = () => {
     if (!newScreenshotUrl) return;
+    
+    if (isLimitReached) {
+      toast.error(`You can upload a maximum of ${MAX_SCREENSHOTS} screenshots.`);
+      return;
+    }
 
     const newScreenshot: Screenshot = {
       image_url: newScreenshotUrl,
@@ -41,6 +52,11 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
   };
 
   const handleImageUploaded = (screenshot: Screenshot) => {
+    if (isLimitReached) {
+      toast.error(`You can upload a maximum of ${MAX_SCREENSHOTS} screenshots.`);
+      return;
+    }
+    
     const updatedScreenshots = [...screenshots, screenshot];
     onChange(updatedScreenshots);
     setActiveTab('gallery');
@@ -122,26 +138,41 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2 mb-4">
-        <Button
-          type="button"
-          variant={activeTab === 'gallery' ? "default" : "outline"}
-          onClick={() => setActiveTab('gallery')}
-          className="flex-1"
-        >
-          <ImageIcon className="mr-2 h-4 w-4" />
-          Gallery {screenshots.length > 0 && `(${screenshots.length})`}
-        </Button>
-        <Button
-          type="button"
-          variant={activeTab === 'add' ? "default" : "outline"}
-          onClick={() => setActiveTab('add')}
-          className="flex-1"
-        >
-          <ImagePlus className="mr-2 h-4 w-4" />
-          Add New
-        </Button>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex gap-2 flex-1">
+          <Button
+            type="button"
+            variant={activeTab === 'gallery' ? "default" : "outline"}
+            onClick={() => setActiveTab('gallery')}
+            className="flex-1"
+          >
+            <ImageIcon className="mr-2 h-4 w-4" />
+            Gallery {screenshots.length > 0 && `(${screenshots.length})`}
+          </Button>
+          <Button
+            type="button"
+            variant={activeTab === 'add' ? "default" : "outline"}
+            onClick={() => !isLimitReached && setActiveTab('add')}
+            className="flex-1"
+            disabled={isLimitReached}
+          >
+            <ImagePlus className="mr-2 h-4 w-4" />
+            Add New
+          </Button>
+        </div>
+        <div className="text-xs text-muted-foreground ml-2">
+          {screenshots.length}/{MAX_SCREENSHOTS}
+        </div>
       </div>
+      
+      {isLimitReached && (
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Maximum limit of {MAX_SCREENSHOTS} screenshots reached. Please remove some screenshots before adding more.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {activeTab === 'gallery' && (
         <ScreenshotGallery
@@ -151,11 +182,11 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
           onUpdateScreenshotField={updateScreenshotField}
           onMoveScreenshot={moveScreenshot}
           onRemoveScreenshot={removeScreenshot}
-          onAddClick={() => setActiveTab('add')}
+          onAddClick={() => !isLimitReached && setActiveTab('add')}
         />
       )}
 
-      {activeTab === 'add' && (
+      {activeTab === 'add' && !isLimitReached && (
         <AddScreenshotForm
           screenshotUrl={newScreenshotUrl}
           screenshotTitle={newScreenshotTitle}
@@ -171,6 +202,8 @@ const ScreenshotsManager: React.FC<ScreenshotsManagerProps> = ({ screenshots, on
           }}
           onAdd={addScreenshot}
           onImageUploaded={handleImageUploaded}
+          screenshotsCount={screenshots.length}
+          maxScreenshots={MAX_SCREENSHOTS}
         />
       )}
     </div>

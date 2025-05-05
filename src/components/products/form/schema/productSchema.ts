@@ -1,3 +1,4 @@
+
 import * as z from 'zod';
 
 // Form validation schema
@@ -14,7 +15,7 @@ export const productSchema = z.object({
     title: z.string().optional(),
     image_url: z.string().url({ message: 'Please enter a valid URL.' }),
     description: z.string().optional(),
-  })),
+  })).max(50, { message: 'You can upload a maximum of 50 screenshots.' }),
   videos: z.array(z.object({
     title: z.string().optional(),
     video_url: z.string().url({ message: 'Please enter a valid URL.' }),

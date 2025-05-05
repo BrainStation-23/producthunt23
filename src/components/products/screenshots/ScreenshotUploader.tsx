@@ -10,15 +10,20 @@ import { validateImageFile, uploadImageToStorage, createScreenshotFromUrl } from
 import ImagePreview from './ImagePreview';
 import ImageDropZone from './ImageDropZone';
 import UploadProgress from './UploadProgress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ScreenshotUploaderProps {
   onImageUploaded: (screenshot: Screenshot) => void;
   onCancel: () => void;
+  isLimitReached?: boolean;
+  remainingScreenshots?: number;
 }
 
 const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
   onImageUploaded,
-  onCancel
+  onCancel,
+  isLimitReached = false,
+  remainingScreenshots = 50
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
@@ -31,6 +36,11 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isLimitReached) {
+      setError(`Maximum limit of screenshots reached (${remainingScreenshots} remaining)`);
+      return;
+    }
+
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
     
@@ -54,6 +64,11 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
   const uploadFile = async () => {
     if (!file) {
       setError('Please select a file to upload');
+      return;
+    }
+
+    if (isLimitReached) {
+      setError(`Maximum limit of screenshots reached (${remainingScreenshots} remaining)`);
       return;
     }
     
@@ -86,6 +101,16 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
 
   return (
     <div className="space-y-6">
+      {isLimitReached && (
+        <Alert variant="warning">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            You've reached the maximum limit of {50 - remainingScreenshots} screenshots. 
+            Please remove some screenshots before adding more.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="space-y-2">
         <Label htmlFor="screenshot-title">Title (Optional)</Label>
         <Input
@@ -93,6 +118,7 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Screenshot title"
+          disabled={isLimitReached}
         />
       </div>
       
@@ -103,6 +129,7 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Describe what's shown in this screenshot"
+          disabled={isLimitReached}
         />
       </div>
       
@@ -117,7 +144,7 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
             }}
           />
         ) : (
-          <ImageDropZone onFileSelected={handleFileChange} />
+          <ImageDropZone onFileSelected={handleFileChange} disabled={isLimitReached} />
         )}
         
         {error && (
@@ -137,7 +164,7 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
         <Button 
           type="button" 
           onClick={uploadFile} 
-          disabled={!file || uploading}
+          disabled={!file || uploading || isLimitReached}
         >
           {uploading ? 'Uploading...' : 'Upload Image'}
         </Button>

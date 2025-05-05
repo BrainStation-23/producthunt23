@@ -20,6 +20,8 @@ interface AddScreenshotFormProps {
   onCancel: () => void;
   onAdd: () => void;
   onImageUploaded?: (screenshot: Screenshot) => void;
+  screenshotsCount?: number;
+  maxScreenshots?: number;
 }
 
 const AddScreenshotForm: React.FC<AddScreenshotFormProps> = ({
@@ -31,12 +33,16 @@ const AddScreenshotForm: React.FC<AddScreenshotFormProps> = ({
   onDescriptionChange,
   onCancel,
   onAdd,
-  onImageUploaded
+  onImageUploaded,
+  screenshotsCount = 0,
+  maxScreenshots = 50
 }) => {
   const [activeTab, setActiveTab] = useState<'url' | 'upload'>('upload');
+  const remainingScreenshots = maxScreenshots - screenshotsCount;
+  const isLimitReached = screenshotsCount >= maxScreenshots;
 
   const handleScreenshotUploaded = (screenshot: Screenshot) => {
-    if (onImageUploaded) {
+    if (onImageUploaded && !isLimitReached) {
       onImageUploaded(screenshot);
     }
   };
@@ -44,7 +50,12 @@ const AddScreenshotForm: React.FC<AddScreenshotFormProps> = ({
   return (
     <Card>
       <CardHeader>
-        <h3 className="text-lg font-medium">Add New Screenshot</h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Add New Screenshot</h3>
+          <span className="text-xs text-muted-foreground">
+            {remainingScreenshots} of {maxScreenshots} remaining
+          </span>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'url' | 'upload')}>
@@ -61,6 +72,8 @@ const AddScreenshotForm: React.FC<AddScreenshotFormProps> = ({
             <ScreenshotUploader 
               onImageUploaded={handleScreenshotUploaded}
               onCancel={onCancel}
+              isLimitReached={isLimitReached}
+              remainingScreenshots={remainingScreenshots}
             />
           </TabsContent>
           
@@ -72,6 +85,7 @@ const AddScreenshotForm: React.FC<AddScreenshotFormProps> = ({
                 value={screenshotUrl}
                 onChange={onUrlChange}
                 placeholder="https://example.com/image.jpg"
+                disabled={isLimitReached}
               />
             </div>
             <div>
@@ -81,6 +95,7 @@ const AddScreenshotForm: React.FC<AddScreenshotFormProps> = ({
                 value={screenshotTitle}
                 onChange={onTitleChange}
                 placeholder="Screenshot title"
+                disabled={isLimitReached}
               />
             </div>
             <div>
@@ -90,6 +105,7 @@ const AddScreenshotForm: React.FC<AddScreenshotFormProps> = ({
                 value={screenshotDescription}
                 onChange={onDescriptionChange}
                 placeholder="Describe what's shown in this screenshot"
+                disabled={isLimitReached}
               />
             </div>
             
@@ -104,7 +120,7 @@ const AddScreenshotForm: React.FC<AddScreenshotFormProps> = ({
               <Button
                 type="button"
                 onClick={onAdd}
-                disabled={!screenshotUrl}
+                disabled={!screenshotUrl || isLimitReached}
               >
                 <UploadCloud className="mr-2 h-4 w-4" />
                 Add Screenshot

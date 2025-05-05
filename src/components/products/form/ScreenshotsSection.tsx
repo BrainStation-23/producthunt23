@@ -34,7 +34,7 @@ const ScreenshotsSection: React.FC<ScreenshotsSectionProps> = ({ form }) => {
                 />
               </FormControl>
               <FormDescription>
-                Add screenshots of your product (optional but recommended).
+                Add screenshots of your product (optional but recommended). Maximum 50 screenshots allowed.
               </FormDescription>
               <FormMessage />
             </FormItem>
