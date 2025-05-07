@@ -23,6 +23,23 @@ interface ProfileFormProps {
   onSave: () => Promise<void>;
 }
 
+// Helper functions for form placeholders
+const formatGithubPlaceholder = (value: string | null): string => {
+  if (!value) return 'https://github.com/username';
+  return value.includes('github.com') ? value : `https://github.com/${value}`;
+};
+
+const formatTwitterPlaceholder = (value: string | null): string => {
+  if (!value) return 'https://twitter.com/username';
+  if (value.startsWith('@')) return `https://twitter.com/${value.substring(1)}`;
+  return value.includes('twitter.com') ? value : `https://twitter.com/${value}`;
+};
+
+const formatLinkedInPlaceholder = (value: string | null): string => {
+  if (!value) return 'https://linkedin.com/in/username';
+  return value.includes('linkedin.com') ? value : `https://linkedin.com/in/${value}`;
+};
+
 const ProfileForm: React.FC<ProfileFormProps> = ({ 
   user, 
   formData, 
@@ -109,8 +126,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   type="url" 
                   value={formData.twitter || ''}
                   onChange={onInputChange}
-                  placeholder="https://twitter.com/username" 
+                  placeholder={formatTwitterPlaceholder(formData.twitter)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Enter your Twitter username or full profile URL
+                </p>
               </div>
               
               <div className="space-y-2">
@@ -124,8 +144,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   type="url" 
                   value={formData.linkedin || ''}
                   onChange={onInputChange}
-                  placeholder="https://linkedin.com/in/username" 
+                  placeholder={formatLinkedInPlaceholder(formData.linkedin)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Enter your LinkedIn username or full profile URL
+                </p>
               </div>
               
               <div className="space-y-2">
@@ -139,8 +162,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   type="url" 
                   value={formData.github || ''}
                   onChange={onInputChange}
-                  placeholder="https://github.com/username" 
+                  placeholder={formatGithubPlaceholder(formData.github)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Enter your GitHub username or full profile URL
+                </p>
               </div>
             </div>
           </div>

@@ -22,6 +22,11 @@ const ProductCardActions: React.FC<ProductCardActionsProps> = ({
   hasUpvoted,
   onUpvote
 }) => {
+  const formatUrl = (url: string | null): string => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `https://${url}`;
+  };
+
   return (
     <div className="p-4 pt-0 flex justify-between items-center mt-auto">
       <div className="flex items-center gap-2">
@@ -49,7 +54,7 @@ const ProductCardActions: React.FC<ProductCardActionsProps> = ({
         <Button variant="outline" size="sm" onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          window.open(websiteUrl, '_blank');
+          window.open(formatUrl(websiteUrl), '_blank');
         }}>
           Visit
         </Button>

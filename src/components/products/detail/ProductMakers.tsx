@@ -21,6 +21,51 @@ const ProductMakers: React.FC<ProductMakersProps> = ({ makers, creatorId }) => {
     if (!username) return '??';
     return username.substring(0, 2).toUpperCase();
   };
+  
+  // Helper functions to sanitize social media URLs
+  const sanitizeTwitterUrl = (twitterHandle: string | null) => {
+    if (!twitterHandle) return '';
+    
+    // If it's already a URL, extract the username
+    if (twitterHandle.includes('twitter.com') || twitterHandle.includes('x.com')) {
+      const parts = twitterHandle.split('/');
+      const username = parts[parts.length - 1];
+      return `https://twitter.com/${username.replace('@', '')}`;
+    }
+    
+    // If it's just a username (with or without @)
+    return `https://twitter.com/${twitterHandle.replace('@', '')}`;
+  };
+  
+  const sanitizeLinkedInUrl = (linkedinProfile: string | null) => {
+    if (!linkedinProfile) return '';
+    
+    // If it's already a complete URL
+    if (linkedinProfile.includes('linkedin.com')) {
+      return linkedinProfile.startsWith('http') ? linkedinProfile : `https://${linkedinProfile}`;
+    }
+    
+    // If it's just a username or path
+    return `https://linkedin.com/in/${linkedinProfile}`;
+  };
+  
+  const sanitizeGitHubUrl = (githubHandle: string | null) => {
+    if (!githubHandle) return '';
+    
+    // If it's already a URL, extract the username
+    if (githubHandle.includes('github.com')) {
+      const parts = githubHandle.split('/');
+      return `https://github.com/${parts[parts.length - 1]}`;
+    }
+    
+    // If it's just a username
+    return `https://github.com/${githubHandle}`;
+  };
+  
+  const sanitizeWebsiteUrl = (website: string | null) => {
+    if (!website) return '';
+    return website.startsWith('http') ? website : `https://${website}`;
+  };
 
   return (
     <Card className="shadow-md">
@@ -70,7 +115,7 @@ const ProductMakers: React.FC<ProductMakersProps> = ({ makers, creatorId }) => {
                     <div className="flex flex-wrap gap-2">
                       {maker.profile?.website && (
                         <a 
-                          href={maker.profile.website.startsWith('http') ? maker.profile.website : `https://${maker.profile.website}`} 
+                          href={sanitizeWebsiteUrl(maker.profile.website)} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
@@ -82,7 +127,7 @@ const ProductMakers: React.FC<ProductMakersProps> = ({ makers, creatorId }) => {
                       
                       {maker.profile?.twitter && (
                         <a 
-                          href={`https://twitter.com/${maker.profile.twitter.replace('@', '')}`}
+                          href={sanitizeTwitterUrl(maker.profile.twitter)}
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#1DA1F2]/10 text-[#1DA1F2] hover:bg-[#1DA1F2]/20 transition-colors"
@@ -94,7 +139,7 @@ const ProductMakers: React.FC<ProductMakersProps> = ({ makers, creatorId }) => {
                       
                       {maker.profile?.linkedin && (
                         <a 
-                          href={maker.profile.linkedin.startsWith('http') ? maker.profile.linkedin : `https://linkedin.com/in/${maker.profile.linkedin}`}
+                          href={sanitizeLinkedInUrl(maker.profile.linkedin)}
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#0077B5]/10 text-[#0077B5] hover:bg-[#0077B5]/20 transition-colors"
@@ -106,7 +151,7 @@ const ProductMakers: React.FC<ProductMakersProps> = ({ makers, creatorId }) => {
                       
                       {maker.profile?.github && (
                         <a 
-                          href={`https://github.com/${maker.profile.github}`}
+                          href={sanitizeGitHubUrl(maker.profile.github)}
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
