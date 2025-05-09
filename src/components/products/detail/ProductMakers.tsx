@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Twitter, Linkedin, Github } from 'lucide-react';
+import { Globe, Twitter, Linkedin, Github, Mail } from 'lucide-react';
 import { ProductMaker } from '@/types/product';
 
 interface ProductMakersProps {
@@ -158,6 +158,16 @@ const ProductMakers: React.FC<ProductMakersProps> = ({ makers, creatorId }) => {
                         >
                           <Github className="h-3 w-3" />
                           GitHub
+                        </a>
+                      )}
+                      
+                      {maker.profile?.email && (
+                        <a 
+                          href={`mailto:${maker.profile.email}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                        >
+                          <Mail className="h-3 w-3" />
+                          Email
                         </a>
                       )}
                     </div>
