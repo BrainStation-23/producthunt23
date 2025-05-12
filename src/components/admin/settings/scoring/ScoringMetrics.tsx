@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ScoringMetricsProps {
   metrics: {
     total_products: number;
+    evaluated_products: number;
     average_score: number;
     high_scoring_count: number;
     low_scoring_count: number;
@@ -19,8 +20,8 @@ export const ScoringMetrics: React.FC<ScoringMetricsProps> = ({ metrics, isLoadi
   const metricItems = [
     {
       title: "Products Evaluated",
-      value: metrics?.total_products || 0,
-      description: "Total products with evaluations",
+      value: metrics?.evaluated_products || 0,
+      description: `Out of ${metrics?.total_products || 0} products`,
       icon: CircleCheck,
       color: "text-green-500",
       bg: "bg-green-100 dark:bg-green-900/20"
@@ -28,7 +29,7 @@ export const ScoringMetrics: React.FC<ScoringMetricsProps> = ({ metrics, isLoadi
     {
       title: "Average Score",
       value: metrics?.average_score ? (metrics.average_score / 10).toFixed(1) : "0.0",
-      description: "Out of 10 points",
+      description: "For evaluated products only",
       icon: Award,
       color: "text-blue-500",
       bg: "bg-blue-100 dark:bg-blue-900/20"
@@ -44,7 +45,7 @@ export const ScoringMetrics: React.FC<ScoringMetricsProps> = ({ metrics, isLoadi
     {
       title: "Completion Rate",
       value: metrics?.evaluation_completion ? `${Math.round(metrics.evaluation_completion)}%` : "0%",
-      description: "Of assigned evaluations",
+      description: "Of all products evaluated",
       icon: GitPullRequest,
       color: "text-amber-500",
       bg: "bg-amber-100 dark:bg-amber-900/20"

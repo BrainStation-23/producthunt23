@@ -5,6 +5,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 export interface ScoringMetricsData {
   total_products: number;
+  evaluated_products: number;
   average_score: number;
   high_scoring_count: number;
   low_scoring_count: number;
@@ -18,7 +19,7 @@ export const useScoringMetrics = () => {
     queryKey: ['scoring-metrics'],
     queryFn: async (): Promise<ScoringMetricsData> => {
       try {
-        // Calculate metrics manually since the RPC function doesn't exist
+        // Get total number of products that need evaluation
         const { data: products, error: productsError } = await supabase
           .from('products')
           .select('id');
@@ -31,7 +32,6 @@ export const useScoringMetrics = () => {
           
         if (submissionsError) throw submissionsError;
         
-        // Calculate metrics
         const totalProducts = products?.length || 0;
         
         // Group submissions by product
@@ -45,7 +45,10 @@ export const useScoringMetrics = () => {
           }
         });
         
-        // Calculate average scores
+        // Calculate products that have been evaluated
+        const evaluatedProducts = Object.keys(productScores).length;
+        
+        // Calculate average scores only for products that have been evaluated
         const productAvgScores = Object.entries(productScores).map(([id, scores]) => {
           return {
             id,
@@ -53,7 +56,7 @@ export const useScoringMetrics = () => {
           };
         });
         
-        // Calculate overall metrics
+        // Calculate overall metrics only for evaluated products
         const averageScore = productAvgScores.length > 0 
           ? productAvgScores.reduce((sum, item) => sum + item.avgScore, 0) / productAvgScores.length
           : 0;
@@ -61,14 +64,14 @@ export const useScoringMetrics = () => {
         const highScoringCount = productAvgScores.filter(p => p.avgScore >= 8).length;
         const lowScoringCount = productAvgScores.filter(p => p.avgScore < 6).length;
         
-        // Calculate evaluation progress
-        const productsWithEvals = Object.keys(productScores).length;
+        // Calculate evaluation progress - percentage of products evaluated out of total
         const evaluationCompletion = totalProducts > 0 
-          ? (productsWithEvals / totalProducts) * 100
+          ? (evaluatedProducts / totalProducts) * 100
           : 0;
         
         return {
           total_products: totalProducts,
+          evaluated_products: evaluatedProducts,
           average_score: averageScore,
           high_scoring_count: highScoringCount,
           low_scoring_count: lowScoringCount,
@@ -83,6 +86,7 @@ export const useScoringMetrics = () => {
         });
         return {
           total_products: 0,
+          evaluated_products: 0,
           average_score: 0,
           high_scoring_count: 0,
           low_scoring_count: 0,
