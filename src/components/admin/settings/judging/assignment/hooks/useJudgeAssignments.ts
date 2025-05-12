@@ -19,6 +19,7 @@ interface Assignment {
   product_id: string;
   assigned_at: string;
   product: Product;
+  hasSubmissions: boolean;
 }
 
 export const useJudgeAssignments = (judge: Judge, onAssignmentsUpdated: () => void) => {
@@ -63,12 +64,35 @@ export const useJudgeAssignments = (judge: Judge, onAssignmentsUpdated: () => vo
         throw productsError;
       }
       
+      // Fetch evaluation submissions to see if judge has evaluated each product
+      const { data: submissionsData, error: submissionsError } = await supabase
+        .from('judging_submissions')
+        .select('judge_id, product_id')
+        .eq('judge_id', judge.id)
+        .in('product_id', productIds);
+      
+      if (submissionsError) {
+        console.error('Error fetching submission data:', submissionsError);
+        // Continue without submissions data
+      }
+      
+      // Create a map to track which products have been evaluated
+      const evaluatedProducts = new Set();
+      if (submissionsData) {
+        submissionsData.forEach(submission => {
+          evaluatedProducts.add(submission.product_id);
+        });
+      }
+      
       // Map products to assignments
       const assignmentsWithProducts = assignmentData.map(assignment => {
         const product = productsData.find(p => p.id === assignment.product_id);
+        const hasSubmissions = evaluatedProducts.has(assignment.product_id);
+        
         return {
           ...assignment,
-          product
+          product,
+          hasSubmissions
         };
       });
 

@@ -30,6 +30,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import AssignJudgeDialog from './AssignJudgeDialog';
+import ProductJudgeStatus from './status/ProductJudgeStatus';
 
 interface Judge {
   id: string;
@@ -44,6 +45,7 @@ interface Product {
   tagline: string;
   image_url: string | null;
   status: string;
+  isJudged?: boolean;
 }
 
 interface Assignment {
@@ -109,6 +111,29 @@ const AssignmentManager: React.FC = () => {
         return [];
       }
 
+      // Get all judge IDs from assignments
+      const judgeIds = assignmentData.map(assignment => assignment.judge_id);
+      
+      // Fetch evaluation data for this product
+      const { data: evaluationsData, error: evaluationsError } = await supabase
+        .from('judging_submissions')
+        .select('judge_id, product_id')
+        .eq('product_id', selectedProduct)
+        .in('judge_id', judgeIds);
+        
+      if (evaluationsError) {
+        console.error('Error fetching evaluations:', evaluationsError);
+        // Continue without evaluation data
+      }
+      
+      // Create a map of judges who have submitted evaluations
+      const judgedMap = new Map();
+      if (evaluationsData) {
+        evaluationsData.forEach(eval => {
+          judgedMap.set(eval.judge_id, true);
+        });
+      }
+
       // Then fetch judge details for each assignment
       const assignments = await Promise.all(
         assignmentData.map(async (assignment) => {
@@ -134,10 +159,16 @@ const AssignmentManager: React.FC = () => {
             return null;
           }
 
+          // Add isJudged property based on our evaluations data
+          const isJudged = judgedMap.has(assignment.judge_id);
+          
           return {
             ...assignment,
             judge: judgeData,
-            product: productData
+            product: {
+              ...productData,
+              isJudged
+            }
           };
         })
       );
@@ -147,6 +178,18 @@ const AssignmentManager: React.FC = () => {
     },
     enabled: !!selectedProduct
   });
+
+  // Get product judging status
+  const getProductJudgingStatus = (productId: string) => {
+    if (!assignments || assignments.length === 0) {
+      return { isAssigned: false, isJudged: false };
+    }
+    
+    const isAssigned = true; // If we have assignments, it's assigned
+    const isJudged = assignments.some(a => a.product.isJudged);
+    
+    return { isAssigned, isJudged };
+  };
 
   const handleProductChange = (productId: string) => {
     setSelectedProduct(productId);
@@ -181,7 +224,7 @@ const AssignmentManager: React.FC = () => {
         <p className="text-muted-foreground mb-4">Assign products to judges for evaluation.</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:items-center">
         <div className="w-full sm:w-64">
           <Select 
             value={selectedProduct || ''}
@@ -201,9 +244,16 @@ const AssignmentManager: React.FC = () => {
           </Select>
         </div>
 
+        {selectedProduct && (
+          <ProductJudgeStatus 
+            {...getProductJudgingStatus(selectedProduct)}
+          />
+        )}
+        
         <Button 
           onClick={() => setAssignDialogOpen(true)}
           disabled={!selectedProduct || isLoading}
+          className="sm:ml-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
           Assign Judge
@@ -231,6 +281,7 @@ const AssignmentManager: React.FC = () => {
                   <TableRow>
                     <TableHead>Judge</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Assigned Date</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -252,6 +303,17 @@ const AssignmentManager: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>{assignment.judge.email}</TableCell>
+                      <TableCell>
+                        {assignment.product.isJudged ? (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            Evaluated
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                            Pending
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell>{new Date(assignment.assigned_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
                         <Button

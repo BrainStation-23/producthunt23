@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Loader2, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import type { Assignment } from './hooks/useJudgeAssignments';
 
 interface AssignmentTableProps {
@@ -29,6 +30,7 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
         <TableRow>
           <TableHead>Product</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Evaluation</TableHead>
           <TableHead>Assigned Date</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
@@ -52,6 +54,17 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
               }`}>
                 {assignment.product.status}
               </span>
+            </TableCell>
+            <TableCell>
+              {assignment.hasSubmissions ? (
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  Evaluated
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                  Pending
+                </Badge>
+              )}
             </TableCell>
             <TableCell>{new Date(assignment.assigned_at).toLocaleDateString()}</TableCell>
             <TableCell className="text-right">
