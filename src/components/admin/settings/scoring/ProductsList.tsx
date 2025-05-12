@@ -3,7 +3,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Star } from 'lucide-react';
+import { Loader2, Star, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -145,7 +145,8 @@ export const ProductsList: React.FC<ProductsListProps> = ({
             onClick={() => onProductSelect(product.id)}
             className={cn(
               "p-4 cursor-pointer hover:bg-muted/50 transition-colors",
-              selectedProduct === product.id && "bg-muted"
+              selectedProduct === product.id && "bg-muted",
+              product.judges_count === 0 && "bg-red-50 dark:bg-red-950/20" // Highlight products with no judges
             )}
           >
             <div className="flex items-start gap-3">
@@ -166,7 +167,12 @@ export const ProductsList: React.FC<ProductsListProps> = ({
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start">
-                  <p className="text-sm font-medium truncate">{product.name}</p>
+                  <div className="flex items-center">
+                    <p className="text-sm font-medium truncate">{product.name}</p>
+                    {product.judges_count === 0 && (
+                      <AlertTriangle className="h-4 w-4 ml-2 text-red-500" />
+                    )}
+                  </div>
                   <div className="flex items-center ml-2 shrink-0">
                     <Star className={cn("h-3.5 w-3.5 mr-1", getScoreColor(product.avg_score))} />
                     <span className={cn("text-xs font-medium", getScoreColor(product.avg_score))}>
@@ -178,11 +184,20 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                 <div className="mt-2">
                   <div className="flex justify-between items-center text-xs mb-1">
                     <span className="text-muted-foreground">Evaluation Progress</span>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge 
+                      variant={product.judges_count === 0 ? "destructive" : "outline"} 
+                      className="text-xs"
+                    >
                       {product.judges_count} {product.judges_count === 1 ? 'judge' : 'judges'}
                     </Badge>
                   </div>
-                  <Progress value={product.evaluation_progress * 100} className="h-1" />
+                  <Progress 
+                    value={product.evaluation_progress * 100} 
+                    className={cn(
+                      "h-1",
+                      product.judges_count === 0 && "bg-red-200 dark:bg-red-900"
+                    )} 
+                  />
                 </div>
               </div>
             </div>
