@@ -56,10 +56,14 @@ export const useScoringMetrics = () => {
           };
         });
         
+        console.log('Product average scores:', productAvgScores);
+        
         // Calculate overall metrics only for evaluated products
         const averageScore = productAvgScores.length > 0 
           ? productAvgScores.reduce((sum, item) => sum + item.avgScore, 0) / productAvgScores.length
           : 0;
+        
+        console.log('Overall average score:', averageScore);
           
         const highScoringCount = productAvgScores.filter(p => p.avgScore >= 8).length;
         const lowScoringCount = productAvgScores.filter(p => p.avgScore < 6).length;

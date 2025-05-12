@@ -28,7 +28,7 @@ export const ScoringMetrics: React.FC<ScoringMetricsProps> = ({ metrics, isLoadi
     },
     {
       title: "Average Score",
-      value: metrics?.average_score ? (metrics.average_score / 10).toFixed(1) : "0.0",
+      value: metrics?.average_score ? metrics.average_score.toFixed(1) : "0.0",
       description: "For evaluated products only",
       icon: Award,
       color: "text-blue-500",
