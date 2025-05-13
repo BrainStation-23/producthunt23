@@ -11,15 +11,21 @@ interface Product {
   tagline: string;
   image_url: string | null;
   status: string;
+  hasSubmissions: boolean; // Add this property here instead of the assignment
 }
 
-interface Assignment {
+export interface Assignment {
   id: string;
   judge_id: string;
   product_id: string;
   assigned_at: string;
   product: Product;
-  hasSubmissions: boolean;
+  judge: {
+    id: string;
+    username: string | null;
+    email: string;
+    avatar_url: string | null;
+  };
 }
 
 export const useJudgeAssignments = (judge: Judge, onAssignmentsUpdated: () => void) => {
@@ -91,8 +97,16 @@ export const useJudgeAssignments = (judge: Judge, onAssignmentsUpdated: () => vo
         
         return {
           ...assignment,
-          product,
-          hasSubmissions
+          judge: {
+            id: judge.id,
+            username: judge.username,
+            email: judge.email,
+            avatar_url: judge.avatar_url
+          },
+          product: {
+            ...product,
+            hasSubmissions
+          }
         };
       });
 

@@ -22,6 +22,7 @@ import { Loader2, Plus } from 'lucide-react';
 import AssignJudgeDialog from './AssignJudgeDialog';
 import ProductJudgeStatus from './status/ProductJudgeStatus';
 import { AssignmentTable } from './assignment/AssignmentTable';
+import type { Assignment } from './assignment/hooks/useJudgeAssignments';
 
 const AssignmentManager: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -90,13 +91,13 @@ const AssignmentManager: React.FC = () => {
       // Create a map of judges who have submitted evaluations
       const judgedMap = new Map();
       if (evaluationsData) {
-        evaluationsData.forEach(eval => {
-          judgedMap.set(eval.judge_id, true);
+        evaluationsData.forEach(evaluation => {
+          judgedMap.set(evaluation.judge_id, true);
         });
       }
 
       // Then fetch judge details for each assignment
-      const assignments = await Promise.all(
+      const assignmentsWithDetails = await Promise.all(
         assignmentData.map(async (assignment) => {
           const { data: judgeData, error: judgeError } = await supabase
             .from('profiles')
@@ -135,7 +136,7 @@ const AssignmentManager: React.FC = () => {
       );
 
       // Filter out any null results from failed fetches
-      return assignments.filter(Boolean);
+      return assignmentsWithDetails.filter(Boolean) as Assignment[];
     },
     enabled: !!selectedProduct
   });
