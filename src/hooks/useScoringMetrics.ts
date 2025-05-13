@@ -26,6 +26,14 @@ export const useScoringMetrics = () => {
           
         if (productsError) throw productsError;
         
+        // Get judge assignments
+        const { data: assignments, error: assignmentsError } = await supabase
+          .from('judge_assignments')
+          .select('product_id, judge_id');
+          
+        if (assignmentsError) throw assignmentsError;
+        
+        // Get submissions data
         const { data: submissions, error: submissionsError } = await supabase
           .from('judging_submissions')
           .select('product_id, judge_id, rating_value');
@@ -33,6 +41,26 @@ export const useScoringMetrics = () => {
         if (submissionsError) throw submissionsError;
         
         const totalProducts = products?.length || 0;
+        
+        // Create map of product_id -> assigned judges count
+        const productJudgeAssignments: Record<string, Set<string>> = {};
+        assignments?.forEach((assignment: any) => {
+          if (!productJudgeAssignments[assignment.product_id]) {
+            productJudgeAssignments[assignment.product_id] = new Set();
+          }
+          productJudgeAssignments[assignment.product_id].add(assignment.judge_id);
+        });
+        
+        // Create map of product_id -> evaluated judges count
+        const productJudgeSubmissions: Record<string, Set<string>> = {};
+        submissions?.forEach((sub: any) => {
+          if (sub.rating_value !== null) {
+            if (!productJudgeSubmissions[sub.product_id]) {
+              productJudgeSubmissions[sub.product_id] = new Set();
+            }
+            productJudgeSubmissions[sub.product_id].add(sub.judge_id);
+          }
+        });
         
         // Group submissions by product
         const productScores: Record<string, number[]> = {};
@@ -68,9 +96,21 @@ export const useScoringMetrics = () => {
         const highScoringCount = productAvgScores.filter(p => p.avgScore >= 8).length;
         const lowScoringCount = productAvgScores.filter(p => p.avgScore < 6).length;
         
-        // Calculate evaluation progress - percentage of products evaluated out of total
-        const evaluationCompletion = totalProducts > 0 
-          ? (evaluatedProducts / totalProducts) * 100
+        // Calculate total assignments and total completed evaluations
+        let totalAssignments = 0;
+        let completedEvaluations = 0;
+        
+        Object.keys(productJudgeAssignments).forEach(productId => {
+          const assignedJudgesCount = productJudgeAssignments[productId].size;
+          const evaluatedJudgesCount = productJudgeSubmissions[productId]?.size || 0;
+          
+          totalAssignments += assignedJudgesCount;
+          completedEvaluations += evaluatedJudgesCount;
+        });
+        
+        // Calculate evaluation progress - percentage of assignments completed
+        const evaluationCompletion = totalAssignments > 0 
+          ? (completedEvaluations / totalAssignments) * 100
           : 0;
         
         return {
