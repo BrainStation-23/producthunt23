@@ -11,7 +11,7 @@ interface Product {
   tagline: string;
   image_url: string | null;
   status: string;
-  hasSubmissions: boolean; // Add this property here instead of the assignment
+  hasSubmissions: boolean; // This property is in the product object
 }
 
 export interface Assignment {
@@ -171,4 +171,5 @@ export const useJudgeAssignments = (judge: Judge, onAssignmentsUpdated: () => vo
   };
 };
 
-export type { Assignment, Product };
+// Only export Product and Assignment once to avoid conflicts
+export type { Product };

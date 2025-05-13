@@ -56,7 +56,7 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
               </span>
             </TableCell>
             <TableCell>
-              {assignment.hasSubmissions ? (
+              {assignment.product.hasSubmissions ? (
                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                   Evaluated
                 </Badge>
