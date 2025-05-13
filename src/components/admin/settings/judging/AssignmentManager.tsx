@@ -18,54 +18,15 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { 
-  Table, 
-  TableHeader, 
-  TableRow, 
-  TableHead, 
-  TableBody, 
-  TableCell 
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import AssignJudgeDialog from './AssignJudgeDialog';
 import ProductJudgeStatus from './status/ProductJudgeStatus';
-
-interface Judge {
-  id: string;
-  username: string | null;
-  email: string;
-  avatar_url: string | null;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  tagline: string;
-  image_url: string | null;
-  status: string;
-  isJudged?: boolean;
-}
-
-interface Assignment {
-  id: string;
-  judge_id: string;
-  product_id: string;
-  assigned_at: string;
-  judge: {
-    id: string;
-    username: string | null;
-    email: string;
-    avatar_url: string | null;
-  };
-  product: Product;
-}
+import { AssignmentTable } from './assignment/AssignmentTable';
 
 const AssignmentManager: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [deletingAssignmentId, setDeletingAssignmentId] = useState<string | null>(null);
 
   // Fetch pending and approved products
   const { data: products, isLoading: isLoadingProducts } = useQuery({
@@ -82,7 +43,7 @@ const AssignmentManager: React.FC = () => {
         throw error;
       }
 
-      return data as Product[];
+      return data;
     }
   });
 
@@ -159,22 +120,22 @@ const AssignmentManager: React.FC = () => {
             return null;
           }
 
-          // Add isJudged property based on our evaluations data
-          const isJudged = judgedMap.has(assignment.judge_id);
+          // Add hasSubmissions property based on our evaluations data
+          const hasSubmissions = judgedMap.has(assignment.judge_id);
           
           return {
             ...assignment,
             judge: judgeData,
             product: {
               ...productData,
-              isJudged
+              hasSubmissions
             }
           };
         })
       );
 
       // Filter out any null results from failed fetches
-      return assignments.filter(Boolean) as Assignment[];
+      return assignments.filter(Boolean);
     },
     enabled: !!selectedProduct
   });
@@ -186,7 +147,7 @@ const AssignmentManager: React.FC = () => {
     }
     
     const isAssigned = true; // If we have assignments, it's assigned
-    const isJudged = assignments.some(a => a.product.isJudged);
+    const isJudged = assignments.some(a => a.product.hasSubmissions);
     
     return { isAssigned, isJudged };
   };
@@ -197,7 +158,7 @@ const AssignmentManager: React.FC = () => {
 
   const handleDeleteAssignment = async (assignmentId: string) => {
     try {
-      setIsDeleting(assignmentId);
+      setDeletingAssignmentId(assignmentId);
       
       const { error } = await supabase
         .from('judge_assignments')
@@ -211,7 +172,7 @@ const AssignmentManager: React.FC = () => {
     } catch (error: any) {
       toast.error(`Failed to remove assignment: ${error.message}`);
     } finally {
-      setIsDeleting(null);
+      setDeletingAssignmentId(null);
     }
   };
 
@@ -276,64 +237,11 @@ const AssignmentManager: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Judge</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Assigned Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {assignments.map((assignment) => (
-                    <TableRow key={assignment.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="h-8 w-8">
-                            {assignment.judge.avatar_url ? (
-                              <AvatarImage src={assignment.judge.avatar_url} alt={assignment.judge.username || ''} />
-                            ) : null}
-                            <AvatarFallback>
-                              {(assignment.judge.username ? assignment.judge.username[0] : assignment.judge.email[0]).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{assignment.judge.username || 'No username'}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{assignment.judge.email}</TableCell>
-                      <TableCell>
-                        {assignment.product.isJudged ? (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            Evaluated
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                            Pending
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{new Date(assignment.assigned_at).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="text-destructive"
-                          onClick={() => handleDeleteAssignment(assignment.id)}
-                          disabled={isDeleting === assignment.id}
-                        >
-                          {isDeleting === assignment.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <AssignmentTable
+                assignments={assignments}
+                deletingAssignmentId={deletingAssignmentId}
+                onDeleteAssignment={handleDeleteAssignment}
+              />
             </CardContent>
           </Card>
         ) : (
