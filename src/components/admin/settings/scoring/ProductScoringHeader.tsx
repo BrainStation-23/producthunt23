@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
 import { ExportButton } from './ExportButton';
 import { exportProductScoring } from '@/utils/excelExport';
@@ -37,6 +37,7 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({ sele
   
   const handleExport = () => {
     if (!product) return;
+    toast.info('Preparing Excel export...');
     exportProductScoring(product.id, product.name);
   };
 
@@ -59,7 +60,7 @@ export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({ sele
   }
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold">{product.name}</h3>
