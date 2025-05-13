@@ -2,188 +2,75 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Star, Calendar } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { ExportButton } from './ExportButton';
+import { exportProductScoring } from '@/utils/excelExport';
 
 interface ProductScoringHeaderProps {
   selectedProduct: string | null;
 }
 
-export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({
-  selectedProduct
-}) => {
-  const { toast } = useToast();
-  
-  const { data: product, isLoading, error } = useQuery({
+export const ProductScoringHeader: React.FC<ProductScoringHeaderProps> = ({ selectedProduct }) => {
+  const { data: product, isLoading } = useQuery({
     queryKey: ['product-detail', selectedProduct],
     queryFn: async () => {
       if (!selectedProduct) return null;
       
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('id, name, tagline, image_url, categories, created_at')
-          .eq('id', selectedProduct)
-          .single();
-          
-        if (error) {
-          toast({
-            title: "Error loading product details",
-            description: error.message,
-            variant: "destructive",
-          });
-          throw error;
-        }
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, tagline, image_url, status')
+        .eq('id', selectedProduct)
+        .single();
         
-        // Get category names
-        let categoryNames: string[] = [];
-        if (data.categories && data.categories.length > 0) {
-          const { data: categoryData, error: categoryError } = await supabase
-            .from('categories')
-            .select('id, name')
-            .in('id', data.categories);
-            
-          if (!categoryError && categoryData) {
-            const categoryMap = categoryData.reduce((acc: Record<string, string>, cat: any) => {
-              acc[cat.id] = cat.name;
-              return acc;
-            }, {});
-            
-            categoryNames = data.categories.map((id: string) => categoryMap[id] || id);
-          }
-        }
-        
-        return {
-          ...data,
-          categoryNames
-        };
-      } catch (err) {
-        console.error("Error fetching product details:", err);
-        throw err;
+      if (error) {
+        toast.error('Failed to load product details');
+        throw error;
       }
+      
+      return data;
     },
     enabled: !!selectedProduct
   });
   
-  // Query product score summary
-  const { data: scoreSummary } = useQuery({
-    queryKey: ['product-score-summary', selectedProduct],
-    queryFn: async () => {
-      if (!selectedProduct) return null;
-      
-      try {
-        // Custom query since the function may not exist
-        const { data, error } = await supabase
-          .from('judging_submissions')
-          .select('rating_value, judge_id')
-          .eq('product_id', selectedProduct);
-          
-        if (error) throw error;
-        
-        // Calculate average score and judge count
-        if (data && data.length > 0) {
-          const validRatings = data.filter(d => d.rating_value !== null).map(d => d.rating_value);
-          const avgScore = validRatings.length > 0 ? 
-            validRatings.reduce((sum: number, val: number) => sum + val, 0) / validRatings.length : 
-            null;
-          
-          return { 
-            avg_score: avgScore, 
-            judges_count: new Set(data.map((d: any) => d.judge_id)).size 
-          };
-        }
-        
-        return { avg_score: null, judges_count: 0 };
-      } catch (err) {
-        console.error("Error fetching score summary:", err);
-        return { avg_score: null, judges_count: 0 };
-      }
-    },
-    enabled: !!selectedProduct
-  });
+  const handleExport = () => {
+    if (!product) return;
+    exportProductScoring(product.id, product.name);
+  };
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Loading product details...</span>
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-5 w-1/2" />
       </div>
     );
   }
 
-  if (error || !product) {
-    return null;
+  if (!product) {
+    return (
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <AlertCircle className="h-4 w-4" />
+        <span>Select a product to view details</span>
+      </div>
+    );
   }
-  
-  const formattedDate = product.created_at 
-    ? new Date(product.created_at).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
-      }) 
-    : '';
-  
-  const getScoreColor = (score: number | null) => {
-    if (score === null) return "text-muted-foreground";
-    if (score >= 8) return "text-green-500";
-    if (score >= 6) return "text-amber-500";
-    return "text-red-500";
-  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-start gap-4">
-        {product.image_url ? (
-          <div className="h-16 w-16 rounded overflow-hidden shrink-0">
-            <img 
-              src={product.image_url} 
-              alt={product.name}
-              className="h-full w-full object-cover" 
-            />
-          </div>
-        ) : (
-          <div className="h-16 w-16 rounded bg-muted flex items-center justify-center shrink-0">
-            <span className="text-lg font-medium text-muted-foreground">
-              {product.name.substring(0, 2).toUpperCase()}
-            </span>
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-start justify-between">
-            <h2 className="text-2xl font-bold">{product.name}</h2>
-            
-            <div className="flex items-center ml-auto">
-              <div className={cn(
-                "flex items-center rounded-md border px-2.5 py-0.5", 
-                getScoreColor(scoreSummary?.avg_score || null)
-              )}>
-                <Star className="h-4 w-4 mr-1" />
-                <span className="text-sm font-semibold">
-                  {scoreSummary?.avg_score !== null && scoreSummary?.avg_score !== undefined
-                    ? scoreSummary.avg_score.toFixed(1)
-                    : "No score"}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <p className="text-muted-foreground mt-1">{product.tagline}</p>
-          
-          <div className="flex flex-wrap gap-2 mt-2">
-            {product.categoryNames && product.categoryNames.map((category: string, i: number) => (
-              <Badge key={i} variant="secondary">
-                {category}
-              </Badge>
-            ))}
-            <div className="flex items-center text-xs text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5 mr-1" />
-              <span>{formattedDate}</span>
-            </div>
-          </div>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold">{product.name}</h3>
+          <Badge variant="outline" className="capitalize">
+            {product.status || 'Unknown'}
+          </Badge>
         </div>
+        <p className="text-sm text-muted-foreground">{product.tagline}</p>
       </div>
+      
+      <ExportButton onClick={handleExport} />
     </div>
   );
 };
