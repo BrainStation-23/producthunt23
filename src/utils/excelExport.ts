@@ -1,24 +1,7 @@
 
 import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-interface JudgeScoring {
-  judgeId: string;
-  judgeName: string;
-  judgeEmail: string;
-  submissions: Array<{
-    criteriaId: string;
-    criteriaName: string;
-    criteriaType: string;
-    criteriaDescription: string | null;
-    ratingValue: number | null;
-    booleanValue: boolean | null;
-    textValue: string | null;
-  }>;
-  notes: string | null;
-}
 
 export async function exportProductScoring(productId: string, productName: string) {
   try {
@@ -130,7 +113,7 @@ export async function exportProductScoring(productId: string, productName: strin
     });
     
     // Format the scores for judge-specific sheets
-    const judgesScoringData: JudgeScoring[] = [];
+    const judgesScoringData = [];
     
     judgeProfiles?.forEach(judge => {
       const judgeSubmissions = submissions.filter(sub => sub.judge_id === judge.id);
@@ -228,10 +211,25 @@ export async function exportProductScoring(productId: string, productName: strin
       });
     });
     
-    // Generate Excel file and download it
+    // Generate Excel file and trigger download using native browser API
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(blob, `${productName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-judging-results.xlsx`);
+    const blob = new Blob([buffer], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    
+    // Create a URL for the blob
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary link element to trigger the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${productName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-judging-results.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
     toast.success('Excel export completed successfully');
   } catch (error) {
