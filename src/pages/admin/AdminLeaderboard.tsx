@@ -41,11 +41,10 @@ const AdminLeaderboard = () => {
           throw error;
         }
         
-        // Ensure the data is in the correct format and normalize scores to 100-point scale
+        // Ensure the data is in the correct format
+        // The total_score is already scaled to 0-100 by the database function
         const formattedData = data?.map((item: any) => ({
           ...item,
-          // Normalize total_score to 100-point scale (assuming original score is out of 10)
-          total_score: item.total_score,
           // Ensure rank is properly converted if needed
           rank: typeof item.rank === 'bigint' ? Number(item.rank) : item.rank
         }));

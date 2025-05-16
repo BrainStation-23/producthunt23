@@ -64,7 +64,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ data }) => {
               </div>
             </TableCell>
             <TableCell className="text-right font-medium">
-              {(item.total_score * 10).toFixed(2)}
+              {item.total_score.toFixed(2)}
             </TableCell>
             <TableCell className="text-right text-muted-foreground">
               {item.avg_rating.toFixed(1)}
