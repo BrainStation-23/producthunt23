@@ -7,6 +7,8 @@ import { Loader2, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import LeaderboardTable from '@/components/admin/settings/scoring/LeaderboardTable';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
+import { exportLeaderboardToCsv } from '@/utils/csvExport';
+import { ExportCsvButton } from '@/components/admin/settings/scoring/ExportCsvButton';
 
 // Define the correct type for leaderboard items
 interface LeaderboardItem {
@@ -54,6 +56,18 @@ const AdminLeaderboard = () => {
     },
   });
 
+  const handleExportCsv = () => {
+    if (leaderboard && leaderboard.length > 0) {
+      exportLeaderboardToCsv(leaderboard, 'product-leaderboard');
+    } else {
+      toast({
+        title: "Cannot export empty data",
+        description: "There is no leaderboard data available to export.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -72,11 +86,17 @@ const AdminLeaderboard = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Product Leaderboard</h1>
-        <p className="text-muted-foreground mb-6">
-          View overall product rankings based on judge evaluations.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Product Leaderboard</h1>
+          <p className="text-muted-foreground mb-6">
+            View overall product rankings based on judge evaluations.
+          </p>
+        </div>
+        <ExportCsvButton 
+          onClick={handleExportCsv} 
+          isDisabled={!leaderboard || leaderboard.length === 0} 
+        />
       </div>
 
       <Card className="p-6">
