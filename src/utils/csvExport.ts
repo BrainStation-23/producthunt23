@@ -26,16 +26,7 @@ export function exportLeaderboardToCsv(data: LeaderboardItem[], filename: string
     }));
     
     // Generate CSV string using PapaParse
-    const csv = Papa.unparse(csvData, {
-      header: true,
-      columns: [
-        { key: 'rank', header: 'Rank' },
-        { key: 'product_name', header: 'Product Name' },
-        { key: 'total_score', header: 'Total Score' },
-        { key: 'avg_rating', header: 'Average Rating' },
-        { key: 'judges_count', header: 'Number of Judges' }
-      ]
-    });
+    const csv = Papa.unparse(csvData);
     
     // Create blob and trigger download
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
