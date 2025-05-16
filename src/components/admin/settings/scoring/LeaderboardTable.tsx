@@ -31,7 +31,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ data }) => {
         <TableRow>
           <TableHead className="w-14">Rank</TableHead>
           <TableHead>Product</TableHead>
-          <TableHead className="text-right">Score</TableHead>
+          <TableHead className="text-right">Score (0-100)</TableHead>
           <TableHead className="text-right">Avg Rating</TableHead>
           <TableHead className="text-right">Judges</TableHead>
         </TableRow>
@@ -64,7 +64,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ data }) => {
               </div>
             </TableCell>
             <TableCell className="text-right font-medium">
-              {item.total_score.toFixed(2)}
+              {(item.total_score * 10).toFixed(2)}
             </TableCell>
             <TableCell className="text-right text-muted-foreground">
               {item.avg_rating.toFixed(1)}

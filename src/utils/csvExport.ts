@@ -20,7 +20,7 @@ export function exportLeaderboardToCsv(data: LeaderboardItem[], filename: string
     const csvData = data.map(item => ({
       rank: typeof item.rank === 'bigint' ? Number(item.rank) : item.rank,
       product_name: item.product_name,
-      total_score: item.total_score.toFixed(2),
+      total_score: (item.total_score * 10).toFixed(2), // Convert to 100 scale (scores are out of 10)
       avg_rating: item.avg_rating.toFixed(1),
       judges_count: item.judges_count
     }));
