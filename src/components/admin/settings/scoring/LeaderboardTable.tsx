@@ -17,7 +17,7 @@ interface LeaderboardItem {
   total_score: number;
   avg_rating: number;
   judges_count: number;
-  rank: number | bigint; // Updated to accept bigint as well
+  rank: number | bigint;
 }
 
 interface LeaderboardTableProps {

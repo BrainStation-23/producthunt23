@@ -17,11 +17,11 @@ export function exportLeaderboardToCsv(data: LeaderboardItem[], filename: string
     toast.info('Preparing CSV export...');
     
     // Format data for CSV (only include the fields we need)
-    // Scale the total_score to 0-100 range
+    // The total_score is already scaled to 0-100 range by the database function
     const csvData = data.map(item => ({
       rank: typeof item.rank === 'bigint' ? Number(item.rank) : item.rank,
       product_name: item.product_name,
-      total_score: item.total_score.toFixed(2), // Already scaled to 0-100 in the DB function
+      total_score: item.total_score.toFixed(2),
       avg_rating: item.avg_rating.toFixed(1),
       judges_count: item.judges_count
     }));
