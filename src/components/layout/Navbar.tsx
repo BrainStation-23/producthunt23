@@ -22,12 +22,14 @@ import {
   getBrandLogoLetter, 
   getPrimaryColorClass 
 } from '@/config/appConfig';
+import MobileNav from './MobileNav';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
   const { userRole } = useRole();
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   
   // Determine if user is actually logged in
   const userIsLoggedIn = !!user;
@@ -75,7 +77,12 @@ const Navbar: React.FC = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2 md:gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden"
+            onClick={() => setMobileNavOpen(true)}
+          >
             <Menu className="h-5 w-5" />
           </Button>
           <Link to="/" className="flex items-center space-x-2">
@@ -148,7 +155,7 @@ const Navbar: React.FC = () => {
             </>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild className="hidden md:flex">
                 <Link to="/login">Log in</Link>
               </Button>
               <Button asChild>
@@ -158,6 +165,8 @@ const Navbar: React.FC = () => {
           )}
         </div>
       </div>
+      
+      <MobileNav open={mobileNavOpen} onOpenChange={setMobileNavOpen} />
     </header>
   );
 };
