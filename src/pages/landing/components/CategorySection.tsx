@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FeaturedCategory, FeaturedProduct } from '../types';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CategorySectionProps {
   categories: FeaturedCategory[] | undefined;
@@ -27,11 +28,13 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   isCategoryProductsLoading,
   hasError
 }) => {
+  const isMobile = useIsMobile();
+
   return (
-    <section className="py-16 bg-background">
+    <section className="py-8 md:py-16 bg-background">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Browse by Category</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tighter md:text-4xl">Browse by Category</h2>
           <p className="max-w-[800px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed">
             Discover products in categories that interest you most
           </p>
@@ -43,15 +46,15 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           onValueChange={setSelectedCategory}
           className="w-full mt-8"
         >
-          <div className="flex justify-center">
+          <div className="flex justify-center overflow-x-auto pb-2">
             {isCategoriesLoading ? (
               <div className="flex gap-2 mb-8">
-                {[1, 2, 3, 4, 5].map((i) => (
+                {[1, 2, 3].map((i) => (
                   <Skeleton key={i} className="h-10 w-24 rounded-md" />
                 ))}
               </div>
             ) : (
-              <TabsList className="mb-8">
+              <TabsList className="mb-8 flex overflow-x-auto">
                 {categories?.map((category) => (
                   <TabsTrigger key={category.id} value={category.slug}>
                     {category.name}
@@ -64,8 +67,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           {/* Only render content for selected category */}
           <TabsContent value={selectedCategory} className="space-y-4">
             {isCategoryProductsLoading ? (
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="group relative overflow-hidden rounded-lg border bg-background p-2">
                     <Skeleton className="aspect-video w-full" />
                     <div className="p-2">
@@ -80,7 +83,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                 ))}
               </div>
             ) : categoryProducts && categoryProducts.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {categoryProducts.map((product) => (
                   <Link key={product.id} to={`/products/${product.id}`}>
                     <div className="group relative overflow-hidden rounded-lg border bg-background p-2 transition-all hover:shadow-md">
@@ -94,8 +97,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                         />
                       </div>
                       <div className="p-2">
-                        <h3 className="font-semibold">{product.name}</h3>
-                        <p className="text-sm text-muted-foreground">{product.tagline}</p>
+                        <h3 className="font-semibold line-clamp-1">{product.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{product.tagline}</p>
                         <div className="mt-2 flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Avatar className="h-6 w-6">
@@ -104,8 +107,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                                 <AvatarImage src={product.profile_avatar_url} />
                               )}
                             </Avatar>
-                            <span className="text-xs text-muted-foreground">
-                              By {product.profile_username || 'Maker'}
+                            <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                              {product.profile_username || 'Maker'}
                             </span>
                           </div>
                           <div className="flex items-center">

@@ -23,6 +23,7 @@ import {
   getPrimaryColorClass 
 } from '@/config/appConfig';
 import MobileNav from './MobileNav';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -30,6 +31,7 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
+  const isMobile = useIsMobile();
   
   // Determine if user is actually logged in
   const userIsLoggedIn = !!user;
@@ -75,7 +77,7 @@ const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-14 md:h-16 items-center justify-between">
         <div className="flex items-center gap-2 md:gap-4">
           <Button 
             variant="ghost" 
@@ -99,7 +101,7 @@ const Navbar: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {userIsLoggedIn ? (
             <>
               <Button variant="ghost" asChild className="hidden md:flex items-center gap-2">
@@ -158,8 +160,8 @@ const Navbar: React.FC = () => {
               <Button variant="ghost" asChild className="hidden md:flex">
                 <Link to="/login">Log in</Link>
               </Button>
-              <Button asChild>
-                <Link to="/register">Sign up</Link>
+              <Button asChild size={isMobile ? "sm" : "default"}>
+                <Link to="/register" className="whitespace-nowrap">Sign up</Link>
               </Button>
             </div>
           )}

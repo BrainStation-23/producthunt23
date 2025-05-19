@@ -21,6 +21,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface HeroSectionProps {
   featuredProducts: FeaturedProduct[] | null;
@@ -30,26 +31,27 @@ interface HeroSectionProps {
 const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }) => {
   const primaryColorClass = getPrimaryColorClass();
   const primaryColorHoverClass = getPrimaryColorHoverClass();
+  const isMobile = useIsMobile();
   
   const hasFeaturedProducts = featuredProducts && featuredProducts.length > 0;
   
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/20">
+    <section className="py-8 md:py-16 lg:py-24 bg-gradient-to-b from-background to-muted/20">
       <div className="container px-4 md:px-6">
         <div className="grid gap-8 md:grid-cols-2 md:gap-12 items-center">
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <Badge variant="outline" className="animate-slide-in animate-once">Today's trending products</Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight animate-slide-in animate-once animate-delay-100">
+            <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold tracking-tight animate-slide-in animate-once animate-delay-100">
               {getBrandSlogan()}
             </h1>
-            <p className="text-xl text-muted-foreground animate-slide-in animate-once animate-delay-200">
+            <p className="text-lg md:text-xl text-muted-foreground animate-slide-in animate-once animate-delay-200">
               {getBrandDescription()}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-slide-in animate-once animate-delay-300">
-              <Button asChild size="lg" className="font-medium">
+              <Button asChild size={isMobile ? "default" : "lg"} className="font-medium">
                 <Link to="/register">Join for free</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="font-medium">
+              <Button asChild variant="outline" size={isMobile ? "default" : "lg"} className="font-medium">
                 <Link to="/products" className="flex items-center">
                   Browse products
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -59,11 +61,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
           </div>
           
           {(isLoading || hasFeaturedProducts) && (
-            <div className="relative">
+            <div className="relative mt-8 md:mt-0">
               {isLoading ? (
                 <div className="glass-card rounded-xl p-2 shadow-xl">
                   <div className="bg-white rounded-lg overflow-hidden">
-                    <Skeleton className="w-full h-48" />
+                    <Skeleton className="w-full h-36 md:h-48" />
                     <div className="p-4 space-y-2">
                       <Skeleton className="h-4 w-24" />
                       <Skeleton className="h-6 w-full" />
@@ -82,7 +84,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
                               <img 
                                 src={product.image_url || "/placeholder.svg"} 
                                 alt={product.name} 
-                                className="w-full h-48 object-cover"
+                                className="w-full h-36 md:h-48 object-cover"
                               />
                               <div className="p-4 space-y-2">
                                 <div className="flex items-center justify-between">
@@ -93,7 +95,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
                                   </div>
                                 </div>
                                 <h3 className="font-semibold text-lg">{product.name}</h3>
-                                <p className="text-sm text-muted-foreground">{product.tagline}</p>
+                                <p className="text-sm text-muted-foreground line-clamp-2">{product.tagline}</p>
                               </div>
                             </div>
                           </div>
@@ -101,8 +103,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2" />
-                  <CarouselNext className="absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2" />
+                  <CarouselPrevious className="hidden md:flex absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2" />
+                  <CarouselNext className="hidden md:flex absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2" />
                 </Carousel>
               ) : null}
               <div className={`absolute -z-10 top-8 left-8 right-8 bottom-8 bg-${appConfig.primaryColorClass}-100 rounded-xl transform rotate-2`} />

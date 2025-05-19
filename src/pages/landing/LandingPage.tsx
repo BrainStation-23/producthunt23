@@ -7,10 +7,13 @@ import { useLandingData } from './hooks/useLandingData';
 import ProductSearch from '@/components/search/ProductSearch';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { getBrandSlogan } from '@/config/appConfig';
+import { Card } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const LandingPage: React.FC = () => {
   // Set document title using our custom hook with slogan
   useDocumentTitle(getBrandSlogan());
+  const isMobile = useIsMobile();
   
   const {
     categories,
@@ -34,7 +37,9 @@ const LandingPage: React.FC = () => {
       
       {/* Mobile Search (visible on small screens only) */}
       <div className="md:hidden container px-4 -mt-4 mb-6">
-        <ProductSearch className="w-full" />
+        <Card className="p-3">
+          <ProductSearch className="w-full" />
+        </Card>
       </div>
       
       {/* Categories Section */}

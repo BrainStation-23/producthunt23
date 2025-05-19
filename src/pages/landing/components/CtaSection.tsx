@@ -1,22 +1,25 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getPrimaryColorClass } from '@/config/appConfig';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 const CtaSection: React.FC = () => {
   const primaryColorClass = getPrimaryColorClass();
-  return <section className="py-16 bg-hunt-50">
+  const isMobile = useIsMobile();
+  
+  return (
+    <section className="py-8 md:py-16 bg-hunt-50">
       <div className="container px-4 md:px-6">
-        <div className={`${primaryColorClass} text-white rounded-xl p-8 sm:p-12`}>
-          <div className="grid gap-8 md:grid-cols-2 md:gap-12 items-center">
+        <div className={`${primaryColorClass} text-white rounded-xl p-6 sm:p-8 md:p-12`}>
+          <div className="grid gap-6 md:gap-8 md:grid-cols-2 md:gap-12 items-center">
             <div className="space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Get your Final Evaluation</h2>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tighter md:text-4xl">Get your Final Evaluation</h2>
               <p className="max-w-[600px] text-hunt-100 md:text-xl/relaxed lg:text-base/relaxed">Join the Learnathon Hall of Fame. Bring your project to public.</p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="lg" variant="secondary" className="font-medium">
+                <Button asChild size={isMobile ? "default" : "lg"} variant="secondary" className="font-medium">
                   <Link to="/submit">Submit your product</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white/10 hover:text-white font-medium">
-                  
                 </Button>
               </div>
             </div>
@@ -26,6 +29,8 @@ const CtaSection: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default CtaSection;

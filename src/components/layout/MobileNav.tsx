@@ -6,7 +6,9 @@ import {
   LogOut,
   User,
   Bell,
-  Search
+  Search,
+  Home,
+  ShoppingBag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,12 +47,12 @@ const MobileNav: React.FC<MobileNavProps> = ({ open, onOpenChange }) => {
   
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
+      <DrawerContent className="max-h-[85vh]">
         <DrawerHeader>
           <DrawerTitle>Menu</DrawerTitle>
         </DrawerHeader>
         
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 overflow-y-auto">
           <div className="py-2 border-b">
             <ProductSearch 
               placeholder="Search products..." 
@@ -61,9 +63,20 @@ const MobileNav: React.FC<MobileNavProps> = ({ open, onOpenChange }) => {
             />
           </div>
           
+          <div className="py-1">
+            <Link to="/" className="flex items-center gap-2 p-2 hover:bg-muted rounded-md" onClick={() => onOpenChange(false)}>
+              <Home className="h-5 w-5" />
+              <span>Home</span>
+            </Link>
+            <Link to="/products" className="flex items-center gap-2 p-2 hover:bg-muted rounded-md" onClick={() => onOpenChange(false)}>
+              <ShoppingBag className="h-5 w-5" />
+              <span>Products</span>
+            </Link>
+          </div>
+          
           {userIsLoggedIn ? (
             <div className="space-y-2">
-              <div className="py-1">
+              <div className="py-1 border-t">
                 <Link to={dashboardPath} className="flex items-center gap-2 p-2 hover:bg-muted rounded-md" onClick={() => onOpenChange(false)}>
                   <LayoutDashboard className="h-5 w-5" />
                   <span>Dashboard</span>
@@ -90,7 +103,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ open, onOpenChange }) => {
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 pt-2 border-t">
               <Button asChild variant="default" className="w-full">
                 <Link to="/login" onClick={() => onOpenChange(false)}>Log in</Link>
               </Button>
