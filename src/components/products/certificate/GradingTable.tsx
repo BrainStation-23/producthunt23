@@ -78,12 +78,13 @@ const GradingTable = ({ judgingSummary, overallScore, detailed = false }: Gradin
             {overallScore !== null && (
               <TableRow className="font-bold border-t-2">
                 <TableCell className="text-left">Overall Score</TableCell>
+                {detailed && <TableCell className="text-center">-</TableCell>}
                 <TableCell className="text-center">
                   <Badge className="bg-primary px-3 py-0.5">
                     {overallScore.toFixed(1)}
                   </Badge>
                 </TableCell>
-                {detailed && <TableCell className="text-center">-</TableCell>}
+                
               </TableRow>
             )}
           </TableBody>
