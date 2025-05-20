@@ -331,7 +331,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
           
           pdf.setTextColor(100, 100, 100);
           for (const line of splitDescription) {
-            yPosition += 2;
+            yPosition += 5;
             pdf.text(line, margin + 10, yPosition);
           }
         }
