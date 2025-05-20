@@ -56,9 +56,10 @@ export const useUserForm = (
     defaultValues: isEditing ? defaultEditValues : defaultCreateValues,
   });
 
-  // Update form when user changes (for editing)
+  // Update form when user changes (for editing), but only initially
   useEffect(() => {
     if (isEditing && user) {
+      // Only reset the form when the user ID changes or when the form is first initialized
       form.reset({
         email: user.email || '',
         username: user.username || '',
@@ -69,7 +70,7 @@ export const useUserForm = (
         github: user.github || '',
       });
     }
-  }, [user, form, isEditing]);
+  }, [user?.id, isEditing]); // Only depend on user.id, not the entire user object
 
   const onSubmit = async (values: typeof formSchema._type) => {
     try {

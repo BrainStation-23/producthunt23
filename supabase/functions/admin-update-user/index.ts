@@ -65,10 +65,9 @@ serve(async (req) => {
     console.log(`Updating user ${id}`, { email, user_metadata });
     
     // Update user details
-    const updateData = {
-      ...(email ? { email } : {}),
-      ...(user_metadata ? { user_metadata } : {})
-    };
+    const updateData: any = {};
+    if (email) updateData.email = email;
+    if (user_metadata) updateData.user_metadata = user_metadata;
     
     // Only proceed with update if there's something to update
     if (Object.keys(updateData).length > 0) {
