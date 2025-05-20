@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Award, Printer, ChevronLeft } from 'lucide-react';
@@ -116,12 +115,11 @@ const CertificationPage: React.FC = () => {
       pdf.setFillColor(250, 250, 255);
       pdf.rect(0, 0, pageWidth, pageHeight, 'F');
       
-      // Add subtle award watermark
-      pdf.setGlobalAlpha(0.03);
-      pdf.setTextColor(0, 0, 0);
+      // Add subtle award watermark - using opacity workaround instead of setGlobalAlpha
+      pdf.setTextColor(240, 240, 250);  // Using very light color instead of alpha
       pdf.setFontSize(180);
       pdf.text('★', pageWidth / 2, pageHeight / 2, { align: 'center' });
-      pdf.setGlobalAlpha(1);
+      pdf.setTextColor(0, 0, 0);  // Reset text color
       
       // Add decorative border
       pdf.setDrawColor(100, 100, 200);
