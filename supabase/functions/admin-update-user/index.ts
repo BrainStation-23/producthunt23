@@ -53,7 +53,7 @@ serve(async (req) => {
     }
 
     // Parse request
-    const { id, ...userUpdateData } = await req.json();
+    const { id, email, user_metadata } = await req.json();
     
     if (!id) {
       return new Response(
@@ -62,20 +62,30 @@ serve(async (req) => {
       );
     }
     
-    console.log(`Updating user ${id}`, userUpdateData);
+    console.log(`Updating user ${id}`, { email, user_metadata });
     
     // Update user details
-    const { error: updateError } = await supabase.auth.admin.updateUserById(
-      id,
-      userUpdateData
-    );
-
-    if (updateError) {
-      console.error('Error updating user:', updateError);
-      throw updateError;
-    }
+    const updateData = {
+      ...(email ? { email } : {}),
+      ...(user_metadata ? { user_metadata } : {})
+    };
     
-    console.log(`User ${id} updated successfully`);
+    // Only proceed with update if there's something to update
+    if (Object.keys(updateData).length > 0) {
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        id,
+        updateData
+      );
+
+      if (updateError) {
+        console.error('Error updating user:', updateError);
+        throw updateError;
+      }
+      
+      console.log(`User ${id} updated successfully`);
+    } else {
+      console.log(`No changes to update for user ${id}`);
+    }
     
     return new Response(
       JSON.stringify({ success: true }),

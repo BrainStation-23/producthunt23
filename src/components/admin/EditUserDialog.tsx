@@ -10,6 +10,10 @@ interface User {
   role: string;
   created_at: string;
   product_count: number;
+  website?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
 }
 
 interface EditUserDialogProps {
@@ -35,7 +39,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
       onOpenChange={onOpenChange}
       onSuccess={onUserUpdated}
       title="Edit User"
-      description="Update user information and access level."
+      description="Update user information, access level, and social profiles."
     />
   );
 };

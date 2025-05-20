@@ -15,6 +15,10 @@ export interface User {
   role: string;
   created_at: string;
   product_count: number;
+  website?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
 }
 
 export const useUserForm = (
@@ -33,6 +37,10 @@ export const useUserForm = (
     email: user?.email || '',
     username: user?.username || '',
     role: (user?.role as 'admin' | 'user' | 'judge') || 'user',
+    website: user?.website || '',
+    twitter: user?.twitter || '',
+    linkedin: user?.linkedin || '',
+    github: user?.github || '',
   };
   
   const defaultCreateValues: CreateFormValues = {
@@ -51,15 +59,23 @@ export const useUserForm = (
   // Update form when user changes (for editing)
   useEffect(() => {
     if (isEditing && user) {
-      form.reset(defaultEditValues);
+      form.reset({
+        email: user.email || '',
+        username: user.username || '',
+        role: (user.role as 'admin' | 'user' | 'judge') || 'user',
+        website: user.website || '',
+        twitter: user.twitter || '',
+        linkedin: user.linkedin || '',
+        github: user.github || '',
+      });
     }
-  }, [user, form, isEditing, defaultEditValues]);
+  }, [user, form, isEditing]);
 
   const onSubmit = async (values: typeof formSchema._type) => {
     try {
       if (isEditing && user) {
         // Handle edit user case
-        const { email, username, role } = values as EditFormValues;
+        const { email, username, role, website, twitter, linkedin, github } = values as EditFormValues;
         
         // First update the user's role if it changed
         if (role !== user.role) {
@@ -71,7 +87,21 @@ export const useUserForm = (
           if (roleError) throw roleError;
         }
 
-        // Then update the user's profile data
+        // Update social profiles in the profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ 
+            username,
+            website, 
+            twitter, 
+            linkedin, 
+            github 
+          })
+          .eq('id', user.id);
+
+        if (profileError) throw profileError;
+
+        // Then update the user's profile data in Auth
         const { data, error } = await supabase.functions.invoke('admin-update-user', {
           body: {
             id: user.id,

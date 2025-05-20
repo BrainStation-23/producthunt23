@@ -8,13 +8,24 @@ export const baseSchema = {
   role: z.enum(['admin', 'user', 'judge']),
 };
 
+// Social profile schema fields
+export const socialSchema = {
+  website: z.string().url({ message: 'Please enter a valid URL' }).or(z.literal('')).optional(),
+  twitter: z.string().url({ message: 'Please enter a valid URL' }).or(z.literal('')).optional(),
+  linkedin: z.string().url({ message: 'Please enter a valid URL' }).or(z.literal('')).optional(),
+  github: z.string().url({ message: 'Please enter a valid URL' }).or(z.literal('')).optional(),
+};
+
 // Define form schema based on whether it's for creating or editing
 export const createSchema = z.object({
   ...baseSchema,
   password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
 });
 
-export const editSchema = z.object(baseSchema);
+export const editSchema = z.object({
+  ...baseSchema,
+  ...socialSchema,
+});
 
 // Define our form types
 export type CreateFormValues = z.infer<typeof createSchema>;

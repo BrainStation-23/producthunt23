@@ -7,6 +7,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import {
   Select,
@@ -16,6 +17,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { GitHubLogoIcon, LinkedInLogoIcon, Twitter } from '@radix-ui/react-icons';
+import { Globe } from 'lucide-react';
 
 interface UserFormFieldsProps {
   form: UseFormReturn<any>;
@@ -32,8 +36,13 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({ form, isEditing }) => {
           <FormItem>
             <FormLabel>Email</FormLabel>
             <FormControl>
-              <Input placeholder="user@example.com" {...field} />
+              <Input placeholder="user@example.com" {...field} disabled={isEditing} />
             </FormControl>
+            {isEditing && (
+              <FormDescription>
+                Email addresses cannot be changed for security reasons.
+              </FormDescription>
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -88,6 +97,81 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({ form, isEditing }) => {
           </FormItem>
         )}
       />
+
+      {isEditing && (
+        <>
+          <Separator className="my-4" />
+          <h3 className="text-lg font-medium mb-3">Social Profiles</h3>
+
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Website
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="https://example.com" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="twitter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Twitter className="h-4 w-4" />
+                  Twitter
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="https://twitter.com/username" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="linkedin"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <LinkedInLogoIcon className="h-4 w-4" />
+                  LinkedIn
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="https://linkedin.com/in/username" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="github"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <GitHubLogoIcon className="h-4 w-4" />
+                  GitHub
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="https://github.com/username" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </>
+      )}
     </>
   );
 };
