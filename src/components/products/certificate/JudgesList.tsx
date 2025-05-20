@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Badge } from 'lucide-react';
-import { LinkedIn } from 'lucide-react';
+import { Linkedin } from 'lucide-react';
 
 interface Judge {
   id: string;
@@ -48,7 +48,7 @@ const JudgesList = ({ judges }: JudgesListProps) => {
                   className="flex items-center justify-center gap-1 text-primary hover:underline"
                 >
                   {judge.profile?.username || 'Anonymous Judge'}
-                  <LinkedIn className="h-4 w-4" />
+                  <Linkedin className="h-4 w-4" />
                 </a>
               ) : (
                 judge.profile?.username || 'Anonymous Judge'

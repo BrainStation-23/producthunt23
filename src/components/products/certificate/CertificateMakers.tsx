@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ProductMaker } from '@/types/product';
-import { LinkedIn } from 'lucide-react';
+import { Linkedin } from 'lucide-react';
 
 interface CertificateMakersProps {
   makers: ProductMaker[];
@@ -24,7 +24,7 @@ const CertificateMakers = ({ makers }: CertificateMakersProps) => {
               className="hover:underline inline-flex items-center"
             >
               {maker.profile?.username || 'Unknown Maker'}
-              <LinkedIn className="ml-1 h-5 w-5 inline" />
+              <Linkedin className="ml-1 h-5 w-5 inline" />
             </a>
           ) : (
             maker.profile?.username || 'Unknown Maker'
