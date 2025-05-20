@@ -39,7 +39,9 @@ const CertificationPage: React.FC = () => {
   const handlePrint = useReactToPrint({
     contentRef: certificateRef,
     documentTitle: `${product?.name || 'Product'} Certificate`,
-    removeAfterPrint: true,
+    onAfterPrint: () => {
+      console.log('Print completed');
+    },
     pageStyle: `
       @page {
         size: A4;
