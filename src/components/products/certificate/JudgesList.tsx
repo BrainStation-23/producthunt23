@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Badge } from 'lucide-react';
-import { Linkedin } from 'lucide-react';
+import { Badge, Linkedin } from 'lucide-react';
 
 interface Judge {
   id: string;

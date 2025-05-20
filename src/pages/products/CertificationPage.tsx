@@ -1,13 +1,14 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Award } from 'lucide-react';
+import { Award, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { useCertificationData } from '@/hooks/useCertificationData';
+import { useReactToPrint } from 'react-to-print';
 
-// Import the newly created components
+// Import the components
 import CertificateHeader from '@/components/products/certificate/CertificateHeader';
 import CertificateMakers from '@/components/products/certificate/CertificateMakers';
 import GradingTable from '@/components/products/certificate/GradingTable';
@@ -28,12 +29,30 @@ const CertificationPage: React.FC = () => {
     certificateUrl,
     overallScore
   } = useCertificationData(productId);
+  
+  // Create a reference to the certificate content
+  const certificateRef = useRef<HTMLDivElement>(null);
 
   useDocumentTitle(product?.name ? `${product.name} Certificate` : 'Product Certificate');
 
-  const handlePrint = () => {
-    window.print();
-  };
+  // Use react-to-print to handle printing only the certificate content
+  const handlePrint = useReactToPrint({
+    content: () => certificateRef.current,
+    documentTitle: `${product?.name || 'Product'} Certificate`,
+    removeAfterPrint: true,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    `
+  });
 
   if (isLoading) {
     return <CertificateSkeleton />;
@@ -62,17 +81,22 @@ const CertificationPage: React.FC = () => {
     : 'Unknown Date';
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4 print:py-0 print:px-0">
-      <div className="flex justify-between mb-6 print:hidden">
+    <div className="container max-w-4xl mx-auto py-8 px-4">
+      <div className="flex justify-between mb-6">
         <Button variant="outline" asChild>
           <Link to={`/products/${productId}`}>&larr; Back to Product</Link>
         </Button>
-        <Button onClick={handlePrint}>
+        <Button onClick={handlePrint} className="flex items-center gap-2">
+          <Printer className="w-4 h-4" />
           Print Certificate
         </Button>
       </div>
 
-      <Card className="p-8 md:p-12 border-4 border-primary/20 relative overflow-hidden certificate-card">
+      {/* Certificate Card - Will be printed */}
+      <Card 
+        ref={certificateRef}
+        className="p-8 md:p-12 border-4 border-primary/20 relative overflow-hidden certificate-card"
+      >
         {/* Background watermark */}
         <div className="absolute inset-0 opacity-[0.03] flex items-center justify-center pointer-events-none">
           <Award className="w-[80%] h-[80%]" />
