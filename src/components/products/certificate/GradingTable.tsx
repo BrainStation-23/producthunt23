@@ -53,24 +53,25 @@ const GradingTable = ({ judgingSummary, overallScore, detailed = false }: Gradin
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50%] text-left">Criteria</TableHead>
-              <TableHead className="text-center">Score</TableHead>
               {detailed && <TableHead className="text-center">Weight</TableHead>}
+              <TableHead className="text-center">Score</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {ratingResults.map((item) => (
               <TableRow key={item.criteria_id}>
                 <TableCell className="font-medium text-left">{item.criteria_name}</TableCell>
+                 {detailed && (
+                  <TableCell className="text-center text-muted-foreground">
+                    {item.weight}x
+                  </TableCell>
+                )}
                 <TableCell className="text-center">
                   <Badge variant={detailed ? "outline" : "default"} className={`font-bold ${detailed ? 'px-3 py-0.5' : ''}`}>
                     {item.avg_rating !== null ? item.avg_rating.toFixed(1) : 'N/A'}
                   </Badge>
                 </TableCell>
-                {detailed && (
-                  <TableCell className="text-center text-muted-foreground">
-                    {item.weight}x
-                  </TableCell>
-                )}
+               
               </TableRow>
             ))}
             
