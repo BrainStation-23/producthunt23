@@ -36,8 +36,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
   const hasFeaturedProducts = featuredProducts && featuredProducts.length > 0;
   
   return (
-    <section className="py-8 md:py-16 lg:py-24 bg-gradient-to-b from-background to-muted/20">
-      <div className="container px-4 md:px-6">
+    <section className="py-8 md:py-16 lg:py-24 bg-gradient-to-b from-background to-muted/20 overflow-x-hidden">
+      <div className="container px-4 md:px-6 mx-auto">
         <div className="grid gap-8 md:grid-cols-2 md:gap-12 items-center">
           <div className="space-y-4 md:space-y-6">
             <Badge variant="outline" className="animate-slide-in animate-once">Today's trending products</Badge>
@@ -47,7 +47,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
             <p className="text-lg md:text-xl text-muted-foreground animate-slide-in animate-once animate-delay-200">
               {getBrandDescription()}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 animate-slide-in animate-once animate-delay-300 max-w-full">
+            <div className="flex flex-col sm:flex-row gap-4 animate-slide-in animate-once animate-delay-300">
               <Button asChild size={isMobile ? "default" : "lg"} className="font-medium w-full sm:w-auto">
                 <Link to="/register">Join for free</Link>
               </Button>
@@ -61,9 +61,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
           </div>
           
           {(isLoading || hasFeaturedProducts) && (
-            <div className="relative mt-8 md:mt-0 max-w-full">
+            <div className="relative mt-8 md:mt-0 w-full">
               {isLoading ? (
-                <div className="glass-card rounded-xl p-2 shadow-xl max-w-full">
+                <div className="glass-card rounded-xl p-2 shadow-xl w-full">
                   <div className="bg-white rounded-lg overflow-hidden">
                     <Skeleton className="w-full h-36 md:h-48" />
                     <div className="p-4 space-y-2">
@@ -74,13 +74,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
                   </div>
                 </div>
               ) : hasFeaturedProducts ? (
-                <div className="max-w-full overflow-hidden">
+                <div className="w-full overflow-hidden">
                   <Carousel className="w-full">
-                    <CarouselContent>
+                    <CarouselContent className="ml-0">
                       {featuredProducts.map((product) => (
-                        <CarouselItem key={product.id}>
-                          <Link to={`/products/${product.id}`} className="block">
-                            <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200">
+                        <CarouselItem key={product.id} className="pl-4 md:pl-6 w-full">
+                          <Link to={`/products/${product.id}`} className="block w-full">
+                            <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200 w-full">
                               <div className="bg-white rounded-lg overflow-hidden">
                                 <img 
                                   src={product.image_url || "/placeholder.svg"} 

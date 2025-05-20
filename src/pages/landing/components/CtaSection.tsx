@@ -10,8 +10,8 @@ const CtaSection: React.FC = () => {
   const isMobile = useIsMobile();
   
   return (
-    <section className="py-8 md:py-16 bg-hunt-50">
-      <div className="container px-4 md:px-6">
+    <section className="py-8 md:py-16 bg-hunt-50 overflow-x-hidden">
+      <div className="container px-4 md:px-6 mx-auto">
         <div className={`${primaryColorClass} text-white rounded-xl p-6 sm:p-8 md:p-12`}>
           <div className="grid gap-6 md:gap-8 md:grid-cols-2 md:gap-12 items-center">
             <div className="space-y-4">

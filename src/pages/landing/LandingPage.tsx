@@ -28,7 +28,7 @@ const LandingPage: React.FC = () => {
   } = useLandingData();
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in overflow-x-hidden">
       {/* Hero Section */}
       <HeroSection 
         featuredProducts={featuredProducts}
@@ -36,7 +36,7 @@ const LandingPage: React.FC = () => {
       />
       
       {/* Mobile Search (visible on small screens only) */}
-      <div className="md:hidden container px-4 -mt-4 mb-6">
+      <div className="md:hidden container px-4 -mt-4 mb-6 mx-auto">
         <Card className="p-3">
           <ProductSearch className="w-full" />
         </Card>
