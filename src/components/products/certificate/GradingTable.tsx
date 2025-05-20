@@ -42,7 +42,7 @@ const GradingTable = ({ judgingSummary, overallScore }: GradingTableProps) => {
 
   return (
     <div className="mb-8">
-      <h3 className="text-xl font-semibold mb-4 flex items-center justify-center">
+      <h3 className="text-xl font-semibold mb-4 text-center flex items-center justify-center">
         <Award className="mr-2" /> 
         Evaluation Results
       </h3>
@@ -51,30 +51,26 @@ const GradingTable = ({ judgingSummary, overallScore }: GradingTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[180px]">Criteria</TableHead>
-              <TableHead>Score</TableHead>
-              <TableHead className="text-right">Judges</TableHead>
+              <TableHead className="w-[60%] text-left">Criteria</TableHead>
+              <TableHead className="text-right">Score</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {ratingResults.map((item) => (
               <TableRow key={item.criteria_id}>
                 <TableCell className="font-medium">{item.criteria_name}</TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <Badge variant="outline" className="font-bold">
-                      {item.avg_rating !== null ? item.avg_rating.toFixed(1) : 'N/A'}
-                    </Badge>
-                  </div>
+                <TableCell className="text-right">
+                  <Badge variant="outline" className="font-bold">
+                    {item.avg_rating !== null ? item.avg_rating.toFixed(1) : 'N/A'}
+                  </Badge>
                 </TableCell>
-                <TableCell className="text-right">{item.count_judges}</TableCell>
               </TableRow>
             ))}
             
             {overallScore !== null && (
               <TableRow className="font-bold">
                 <TableCell>Overall Score</TableCell>
-                <TableCell colSpan={2}>
+                <TableCell className="text-right">
                   <Badge className="bg-primary">
                     {overallScore.toFixed(1)}
                   </Badge>
