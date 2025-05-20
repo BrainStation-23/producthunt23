@@ -66,34 +66,56 @@
 @media print {
   body {
     background-color: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
   }
   
   .certificate-card {
     border: none !important;
     box-shadow: none !important;
-    padding: 1.5cm !important;
+    padding: 0 !important;
     margin: 0 !important;
     max-width: none !important;
+    border-radius: 0 !important;
   }
   
   .certificate-page-1 {
-    height: calc(100vh - 3cm);
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    padding: 2cm;
+    box-sizing: border-box;
   }
   
   .certificate-page-2 {
-    height: calc(100vh - 3cm);
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    padding: 2cm;
+    box-sizing: border-box;
   }
   
   .page-2 {
     page-break-before: always;
   }
   
+  .mb-8 {
+    margin-bottom: 1.5rem !important;
+  }
+  
   @page {
-    size: A4 portrait;
-    margin: 1cm;
+    size: A4;
+    margin: 0;
+  }
+  
+  /* Hide navigation elements when printing */
+  .flex.justify-between.mb-6 {
+    display: none !important;
   }
 }
