@@ -58,7 +58,7 @@ const GradingTable = ({ judgingSummary, overallScore }: GradingTableProps) => {
           <TableBody>
             {ratingResults.map((item) => (
               <TableRow key={item.criteria_id}>
-                <TableCell className="font-medium">{item.criteria_name}</TableCell>
+                <TableCell className="font-medium text-left">{item.criteria_name}</TableCell>
                 <TableCell className="text-right">
                   <Badge variant="outline" className="font-bold">
                     {item.avg_rating !== null ? item.avg_rating.toFixed(1) : 'N/A'}
