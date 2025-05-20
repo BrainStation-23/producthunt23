@@ -1,5 +1,4 @@
-
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Award, Printer, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,6 @@ import { Card } from '@/components/ui/card';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { useCertificationData } from '@/hooks/useCertificationData';
 import jsPDF from 'jspdf';
-import { toast } from 'sonner';
 
 // Import the components
 import CertificateHeader from '@/components/products/certificate/CertificateHeader';
@@ -17,9 +15,6 @@ import CriteriaList from '@/components/products/certificate/CriteriaList';
 import JudgesList from '@/components/products/certificate/JudgesList';
 import CertificateFooter from '@/components/products/certificate/CertificateFooter';
 import CertificateSkeleton from '@/components/products/certificate/CertificateSkeleton';
-
-// Create a new utility for image handling
-import { convertImageToDataURL } from '@/utils/imageUtils';
 
 const CertificationPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -34,8 +29,6 @@ const CertificationPage: React.FC = () => {
     overallScore
   } = useCertificationData(productId);
   
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  
   // Create a reference to the certificate content
   const certificateRef = useRef<HTMLDivElement>(null);
 
@@ -44,9 +37,6 @@ const CertificationPage: React.FC = () => {
   // Generate PDF using jsPDF
   const handlePrintPDF = async () => {
     if (!product || !makers || makers.length === 0) return;
-    
-    setIsGeneratingPDF(true);
-    toast.info("Preparing PDF, this may take a moment...");
     
     // Create a new PDF document on A4 size
     const pdf = new jsPDF({
@@ -61,37 +51,30 @@ const CertificationPage: React.FC = () => {
     
     // Helper function to add image with aspect ratio preservation
     const addImageWithAspect = async (imageUrl: string, x: number, y: number, maxWidth: number, maxHeight: number) => {
-      try {
-        // Convert external image URL to data URL to avoid CORS issues
-        const dataUrl = await convertImageToDataURL(imageUrl);
-        
-        return new Promise<{y: number}>((resolve) => {
-          const img = new Image();
-          img.onload = function() {
-            const imgWidth = img.width;
-            const imgHeight = img.height;
-            let newWidth = maxWidth;
-            let newHeight = (imgHeight * maxWidth) / imgWidth;
-            
-            if (newHeight > maxHeight) {
-              newHeight = maxHeight;
-              newWidth = (imgWidth * maxHeight) / imgHeight;
-            }
-            
-            const centerX = x + (maxWidth - newWidth) / 2;
-            pdf.addImage(img, 'PNG', centerX, y, newWidth, newHeight);
-            resolve({y: y + newHeight});
-          };
-          img.onerror = function() {
-            console.error("Failed to load image", imageUrl);
-            resolve({y: y + 10}); // Return minimal height in case of error
-          };
-          img.src = dataUrl;
-        });
-      } catch (error) {
-        console.error("Error loading image:", error);
-        return {y: y + 10}; // Return minimal height in case of error
-      }
+      return new Promise<{y: number}>((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+          const imgWidth = img.width;
+          const imgHeight = img.height;
+          let newWidth = maxWidth;
+          let newHeight = (imgHeight * maxWidth) / imgWidth;
+          
+          if (newHeight > maxHeight) {
+            newHeight = maxHeight;
+            newWidth = (imgWidth * maxHeight) / imgHeight;
+          }
+          
+          const centerX = x + (maxWidth - newWidth) / 2;
+          pdf.addImage(img, 'PNG', centerX, y, newWidth, newHeight);
+          resolve({y: y + newHeight});
+        };
+        img.onerror = function() {
+          console.error("Failed to load image");
+          resolve({y});
+        };
+        img.src = imageUrl;
+      });
     };
 
     // Function to add QR code
@@ -99,37 +82,27 @@ const CertificationPage: React.FC = () => {
       if (!certificateUrl) return margin;
       
       try {
-        // Generate QR code URL
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(certificateUrl)}`;
+        const qrImage = new Image();
+        qrImage.crossOrigin = 'Anonymous';
+        const qrPromise = new Promise<void>((resolve) => {
+          qrImage.onload = function() {
+            const qrSize = 30;
+            const qrX = (pageWidth - qrSize) / 2;
+            pdf.addImage(qrImage, 'PNG', qrX, pageHeight - 60, qrSize, qrSize);
+            pdf.setFontSize(10);
+            pdf.setTextColor(100, 100, 100);
+            pdf.text('Scan to verify this certificate', pageWidth / 2, pageHeight - 25, { align: 'center' });
+            resolve();
+          };
+          qrImage.onerror = () => {
+            console.error('Failed to load QR code');
+            resolve();
+          };
+        });
         
-        // Load and process QR code with our utility
-        try {
-          const qrDataUrl = await convertImageToDataURL(qrCodeUrl);
-          
-          const qrImage = new Image();
-          const qrPromise = new Promise<void>((resolve) => {
-            qrImage.onload = function() {
-              const qrSize = 30;
-              const qrX = (pageWidth - qrSize) / 2;
-              pdf.addImage(qrImage, 'PNG', qrX, pageHeight - 60, qrSize, qrSize);
-              pdf.setFontSize(10);
-              pdf.setTextColor(100, 100, 100);
-              pdf.text('Scan to verify this certificate', pageWidth / 2, pageHeight - 25, { align: 'center' });
-              resolve();
-            };
-            qrImage.onerror = () => {
-              console.error('Failed to load QR code');
-              resolve();
-            };
-            qrImage.src = qrDataUrl;
-          });
-          
-          await qrPromise;
-          return 60;
-        } catch (error) {
-          console.error('Error processing QR code:', error);
-          return margin;
-        }
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(certificateUrl)}`;
+        await qrPromise;
+        return 60;
       } catch (error) {
         console.error('Error adding QR code:', error);
         return margin;
@@ -201,13 +174,8 @@ const CertificationPage: React.FC = () => {
       
       // Project Image
       if (product.image_url) {
-        try {
-          const imageResult = await addImageWithAspect(product.image_url, margin + 40, currentY, pageWidth - margin * 2 - 80, 80);
-          currentY = imageResult.y + 25;
-        } catch (error) {
-          console.error("Failed to add project image to PDF:", error);
-          currentY += 80; // Still advance Y position even if image fails
-        }
+        const imageResult = await addImageWithAspect(product.image_url, margin + 40, currentY, pageWidth - margin * 2 - 80, 80);
+        currentY = imageResult.y + 25;
       }
       
       // Overall Score
@@ -424,12 +392,8 @@ const CertificationPage: React.FC = () => {
       // Save the PDF
       pdf.save(`${product.name}_Certificate.pdf`);
       
-      toast.success("PDF generated successfully!");
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.error("Failed to generate PDF. Please try again.");
-    } finally {
-      setIsGeneratingPDF(false);
     }
   };
 
@@ -465,13 +429,9 @@ const CertificationPage: React.FC = () => {
         <Button variant="outline" asChild className="flex items-center gap-1">
           <Link to={`/products/${productId}`}><ChevronLeft className="w-4 h-4" /> Back to Product</Link>
         </Button>
-        <Button 
-          onClick={handlePrintPDF} 
-          className="flex items-center gap-2" 
-          disabled={isGeneratingPDF}
-        >
+        <Button onClick={handlePrintPDF} className="flex items-center gap-2">
           <Printer className="w-4 h-4" />
-          {isGeneratingPDF ? "Generating PDF..." : "Generate PDF"}
+          Generate PDF
         </Button>
       </div>
 
@@ -501,18 +461,17 @@ const CertificationPage: React.FC = () => {
                 <CertificateMakers makers={makers} featured={true} />
               </div>
               <p className="text-lg my-4">
-                successfully completed the project <span className="font-bold text-xl md:text-2xl text-primary">{product?.name}</span>
+                successfully completed the project <span className="font-bold text-xl md:text-2xl text-primary">{product.name}</span>
               </p>
               
               {/* Project Image */}
-              {product?.image_url && (
+              {product.image_url && (
                 <div className="my-6 max-w-xs mx-auto">
                   <div className="bg-muted rounded-md overflow-hidden border border-border aspect-video">
                     <img 
                       src={product.image_url} 
                       alt={product.name} 
                       className="w-full h-full object-contain"
-                      crossOrigin="anonymous" // Add CORS attribute
                     />
                   </div>
                 </div>
@@ -545,7 +504,7 @@ const CertificationPage: React.FC = () => {
             {/* Page 2 Header */}
             <div className="mb-6 text-center">
               <h2 className="text-2xl md:text-3xl font-bold mb-2">Detailed Evaluation</h2>
-              <h3 className="text-xl text-primary font-semibold">{product?.name}</h3>
+              <h3 className="text-xl text-primary font-semibold">{product.name}</h3>
             </div>
             
             {/* Evaluation Results */}
@@ -558,7 +517,7 @@ const CertificationPage: React.FC = () => {
             <JudgesList judges={judges} />
             
             {/* Project Context */}
-            {product?.tagline && (
+            {product.tagline && (
               <div className="mt-4 p-4 bg-muted/30 rounded-lg">
                 <p className="font-medium mb-1">Project Description:</p>
                 <p className="text-muted-foreground">{product.tagline}</p>
