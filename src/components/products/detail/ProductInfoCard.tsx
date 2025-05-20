@@ -1,13 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ExternalLink, ThumbsUp, MessageSquare, Award } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Product } from '@/types/product';
-import { supabase } from '@/integrations/supabase/client';
-import UpvoteActions from './info/UpvoteActions';
-import WebsiteButton from './info/WebsiteButton';
-import CategoryList from './info/CategoryList';
-import TechnologiesList from './info/TechnologiesList';
-import LaunchDate from './info/LaunchDate';
+import CategoryList from '@/components/products/detail/info/CategoryList';
+import TechnologiesList from '@/components/products/detail/info/TechnologiesList';
+import LaunchDate from '@/components/products/detail/info/LaunchDate';
+import WebsiteButton from '@/components/products/detail/info/WebsiteButton';
+import UpvoteActions from '@/components/products/detail/info/UpvoteActions';
 
 interface ProductInfoCardProps {
   product: Product;
@@ -15,49 +17,56 @@ interface ProductInfoCardProps {
 }
 
 const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount }) => {
-  const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
-  
-  useEffect(() => {
-    const fetchCategoryNames = async () => {
-      if (!product.categories || product.categories.length === 0) return;
-      
-      const { data, error } = await supabase
-        .from('categories')
-        .select('id, name')
-        .in('id', product.categories);
-        
-      if (error) {
-        console.error('Error fetching category names:', error);
-        return;
-      }
-      
-      if (data) {
-        const nameMap: Record<string, string> = {};
-        data.forEach(category => {
-          nameMap[category.id] = category.name;
-        });
-        setCategoryNames(nameMap);
-      }
-    };
-    
-    fetchCategoryNames();
-  }, [product.categories]);
-
   return (
-    <Card>
-      <CardContent className="p-6 space-y-4">
-        <div className="flex justify-between items-center">
-          <UpvoteActions 
-            productId={product.id} 
-            initialUpvotes={product?.upvotes || 0} 
-            commentCount={commentCount} 
-          />
+    <Card className="border shadow-sm">
+      <CardContent className="p-5 space-y-5">
+        {/* Website Link */}
+        <WebsiteButton website_url={product.website_url} />
+        
+        {/* Stats */}
+        <div className="flex items-center justify-between">
+          {/* Upvotes */}
+          <div className="flex items-center gap-1.5">
+            <ThumbsUp className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{product.upvotes || 0} upvotes</span>
+          </div>
+          
+          {/* Comments count */}
+          <div className="flex items-center gap-1.5">
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{commentCount} comments</span>
+          </div>
         </div>
-
-        <WebsiteButton url={product?.website_url} />
-        <CategoryList categories={product?.categories} categoryNames={categoryNames} />
-        <TechnologiesList technologies={product?.technologies} />
-        <LaunchDate date={product?.created_at} />
+        
+        {/* Upvote Button */}
+        <UpvoteActions product={product} />
+        
+        {/* Certificate Link */}
+        <Button variant="outline" className="w-full" asChild>
+          <Link to={`/products/${product.id}/certificate`} className="flex items-center justify-center gap-2">
+            <Award className="h-4 w-4" />
+            View Certificate
+          </Link>
+        </Button>
+        
+        {/* Categories */}
+        {product.categoryNames && product.categoryNames.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">Categories</h4>
+            <CategoryList categories={product.categoryNames} />
+          </div>
+        )}
+        
+        {/* Technologies */}
+        {product.technologies && product.technologies.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">Built with</h4>
+            <TechnologiesList technologies={product.technologies} />
+          </div>
+        )}
+        
+        {/* Launch Date */}
+        <LaunchDate created_at={product.created_at} />
       </CardContent>
     </Card>
   );

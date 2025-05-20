@@ -29,6 +29,7 @@ import ProductsPage from './pages/products/ProductsPage';
 import SubmitProductPage from './pages/products/SubmitProductPage';
 import EditProductPage from './pages/products/EditProductPage';
 import ProductDetailPage from './pages/products/ProductDetailPage';
+import CertificationPage from './pages/products/CertificationPage';
 import NotFound from './pages/NotFound';
 import TermsOfServicePage from './pages/legal/TermsOfServicePage';
 import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
@@ -77,6 +78,7 @@ function App() {
                 <Route path="landing" element={<LandingPage />} />
                 <Route path="products" element={<ProductsPage />} />
                 <Route path="products/:productId" element={<ProductDetailPage />} />
+                <Route path="products/:productId/certificate" element={<CertificationPage />} />
                 <Route path="terms" element={<TermsOfServicePage />} />
                 <Route path="privacy" element={<PrivacyPolicyPage />} />
               </Route>

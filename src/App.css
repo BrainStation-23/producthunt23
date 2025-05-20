@@ -35,3 +35,21 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Certificate print styles */
+@media print {
+  body {
+    background-color: white;
+  }
+  
+  .certificate-card {
+    border: 2px solid #ccc !important;
+    box-shadow: none !important;
+    padding: 1.5cm !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+}
