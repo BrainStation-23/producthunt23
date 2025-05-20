@@ -47,12 +47,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
             <p className="text-lg md:text-xl text-muted-foreground animate-slide-in animate-once animate-delay-200">
               {getBrandDescription()}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 animate-slide-in animate-once animate-delay-300">
-              <Button asChild size={isMobile ? "default" : "lg"} className="font-medium">
+            <div className="flex flex-col sm:flex-row gap-4 animate-slide-in animate-once animate-delay-300 max-w-full">
+              <Button asChild size={isMobile ? "default" : "lg"} className="font-medium w-full sm:w-auto">
                 <Link to="/register">Join for free</Link>
               </Button>
-              <Button asChild variant="outline" size={isMobile ? "default" : "lg"} className="font-medium">
-                <Link to="/products" className="flex items-center">
+              <Button asChild variant="outline" size={isMobile ? "default" : "lg"} className="font-medium w-full sm:w-auto">
+                <Link to="/products" className="flex items-center justify-center">
                   Browse products
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -61,9 +61,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
           </div>
           
           {(isLoading || hasFeaturedProducts) && (
-            <div className="relative mt-8 md:mt-0">
+            <div className="relative mt-8 md:mt-0 max-w-full">
               {isLoading ? (
-                <div className="glass-card rounded-xl p-2 shadow-xl">
+                <div className="glass-card rounded-xl p-2 shadow-xl max-w-full">
                   <div className="bg-white rounded-lg overflow-hidden">
                     <Skeleton className="w-full h-36 md:h-48" />
                     <div className="p-4 space-y-2">
@@ -74,38 +74,40 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
                   </div>
                 </div>
               ) : hasFeaturedProducts ? (
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {featuredProducts.map((product) => (
-                      <CarouselItem key={product.id}>
-                        <Link to={`/products/${product.id}`} className="block">
-                          <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200">
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <img 
-                                src={product.image_url || "/placeholder.svg"} 
-                                alt={product.name} 
-                                className="w-full h-36 md:h-48 object-cover"
-                              />
-                              <div className="p-4 space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Badge className={`${primaryColorClass} ${primaryColorHoverClass}`}>Featured</Badge>
-                                  <div className="flex items-center">
-                                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                                    <span className="ml-1 text-sm font-medium">{product.upvotes || 0}</span>
+                <div className="max-w-full overflow-hidden">
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {featuredProducts.map((product) => (
+                        <CarouselItem key={product.id}>
+                          <Link to={`/products/${product.id}`} className="block">
+                            <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200">
+                              <div className="bg-white rounded-lg overflow-hidden">
+                                <img 
+                                  src={product.image_url || "/placeholder.svg"} 
+                                  alt={product.name} 
+                                  className="w-full h-36 md:h-48 object-cover"
+                                />
+                                <div className="p-4 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <Badge className={`${primaryColorClass} ${primaryColorHoverClass}`}>Featured</Badge>
+                                    <div className="flex items-center">
+                                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                                      <span className="ml-1 text-sm font-medium">{product.upvotes || 0}</span>
+                                    </div>
                                   </div>
+                                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                                  <p className="text-sm text-muted-foreground line-clamp-2">{product.tagline}</p>
                                 </div>
-                                <h3 className="font-semibold text-lg">{product.name}</h3>
-                                <p className="text-sm text-muted-foreground line-clamp-2">{product.tagline}</p>
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="hidden md:flex absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2" />
-                  <CarouselNext className="hidden md:flex absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2" />
-                </Carousel>
+                          </Link>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="hidden md:flex absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2" />
+                    <CarouselNext className="hidden md:flex absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2" />
+                  </Carousel>
+                </div>
               ) : null}
               <div className={`absolute -z-10 top-8 left-8 right-8 bottom-8 bg-${appConfig.primaryColorClass}-100 rounded-xl transform rotate-2`} />
             </div>
