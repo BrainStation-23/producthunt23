@@ -136,7 +136,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     pdf.setDrawColor(100, 100, 200);
     pdf.setLineWidth(0.5);
     // Increase bottom margin to accommodate footer
-    pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2) - 10, 'S');
+    pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2), 'S');
     
     // Certificate Title
     pdf.setTextColor(80, 80, 120);
@@ -225,9 +225,9 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     pdf.setTextColor(100, 100, 100);
     pdf.setFontSize(10);
     pdf.text('This certificate was issued as part of the Learnathon 3.0 program,', 
-      pageWidth / 2, pageHeight - margin - 15, { align: 'center' });
+      pageWidth / 2, pageHeight - margin - 5, { align: 'center' });
     pdf.text('organized by Geeky Solutions.', 
-      pageWidth / 2, pageHeight - margin - 10, { align: 'center' });
+      pageWidth / 2, pageHeight - margin, { align: 'center' });
     
     // ---------- PAGE 2: Detailed Evaluation ----------
     pdf.addPage();
