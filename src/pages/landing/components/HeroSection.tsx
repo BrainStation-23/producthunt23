@@ -37,9 +37,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
   const hasFeaturedProducts = featuredProducts && featuredProducts.length > 0;
   
   return (
-    <section className="py-8 md:py-16 lg:py-24 bg-gradient-to-b from-background to-muted/20 overflow-x-hidden">
+    <section className="w-full py-8 md:py-16 lg:py-24 bg-gradient-to-b from-background to-muted/20 overflow-hidden">
       <div className="container px-4 md:px-6 mx-auto">
         <div className="grid gap-8 md:grid-cols-2 md:gap-12 items-center">
+          {/* Left side: Text content */}
           <div className="space-y-4 md:space-y-6">
             <Badge variant="outline" className="animate-slide-in animate-once">Today's trending products</Badge>
             <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold tracking-tight animate-slide-in animate-once animate-delay-100">
@@ -61,62 +62,61 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
             </div>
           </div>
           
-          {(isLoading || hasFeaturedProducts) && (
-            <div className="relative mt-8 md:mt-0 w-full">
-              {isLoading ? (
-                <div className="glass-card rounded-xl p-2 shadow-xl w-full">
-                  <div className="bg-white rounded-lg overflow-hidden">
-                    <Skeleton className="w-full h-36 md:h-48" />
-                    <div className="p-4 space-y-2">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-6 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
+          {/* Right side: Featured Products Carousel */}
+          <div className="w-full overflow-hidden">
+            {isLoading ? (
+              <div className="glass-card rounded-xl p-2 shadow-xl w-full">
+                <div className="bg-white rounded-lg overflow-hidden">
+                  <Skeleton className="w-full h-36 md:h-48" />
+                  <div className="p-4 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
                   </div>
                 </div>
-              ) : hasFeaturedProducts ? (
-                <div className="w-full overflow-hidden">
-                  <Carousel className="w-full">
-                    <CarouselContent className="ml-0">
-                      {featuredProducts.map((product) => (
-                        <CarouselItem key={product.id} className="pl-4 md:pl-6 w-full">
-                          <Link to={`/products/${product.id}`} className="block w-full">
-                            <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200 w-full">
-                              <div className="bg-white rounded-lg overflow-hidden">
-                                <div className="w-full">
-                                  <AspectRatio ratio={16/9} className="bg-muted">
-                                    <img 
-                                      src={product.image_url || "/placeholder.svg"} 
-                                      alt={product.name} 
-                                      className="w-full h-full object-contain"
-                                    />
-                                  </AspectRatio>
-                                </div>
-                                <div className="p-4 space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <Badge className={`${primaryColorClass} ${primaryColorHoverClass}`}>Featured</Badge>
-                                    <div className="flex items-center">
-                                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                                      <span className="ml-1 text-sm font-medium">{product.upvotes || 0}</span>
-                                    </div>
+              </div>
+            ) : hasFeaturedProducts ? (
+              <div className="relative mt-8 md:mt-0 w-full">
+                <Carousel className="w-full max-w-full">
+                  <CarouselContent className="ml-0 w-full">
+                    {featuredProducts.map((product) => (
+                      <CarouselItem key={product.id} className="pl-0 sm:pl-4 w-full">
+                        <Link to={`/products/${product.id}`} className="block w-full">
+                          <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200 w-full">
+                            <div className="bg-white rounded-lg overflow-hidden">
+                              <div className="w-full">
+                                <AspectRatio ratio={16/9} className="bg-muted">
+                                  <img 
+                                    src={product.image_url || "/placeholder.svg"} 
+                                    alt={product.name} 
+                                    className="w-full h-full object-contain"
+                                  />
+                                </AspectRatio>
+                              </div>
+                              <div className="p-4 space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <Badge className={`${primaryColorClass} ${primaryColorHoverClass}`}>Featured</Badge>
+                                  <div className="flex items-center">
+                                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                                    <span className="ml-1 text-sm font-medium">{product.upvotes || 0}</span>
                                   </div>
-                                  <h3 className="font-semibold text-lg">{product.name}</h3>
-                                  <p className="text-sm text-muted-foreground line-clamp-2">{product.tagline}</p>
                                 </div>
+                                <h3 className="font-semibold text-lg line-clamp-1">{product.name}</h3>
+                                <p className="text-sm text-muted-foreground line-clamp-2">{product.tagline}</p>
                               </div>
                             </div>
-                          </Link>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="hidden md:flex absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2" />
-                    <CarouselNext className="hidden md:flex absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2" />
-                  </Carousel>
-                </div>
-              ) : null}
-              <div className={`absolute -z-10 top-8 left-8 right-8 bottom-8 bg-${appConfig.primaryColorClass}-100 rounded-xl transform rotate-2`} />
-            </div>
-          )}
+                          </div>
+                        </Link>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="hidden md:flex absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2" />
+                  <CarouselNext className="hidden md:flex absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2" />
+                </Carousel>
+                <div className={`absolute -z-10 top-8 left-8 right-8 bottom-8 bg-${appConfig.primaryColorClass}-100 rounded-xl transform rotate-2`} />
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </section>

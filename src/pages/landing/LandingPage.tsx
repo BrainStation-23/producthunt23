@@ -28,7 +28,7 @@ const LandingPage: React.FC = () => {
   } = useLandingData();
 
   return (
-    <div className="animate-fade-in overflow-x-hidden">
+    <div className="animate-fade-in w-full overflow-hidden">
       {/* Hero Section */}
       <HeroSection 
         featuredProducts={featuredProducts}

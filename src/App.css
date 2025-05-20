@@ -1,9 +1,5 @@
 
-/* Remove conflicting root styles that limit the width and add padding */
-#root {
-  margin: 0 auto;
-}
-
+/* Clean base styles without conflicting constraints */
 .logo {
   height: 6em;
   padding: 1.5em;
