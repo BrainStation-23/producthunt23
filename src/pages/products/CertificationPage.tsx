@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Award, Printer, ChevronLeft } from 'lucide-react';
@@ -15,25 +16,23 @@ import CriteriaList from '@/components/products/certificate/CriteriaList';
 import JudgesList from '@/components/products/certificate/JudgesList';
 import CertificateFooter from '@/components/products/certificate/CertificateFooter';
 import CertificateSkeleton from '@/components/products/certificate/CertificateSkeleton';
+
 const CertificationPage: React.FC = () => {
-  const {
-    productId
-  } = useParams<{
-    productId: string;
-  }>();
-  const {
-    product,
-    makers,
-    criteria,
+  const { productId } = useParams<{ productId: string }>();
+  const { 
+    product, 
+    makers, 
+    criteria, 
     judgingSummary,
     judges,
-    isLoading,
+    isLoading, 
     certificateUrl,
     overallScore
   } = useCertificationData(productId);
-
+  
   // Create a reference to the certificate content
   const certificateRef = useRef<HTMLDivElement>(null);
+
   useDocumentTitle(product?.name ? `${product.name} Certificate` : 'Product Certificate');
 
   // Use react-to-print to handle printing only the certificate content
@@ -65,11 +64,14 @@ const CertificationPage: React.FC = () => {
       }
     `
   });
+
   if (isLoading) {
     return <CertificateSkeleton />;
   }
+
   if (!product || !makers || makers.length === 0) {
-    return <div className="container max-w-4xl mx-auto py-12 px-4">
+    return (
+      <div className="container max-w-4xl mx-auto py-12 px-4">
         <Card className="p-8 text-center">
           <h2 className="text-2xl font-bold mb-4">Certificate Not Found</h2>
           <p className="mb-6">The certificate you're looking for doesn't exist or is not available.</p>
@@ -77,19 +79,28 @@ const CertificationPage: React.FC = () => {
             <Link to="/products">Browse Products</Link>
           </Button>
         </Card>
-      </div>;
+      </div>
+    );
   }
-  const formattedDate = product.created_at ? new Date(product.created_at).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }) : 'Unknown Date';
-  return <div className="container max-w-4xl mx-auto py-8 px-4">
+  
+  const formattedDate = product.created_at
+    ? new Date(product.created_at).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    : 'Unknown Date';
+
+  return (
+    <div className="container max-w-4xl mx-auto py-8 px-4">
       <div className="flex justify-between mb-6">
         <Button variant="outline" asChild className="flex items-center gap-1">
           <Link to={`/products/${productId}`}><ChevronLeft className="w-4 h-4" /> Back to Product</Link>
         </Button>
-        
+        <Button onClick={handlePrint} className="flex items-center gap-2">
+          <Printer className="w-4 h-4" />
+          Print Certificate
+        </Button>
       </div>
 
       {/* Certificate Pages Container - Will be printed */}
@@ -122,20 +133,28 @@ const CertificationPage: React.FC = () => {
               </p>
               
               {/* Project Image */}
-              {product.image_url && <div className="my-6 max-w-xs mx-auto">
+              {product.image_url && (
+                <div className="my-6 max-w-xs mx-auto">
                   <div className="bg-muted rounded-md overflow-hidden border border-border aspect-video">
-                    <img src={product.image_url} alt={product.name} className="w-full h-full object-contain" />
+                    <img 
+                      src={product.image_url} 
+                      alt={product.name} 
+                      className="w-full h-full object-contain"
+                    />
                   </div>
-                </div>}
+                </div>
+              )}
               
               {/* Overall Score */}
-              {overallScore !== null && <div className="my-6 flex flex-col items-center">
+              {overallScore !== null && (
+                <div className="my-6 flex flex-col items-center">
                   <p className="text-lg mb-2">Overall Score</p>
                   <div className="certificate-score">
                     <span className="text-3xl font-bold text-primary">{overallScore.toFixed(1)}</span>
                     <span className="text-lg">/10</span>
                   </div>
-                </div>}
+                </div>
+              )}
               
               <p className="text-muted-foreground mt-4">Issued on {formattedDate}</p>
             </div>
@@ -166,10 +185,12 @@ const CertificationPage: React.FC = () => {
             <JudgesList judges={judges} />
             
             {/* Project Context */}
-            {product.tagline && <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+            {product.tagline && (
+              <div className="mt-4 p-4 bg-muted/30 rounded-lg">
                 <p className="font-medium mb-1">Project Description:</p>
                 <p className="text-muted-foreground">{product.tagline}</p>
-              </div>}
+              </div>
+            )}
             
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-border text-center">
@@ -181,6 +202,8 @@ const CertificationPage: React.FC = () => {
           </div>
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default CertificationPage;
