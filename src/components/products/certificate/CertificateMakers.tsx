@@ -24,7 +24,6 @@ const CertificateMakers = ({ makers }: CertificateMakersProps) => {
               className="hover:underline inline-flex items-center"
             >
               {maker.profile?.username || 'Unknown Maker'}
-              <Linkedin className="ml-1 h-5 w-5 inline" />
             </a>
           ) : (
             maker.profile?.username || 'Unknown Maker'
