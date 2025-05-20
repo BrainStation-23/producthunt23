@@ -69,7 +69,7 @@ const GradingTable = ({ judgingSummary, overallScore }: GradingTableProps) => {
             
             {overallScore !== null && (
               <TableRow className="font-bold">
-                <TableCell>Overall Score</TableCell>
+                <TableCell className="text-left">Overall Score</TableCell>
                 <TableCell className="text-right">
                   <Badge className="bg-primary">
                     {overallScore.toFixed(1)}
