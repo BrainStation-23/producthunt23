@@ -6,12 +6,14 @@ interface LaunchDateProps {
 }
 
 const LaunchDate: React.FC<LaunchDateProps> = ({ date }) => {
+  if (!date) return null;
+  
+  const formattedDate = new Date(date).toLocaleDateString();
+  
   return (
     <div>
-      <h3 className="font-medium mb-2">Launched</h3>
-      <p className="text-sm text-muted-foreground">
-        {date ? new Date(date).toLocaleDateString() : ''}
-      </p>
+      <h3 className="text-sm font-medium text-muted-foreground">Launched</h3>
+      <p className="text-sm">{formattedDate}</p>
     </div>
   );
 };

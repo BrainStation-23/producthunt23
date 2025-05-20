@@ -21,7 +21,7 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
     <Card className="border shadow-sm">
       <CardContent className="p-5 space-y-5">
         {/* Website Link */}
-        <WebsiteButton website_url={product.website_url} />
+        <WebsiteButton url={product.website_url} />
         
         {/* Stats */}
         <div className="flex items-center justify-between">
@@ -39,7 +39,11 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
         </div>
         
         {/* Upvote Button */}
-        <UpvoteActions product={product} />
+        <UpvoteActions 
+          productId={product.id} 
+          initialUpvotes={product.upvotes || 0} 
+          commentCount={commentCount} 
+        />
         
         {/* Certificate Link */}
         <Button variant="outline" className="w-full" asChild>
@@ -66,7 +70,7 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({ product, commentCount
         )}
         
         {/* Launch Date */}
-        <LaunchDate created_at={product.created_at} />
+        <LaunchDate date={product.created_at} />
       </CardContent>
     </Card>
   );

@@ -109,7 +109,7 @@ export const useCertificationData = (productId: string | undefined) => {
           .select(`
             id,
             judge_id,
-            profiles:judge_id(
+            judge:profiles!judge_id(
               username,
               avatar_url
             )
@@ -118,10 +118,13 @@ export const useCertificationData = (productId: string | undefined) => {
           
         if (judgeError) throw judgeError;
         
-        const formattedJudges = judgeAssignments.map(assignment => ({
-          id: assignment.id,
-          profile: assignment.profiles
-        }));
+        // Format judges data - handle the possibility of missing profiles safely
+        const formattedJudges: Judge[] = judgeAssignments
+          .filter(assignment => assignment.judge) // Filter out assignments with missing judge profiles
+          .map(assignment => ({
+            id: assignment.id,
+            profile: assignment.judge
+          }));
         
         setJudges(formattedJudges);
         
