@@ -36,6 +36,32 @@
   color: #888;
 }
 
+/* Certificate styles */
+.certificate-container {
+  position: relative;
+}
+
+.certificate-card {
+  background-color: white;
+  position: relative;
+}
+
+.certificate-ribbon {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.certificate-score {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.page-2 {
+  page-break-before: always;
+}
+
 /* Certificate print styles */
 @media print {
   body {
@@ -43,13 +69,31 @@
   }
   
   .certificate-card {
-    border: 2px solid #ccc !important;
+    border: none !important;
     box-shadow: none !important;
     padding: 1.5cm !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  
+  .certificate-page-1 {
+    height: calc(100vh - 3cm);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .certificate-page-2 {
+    height: calc(100vh - 3cm);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-2 {
+    page-break-before: always;
   }
   
   @page {
-    size: A4;
+    size: A4 portrait;
     margin: 1cm;
   }
 }

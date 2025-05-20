@@ -10,9 +10,9 @@ const CertificateFooter = ({ certificateUrl }: CertificateFooterProps) => {
   return (
     <>
       {/* QR Code */}
-      <div className="mb-4 flex justify-center">
+      <div className="mb-6 flex justify-center">
         <div className="text-center">
-          <div className="bg-white p-2 inline-block rounded-md">
+          <div className="bg-white p-2 inline-block rounded-md border border-border shadow-sm">
             {certificateUrl && (
               <img 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(certificateUrl)}`}
@@ -28,7 +28,7 @@ const CertificateFooter = ({ certificateUrl }: CertificateFooterProps) => {
       </div>
       
       {/* Footer */}
-      <div className="mt-12 pt-8 border-t border-border">
+      <div className="mt-8 pt-4 border-t border-border">
         <p className="text-sm text-muted-foreground">
           This certificate was issued as part of the Learnathon 3.0 program, 
           organized by Geeky Solutions.
