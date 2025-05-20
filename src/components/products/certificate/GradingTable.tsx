@@ -55,7 +55,6 @@ const GradingTable = ({ judgingSummary, overallScore, detailed = false }: Gradin
               <TableHead className="w-[50%] text-left">Criteria</TableHead>
               <TableHead className="text-center">Score</TableHead>
               {detailed && <TableHead className="text-center">Weight</TableHead>}
-              {detailed && <TableHead className="text-right">Judges</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,12 +68,7 @@ const GradingTable = ({ judgingSummary, overallScore, detailed = false }: Gradin
                 </TableCell>
                 {detailed && (
                   <TableCell className="text-center text-muted-foreground">
-                    {item.weight}%
-                  </TableCell>
-                )}
-                {detailed && (
-                  <TableCell className="text-right text-muted-foreground">
-                    {item.count_judges}
+                    {item.weight}x
                   </TableCell>
                 )}
               </TableRow>
@@ -88,8 +82,7 @@ const GradingTable = ({ judgingSummary, overallScore, detailed = false }: Gradin
                     {overallScore.toFixed(1)}
                   </Badge>
                 </TableCell>
-                {detailed && <TableCell className="text-center">100%</TableCell>}
-                {detailed && <TableCell className="text-right">-</TableCell>}
+                {detailed && <TableCell className="text-center">-</TableCell>}
               </TableRow>
             )}
           </TableBody>
