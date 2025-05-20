@@ -10,6 +10,7 @@ type Judge = {
   profile?: {
     username: string | null;
     avatar_url: string | null;
+    linkedin?: string | null;
   };
 };
 
@@ -63,7 +64,7 @@ export const useCertificationData = (productId: string | undefined) => {
         if (productError) throw productError;
         setProduct(productData as Product);
         
-        // 2. Fetch makers
+        // 2. Fetch makers with LinkedIn profiles
         const { data: makersData, error: makersError } = await supabase
           .from('product_makers')
           .select(`
@@ -73,7 +74,8 @@ export const useCertificationData = (productId: string | undefined) => {
             created_at,
             profile:profiles (
               username,
-              avatar_url
+              avatar_url,
+              linkedin
             )
           `)
           .eq('product_id', productId);
@@ -131,7 +133,7 @@ export const useCertificationData = (productId: string | undefined) => {
           
         if (judgeAssignmentError) throw judgeAssignmentError;
         
-        // Now fetch judge profiles separately
+        // Now fetch judge profiles separately with LinkedIn info
         const judgeDatas: Judge[] = [];
         
         // Only proceed if we have judge assignments
@@ -139,10 +141,10 @@ export const useCertificationData = (productId: string | undefined) => {
           // Get all judge IDs
           const judgeIds = judgeAssignments.map(assignment => assignment.judge_id);
           
-          // Fetch profiles for these judges
+          // Fetch profiles for these judges including LinkedIn
           const { data: judgeProfiles, error: profilesError } = await supabase
             .from('profiles')
-            .select('id, username, avatar_url')
+            .select('id, username, avatar_url, linkedin')
             .in('id', judgeIds);
           
           if (profilesError) throw profilesError;
@@ -155,7 +157,8 @@ export const useCertificationData = (productId: string | undefined) => {
                 id: assignment.id,
                 profile: {
                   username: profile.username,
-                  avatar_url: profile.avatar_url
+                  avatar_url: profile.avatar_url,
+                  linkedin: profile.linkedin
                 }
               });
             }

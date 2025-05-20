@@ -1,12 +1,14 @@
 
 import React from 'react';
 import { Badge } from 'lucide-react';
+import { LinkedIn } from 'lucide-react';
 
 interface Judge {
   id: string;
   profile?: {
     username: string | null;
     avatar_url: string | null;
+    linkedin?: string | null;
   };
 }
 
@@ -37,7 +39,21 @@ const JudgesList = ({ judges }: JudgesListProps) => {
                 />
               </div>
             )}
-            <p className="font-medium">{judge.profile?.username || 'Anonymous Judge'}</p>
+            <p className="font-medium">
+              {judge.profile?.linkedin ? (
+                <a 
+                  href={judge.profile.linkedin} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1 text-primary hover:underline"
+                >
+                  {judge.profile?.username || 'Anonymous Judge'}
+                  <LinkedIn className="h-4 w-4" />
+                </a>
+              ) : (
+                judge.profile?.username || 'Anonymous Judge'
+              )}
+            </p>
           </div>
         ))}
       </div>
