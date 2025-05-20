@@ -103,30 +103,47 @@ export const useCertificationData = (productId: string | undefined) => {
         
         setGrades(formattedGrades);
         
-        // 5. Fetch judges who evaluated this product
-        const { data: judgeAssignments, error: judgeError } = await supabase
+        // 5. Fetch judges who evaluated this product - with a different approach
+        // First, get the judge IDs from judge_assignments
+        const { data: judgeAssignments, error: judgeAssignmentError } = await supabase
           .from('judge_assignments')
-          .select(`
-            id,
-            judge_id,
-            judge:profiles!judge_id(
-              username,
-              avatar_url
-            )
-          `)
+          .select('id, judge_id')
           .eq('product_id', productId);
           
-        if (judgeError) throw judgeError;
+        if (judgeAssignmentError) throw judgeAssignmentError;
         
-        // Format judges data - handle the possibility of missing profiles safely
-        const formattedJudges: Judge[] = judgeAssignments
-          .filter(assignment => assignment.judge) // Filter out assignments with missing judge profiles
-          .map(assignment => ({
-            id: assignment.id,
-            profile: assignment.judge
-          }));
+        // Now fetch judge profiles separately
+        const judgeDatas: Judge[] = [];
         
-        setJudges(formattedJudges);
+        // Only proceed if we have judge assignments
+        if (judgeAssignments && judgeAssignments.length > 0) {
+          // Get all judge IDs
+          const judgeIds = judgeAssignments.map(assignment => assignment.judge_id);
+          
+          // Fetch profiles for these judges
+          const { data: judgeProfiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, username, avatar_url')
+            .in('id', judgeIds);
+          
+          if (profilesError) throw profilesError;
+          
+          // Map the judge profiles to the assignments
+          for (const assignment of judgeAssignments) {
+            const profile = judgeProfiles?.find(p => p.id === assignment.judge_id);
+            if (profile) {
+              judgeDatas.push({
+                id: assignment.id,
+                profile: {
+                  username: profile.username,
+                  avatar_url: profile.avatar_url
+                }
+              });
+            }
+          }
+        }
+        
+        setJudges(judgeDatas);
         
       } catch (error) {
         console.error('Error fetching certification data:', error);
