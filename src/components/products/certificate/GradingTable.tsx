@@ -51,7 +51,7 @@ const GradingTable = ({ judgingSummary, overallScore }: GradingTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[60%] text-left">Criteria</TableHead>
+              <TableHead className="w-[60%] text-center">Criteria</TableHead>
               <TableHead className="text-right">Score</TableHead>
             </TableRow>
           </TableHeader>
