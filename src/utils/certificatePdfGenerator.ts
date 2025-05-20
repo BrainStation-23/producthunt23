@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { Product, ProductMaker } from '@/types/product';
 import { JudgingCriteria } from '@/components/admin/settings/judging/types';
@@ -99,10 +98,11 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
         qrImage.onload = function() {
           const qrSize = 30;
           const qrX = (pageWidth - qrSize) / 2;
-          pdf.addImage(qrImage, 'PNG', qrX, pageHeight - 60, qrSize, qrSize);
+          // Adjusted QR code position to be higher up
+          pdf.addImage(qrImage, 'PNG', qrX, pageHeight - 70, qrSize, qrSize);
           pdf.setFontSize(10);
           pdf.setTextColor(100, 100, 100);
-          pdf.text('Scan to verify this certificate', pageWidth / 2, pageHeight - 25, { align: 'center' });
+          pdf.text('Scan to verify this certificate', pageWidth / 2, pageHeight - 35, { align: 'center' });
           resolve();
         };
         qrImage.onerror = () => {
@@ -132,10 +132,11 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     pdf.text('★', pageWidth / 2, pageHeight / 2, { align: 'center' });
     pdf.setTextColor(0, 0, 0);  // Reset text color
     
-    // Add decorative border
+    // Add decorative border with more space at the bottom
     pdf.setDrawColor(100, 100, 200);
     pdf.setLineWidth(0.5);
-    pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2), 'S');
+    // Increase bottom margin to accommodate footer
+    pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2) - 10, 'S');
     
     // Certificate Title
     pdf.setTextColor(80, 80, 120);
@@ -185,7 +186,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     
     // Project Image
     if (product.image_url) {
-      const imageResult = await addImageWithAspect(product.image_url, margin + 40, currentY, pageWidth - margin * 2 - 80, 80);
+      const imageResult = await addImageWithAspect(product.image_url, margin + 40, currentY, pageWidth - margin * 2 - 80, 70);
       currentY = imageResult.y + 25;
     }
     
@@ -201,7 +202,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
       pdf.setTextColor(70, 60, 120);
       pdf.setFontSize(24);
       pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, currentY, { align: 'center' });
-      currentY += 25;
+      currentY += 20;
     }
     
     // Issue date
@@ -217,16 +218,16 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
       : 'Unknown Date';
     pdf.text(`Issued on ${formattedDate}`, pageWidth / 2, currentY, { align: 'center' });
     
-    // QR Code at the bottom
+    // QR Code at the bottom - moved up to avoid overflow
     const qrHeight = await addQRCode();
     
-    // Footer
+    // Footer - moved up significantly to fit within border
     pdf.setTextColor(100, 100, 100);
     pdf.setFontSize(10);
     pdf.text('This certificate was issued as part of the Learnathon 3.0 program,', 
-      pageWidth / 2, pageHeight - 15, { align: 'center' });
+      pageWidth / 2, pageHeight - margin - 15, { align: 'center' });
     pdf.text('organized by Geeky Solutions.', 
-      pageWidth / 2, pageHeight - 10, { align: 'center' });
+      pageWidth / 2, pageHeight - margin - 10, { align: 'center' });
     
     // ---------- PAGE 2: Detailed Evaluation ----------
     pdf.addPage();
