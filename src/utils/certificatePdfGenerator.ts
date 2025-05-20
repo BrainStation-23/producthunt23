@@ -318,10 +318,10 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
       for (const criterion of criteria) {
         // Criterion name with check mark
         pdf.setFont('helvetica', 'bold');
-        pdf.text(`✓ ${criterion.name}`, margin + 5, yPosition);
+        pdf.text(`✓ ${criterion.name}`, margin + 1, yPosition);
         pdf.setFont('helvetica', 'normal');
         
-        yPosition += 5;
+        yPosition += 2;
         
         // Description (if available)
         if (criterion.description) {
@@ -331,7 +331,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
           
           pdf.setTextColor(100, 100, 100);
           for (const line of splitDescription) {
-            yPosition += 5;
+            yPosition += 2;
             pdf.text(line, margin + 10, yPosition);
           }
         }
