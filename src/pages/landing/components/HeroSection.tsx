@@ -22,6 +22,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface HeroSectionProps {
   featuredProducts: FeaturedProduct[] | null;
@@ -82,11 +83,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ featuredProducts, isLoading }
                           <Link to={`/products/${product.id}`} className="block w-full">
                             <div className="glass-card rounded-xl p-2 shadow-xl animate-fade-in animate-once animate-delay-200 w-full">
                               <div className="bg-white rounded-lg overflow-hidden">
-                                <img 
-                                  src={product.image_url || "/placeholder.svg"} 
-                                  alt={product.name} 
-                                  className="w-full h-36 md:h-48 object-cover"
-                                />
+                                <div className="w-full">
+                                  <AspectRatio ratio={16/9} className="bg-muted">
+                                    <img 
+                                      src={product.image_url || "/placeholder.svg"} 
+                                      alt={product.name} 
+                                      className="w-full h-full object-contain"
+                                    />
+                                  </AspectRatio>
+                                </div>
                                 <div className="p-4 space-y-2">
                                   <div className="flex items-center justify-between">
                                     <Badge className={`${primaryColorClass} ${primaryColorHoverClass}`}>Featured</Badge>
