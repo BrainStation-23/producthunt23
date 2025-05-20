@@ -37,7 +37,7 @@ const CertificationPage: React.FC = () => {
 
   // Use react-to-print to handle printing only the certificate content
   const handlePrint = useReactToPrint({
-    content: () => certificateRef.current,
+    contentRef: certificateRef,
     documentTitle: `${product?.name || 'Product'} Certificate`,
     removeAfterPrint: true,
     pageStyle: `
