@@ -1,13 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { QrCode, Award, Badge, Check } from 'lucide-react';
+import { QrCode, Award, Badge, Check, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge as BadgeComponent } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { useCertificationData } from '@/hooks/useCertificationData';
@@ -18,10 +25,11 @@ const CertificationPage: React.FC = () => {
     product, 
     makers, 
     criteria, 
-    grades,
+    judgingSummary,
     judges,
     isLoading, 
-    certificateUrl
+    certificateUrl,
+    overallScore
   } = useCertificationData(productId);
 
   useDocumentTitle(product?.name ? `${product.name} Certificate` : 'Product Certificate');
@@ -47,11 +55,6 @@ const CertificationPage: React.FC = () => {
       </div>
     );
   }
-
-  // Calculate average score if grades are available
-  const averageScore = grades?.length > 0 
-    ? grades.reduce((sum, grade) => sum + grade.score, 0) / grades.length 
-    : null;
   
   const formattedDate = product.created_at
     ? new Date(product.created_at).toLocaleDateString('en-US', { 
@@ -116,35 +119,52 @@ const CertificationPage: React.FC = () => {
             </div>
           )}
           
-          {/* Grades */}
-          {grades && grades.length > 0 && (
+          {/* Evaluation Results */}
+          {judgingSummary && judgingSummary.length > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4 flex items-center justify-center">
                 <Award className="mr-2" /> 
                 Evaluation Results
               </h3>
               
-              <div className="grid grid-cols-1 gap-3 max-w-lg mx-auto">
-                {grades.map((grade) => (
-                  <div 
-                    key={grade.id} 
-                    className="flex justify-between items-center border-b pb-2"
-                  >
-                    <span className="font-medium">{grade.criteria_name}</span>
-                    <div className="flex items-center">
-                      <BadgeComponent variant="outline" className="font-bold">
-                        {grade.score}/{grade.max_score}
-                      </BadgeComponent>
-                    </div>
-                  </div>
-                ))}
-                
-                {averageScore !== null && (
-                  <div className="flex justify-between items-center pt-2 font-bold">
-                    <span>Overall Score</span>
-                    <BadgeComponent className="bg-primary">{averageScore.toFixed(1)}</BadgeComponent>
-                  </div>
-                )}
+              <div className="max-w-lg mx-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[180px]">Criteria</TableHead>
+                      <TableHead>Score</TableHead>
+                      <TableHead className="text-right">Judges</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {judgingSummary
+                      .filter(item => item.criteria_type === 'rating' && item.avg_rating !== null)
+                      .map((item) => (
+                        <TableRow key={item.criteria_id}>
+                          <TableCell className="font-medium">{item.criteria_name}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <BadgeComponent variant="outline" className="font-bold">
+                                {item.avg_rating !== null ? item.avg_rating.toFixed(1) : 'N/A'}
+                              </BadgeComponent>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">{item.count_judges}</TableCell>
+                        </TableRow>
+                    ))}
+                    
+                    {overallScore !== null && (
+                      <TableRow className="font-bold">
+                        <TableCell>Overall Score</TableCell>
+                        <TableCell colSpan={2}>
+                          <BadgeComponent className="bg-primary">
+                            {overallScore.toFixed(1)}
+                          </BadgeComponent>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </div>
             </div>
           )}

@@ -21,13 +21,26 @@ type Grade = {
   max_score: number;
 };
 
+type JudgingSummary = {
+  criteria_id: string;
+  criteria_name: string;
+  criteria_type: string;
+  avg_rating: number | null;
+  count_judges: number;
+  count_true: number;
+  count_false: number;
+  weight: number;
+};
+
 export const useCertificationData = (productId: string | undefined) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [makers, setMakers] = useState<ProductMaker[]>([]);
   const [criteria, setCriteria] = useState<JudgingCriteria[]>([]);
   const [grades, setGrades] = useState<Grade[]>([]);
+  const [judgingSummary, setJudgingSummary] = useState<JudgingSummary[]>([]);
   const [judges, setJudges] = useState<Judge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [overallScore, setOverallScore] = useState<number | null>(null);
   
   // Generate the certificate URL for QR code
   const certificateUrl = productId 
@@ -77,34 +90,40 @@ export const useCertificationData = (productId: string | undefined) => {
         if (criteriaError) throw criteriaError;
         setCriteria(criteriaData as JudgingCriteria[]);
         
-        // 4. Fetch grades (judging submissions)
-        const { data: submissionsData, error: submissionsError } = await supabase
-          .from('judging_submissions')
-          .select(`
-            id,
-            criteria_id,
-            rating_value,
-            judging_criteria(name, max_value)
-          `)
-          .eq('product_id', productId);
+        // 4. Fetch product judging summary using RPC function
+        const { data: summaryData, error: summaryError } = await supabase
+          .rpc('get_product_judging_summary', { product_uuid: productId });
           
-        if (submissionsError) throw submissionsError;
+        if (summaryError) throw summaryError;
         
-        // Format grades data
-        const formattedGrades = submissionsData
-          .filter(sub => sub.rating_value !== null) // Only include submissions with ratings
-          .map(sub => ({
-            id: sub.id,
-            criteria_id: sub.criteria_id,
-            criteria_name: sub.judging_criteria?.name || 'Unknown Criteria',
-            score: sub.rating_value || 0,
-            max_score: sub.judging_criteria?.max_value || 10
+        setJudgingSummary(summaryData);
+        
+        // Calculate overall score only from rating criteria
+        const ratingEntries = summaryData.filter(item => 
+          item.criteria_type === 'rating' && item.avg_rating !== null
+        );
+        
+        if (ratingEntries.length > 0) {
+          const totalWeight = ratingEntries.reduce((sum, item) => sum + item.weight, 0);
+          const weightedSum = ratingEntries.reduce((sum, item) => 
+            sum + ((item.avg_rating || 0) * item.weight), 0
+          );
+          
+          setOverallScore(totalWeight > 0 ? weightedSum / totalWeight : null);
+          
+          // Format grades for backward compatibility
+          const formattedGrades = ratingEntries.map(item => ({
+            id: item.criteria_id,
+            criteria_id: item.criteria_id,
+            criteria_name: item.criteria_name,
+            score: item.avg_rating || 0,
+            max_score: 10 // Assuming max score is 10, adjust if needed
           }));
+          
+          setGrades(formattedGrades);
+        }
         
-        setGrades(formattedGrades);
-        
-        // 5. Fetch judges who evaluated this product - with a different approach
-        // First, get the judge IDs from judge_assignments
+        // 5. Fetch judges who evaluated this product
         const { data: judgeAssignments, error: judgeAssignmentError } = await supabase
           .from('judge_assignments')
           .select('id, judge_id')
@@ -161,8 +180,10 @@ export const useCertificationData = (productId: string | undefined) => {
     makers,
     criteria,
     grades,
+    judgingSummary,
     judges,
     isLoading,
-    certificateUrl
+    certificateUrl,
+    overallScore
   };
 };
