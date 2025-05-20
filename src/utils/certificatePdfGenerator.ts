@@ -136,7 +136,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     pdf.setDrawColor(100, 100, 200);
     pdf.setLineWidth(0.5);
     // Increase bottom margin to accommodate footer
-    pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2), 'S');
+    pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin), 'S');
     
     // Certificate Title
     pdf.setTextColor(80, 80, 120);
