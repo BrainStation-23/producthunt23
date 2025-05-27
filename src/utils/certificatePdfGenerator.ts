@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { Product, ProductMaker } from '@/types/product';
 import { JudgingCriteria } from '@/components/admin/settings/judging/types';
@@ -33,6 +34,30 @@ interface CertificateData {
 }
 
 /**
+ * Prioritizes and limits judges to 2, favoring those with images and LinkedIn
+ */
+const selectTopJudges = (judges: Judge[]): Judge[] => {
+  if (!judges || judges.length === 0) return [];
+  
+  // Sort judges by priority: avatar_url and linkedin presence
+  const sortedJudges = [...judges].sort((a, b) => {
+    const aHasAvatar = !!a.profile?.avatar_url;
+    const aHasLinkedIn = !!a.profile?.linkedin;
+    const bHasAvatar = !!b.profile?.avatar_url;
+    const bHasLinkedIn = !!b.profile?.linkedin;
+    
+    // Priority score: both avatar and linkedin = 3, only avatar = 2, only linkedin = 1, neither = 0
+    const aScore = (aHasAvatar ? 2 : 0) + (aHasLinkedIn ? 1 : 0);
+    const bScore = (bHasAvatar ? 2 : 0) + (bHasLinkedIn ? 1 : 0);
+    
+    return bScore - aScore; // Descending order
+  });
+  
+  // Return max 2 judges
+  return sortedJudges.slice(0, 2);
+};
+
+/**
  * Generates a PDF certificate for a product
  */
 export const generateCertificatePdf = async (certificateData: CertificateData): Promise<void> => {
@@ -47,6 +72,9 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
   } = certificateData;
   
   if (!product || !makers || makers.length === 0) return;
+  
+  // Select top 2 judges based on priority
+  const selectedJudges = selectTopJudges(judges);
   
   // Create a new PDF document on A4 size
   const pdf = new jsPDF({
@@ -99,10 +127,10 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
           const qrSize = 30;
           const qrX = (pageWidth - qrSize) / 2;
           // Adjusted QR code position to be higher up
-          pdf.addImage(qrImage, 'PNG', qrX, pageHeight - 70, qrSize, qrSize);
+          pdf.addImage(qrImage, 'PNG', qrX, pageHeight - 80, qrSize, qrSize);
           pdf.setFontSize(10);
           pdf.setTextColor(100, 100, 100);
-          pdf.text('Scan to verify this certificate', pageWidth / 2, pageHeight - 35, { align: 'center' });
+          pdf.text('Scan to verify this certificate', pageWidth / 2, pageHeight - 45, { align: 'center' });
           resolve();
         };
         qrImage.onerror = () => {
@@ -135,8 +163,8 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     // Add decorative border with more space at the bottom
     pdf.setDrawColor(100, 100, 200);
     pdf.setLineWidth(0.5);
-    // Increase bottom margin to accommodate footer
-    pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin*1.5), 'S');
+    // Increase bottom margin to accommodate footer - adjusted for better spacing
+    pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2.5), 'S');
     
     // Certificate Title
     pdf.setTextColor(80, 80, 120);
@@ -221,13 +249,13 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     // QR Code at the bottom - moved up to avoid overflow
     const qrHeight = await addQRCode();
     
-    // Footer - moved up significantly to fit within border
+    // Footer - positioned within the border
     pdf.setTextColor(100, 100, 100);
     pdf.setFontSize(10);
     pdf.text('This certificate was issued as part of the Learnathon 3.0 program,', 
-      pageWidth / 2, pageHeight - margin - 5, { align: 'center' });
+      pageWidth / 2, pageHeight - margin - 20, { align: 'center' });
     pdf.text('organized by Geeky Solutions.', 
-      pageWidth / 2, pageHeight - margin, { align: 'center' });
+      pageWidth / 2, pageHeight - margin - 15, { align: 'center' });
     
     // ---------- PAGE 2: Detailed Evaluation ----------
     pdf.addPage();
@@ -348,8 +376,8 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
       yPosition += 10;
     }
     
-    // Judges section
-    if (judges && judges.length > 0) {
+    // Judges section - now limited to 2 judges
+    if (selectedJudges && selectedJudges.length > 0) {
       // Check if we need a new page
       if (yPosition > pageHeight - 60) {
         pdf.addPage();
@@ -366,7 +394,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
       pdf.setFontSize(10);
       pdf.setTextColor(60, 60, 60);
       
-      const judgeNames = judges.map(judge => judge.profile?.username || 'Anonymous Judge');
+      const judgeNames = selectedJudges.map(judge => judge.profile?.username || 'Anonymous Judge');
       pdf.text(judgeNames.join(', '), margin + 5, yPosition);
     }
     
