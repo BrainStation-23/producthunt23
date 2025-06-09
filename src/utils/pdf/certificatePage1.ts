@@ -70,7 +70,7 @@ export const generateCertificatePage1 = async (
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(20);
   pdf.text(product.name, pageWidth / 2, currentY, { align: 'center' });
-  currentY += 30;
+  currentY += 10;
 
   // Project Image
   if (product.image_url) {
@@ -83,7 +83,7 @@ export const generateCertificatePage1 = async (
       pageWidth - margin * 2 - 80,
       imageHeight
     );
-    currentY += imageHeight + 20;
+    currentY += imageHeight + 8;
   }
 
   // Overall Score
