@@ -102,7 +102,7 @@ export const generateCertificatePage1 = async (
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(70, 60, 120);
     pdf.setFontSize(28);
-    pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, zones.score.start + 10, { align: 'center' });
+    pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, zones.score.start + 15, { align: 'center' });
   }
 
 
