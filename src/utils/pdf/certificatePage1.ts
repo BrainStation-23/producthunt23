@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { CertificateData } from './types';
 import { addImageWithAspect, addQRCode } from './pdfHelpers';
@@ -26,84 +27,84 @@ export const generateCertificatePage1 = async (
   pdf.setLineWidth(0.5);
   pdf.rect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2.5, 'S');
 
-  // Title
+  // Title - reduced top spacing
   pdf.setTextColor(80, 80, 120);
-  pdf.setFontSize(30);
+  pdf.setFontSize(28);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Certificate of Completion', pageWidth / 2, margin + 15, { align: 'center' });
+  pdf.text('Certificate of Completion', pageWidth / 2, margin + 12, { align: 'center' });
 
-  // Organization
+  // Organization - reduced spacing
   pdf.setTextColor(100, 100, 100);
-  pdf.setFontSize(14);
+  pdf.setFontSize(12);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('Learnathon 3.0 by Geeky Solutions', pageWidth / 2, margin + 28, { align: 'center' });
+  pdf.text('Learnathon 3.0 by Geeky Solutions', pageWidth / 2, margin + 22, { align: 'center' });
 
-  // Divider
+  // Divider - adjusted position
   pdf.setDrawColor(150, 150, 220);
   pdf.setLineWidth(0.5);
-  pdf.line(margin + 30, margin + 48, pageWidth - margin - 30, margin + 48);
+  pdf.line(margin + 30, margin + 35, pageWidth - margin - 30, margin + 35);
 
-  // Certify line
+  // Certify line - reduced spacing
   pdf.setTextColor(80, 80, 80);
-  pdf.setFontSize(14);
-  pdf.text('This is to certify that', pageWidth / 2, margin + 65, { align: 'center' });
+  pdf.setFontSize(12);
+  pdf.text('This is to certify that', pageWidth / 2, margin + 48, { align: 'center' });
 
-  // Makers
-  let currentY = margin + 80;
+  // Makers - reduced spacing
+  let currentY = margin + 58;
   const makerNames = makers.map((m) => m.profile?.username || 'Unknown Maker');
 
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(70, 60, 120);
-  pdf.setFontSize(18);
+  pdf.setFontSize(16);
   pdf.text(makerNames.join(', '), pageWidth / 2, currentY, { align: 'center' });
-  currentY += 16;
+  currentY += 12;
 
-  // Completion text
+  // Completion text - reduced spacing
   pdf.setTextColor(80, 80, 80);
-  pdf.setFontSize(14);
+  pdf.setFontSize(12);
   pdf.setFont('helvetica', 'normal');
   pdf.text('successfully completed the project', pageWidth / 2, currentY, { align: 'center' });
-  currentY += 10;
+  currentY += 8;
 
-  // Project Name
+  // Project Name - reduced spacing
   pdf.setTextColor(70, 60, 120);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(20);
+  pdf.setFontSize(18);
   pdf.text(product.name, pageWidth / 2, currentY, { align: 'center' });
-  currentY += 10;
+  currentY += 12;
 
-  // Project Image
+  // Project Image - fixed height and better positioning
   if (product.image_url) {
-    const imageHeight = 60;
+    const imageHeight = 40; // Reduced from 60
     await addImageWithAspect(
       pdf,
       product.image_url,
-      margin + 40,
+      margin + 50,
       currentY,
-      pageWidth - margin * 2 - 80,
+      pageWidth - margin * 2 - 100,
       imageHeight
     );
-    currentY += imageHeight + 8;
+    currentY += imageHeight + 10;
   }
 
-  // Overall Score
+  // Overall Score - better positioning
   if (overallScore !== null) {
-    pdf.setFontSize(14);
+    pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(80, 80, 80);
     pdf.text('Overall Score', pageWidth / 2, currentY, { align: 'center' });
-    currentY += 16;
+    currentY += 12;
 
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(70, 60, 120);
-    pdf.setFontSize(24);
+    pdf.setFontSize(20);
     pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, currentY, { align: 'center' });
-    currentY += 25;
+    currentY += 18;
   }
 
-  // Issued Date
+  // Issued Date - better positioning
   pdf.setTextColor(100, 100, 100);
-  pdf.setFontSize(12);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
 
   const formattedDate = product.created_at
@@ -116,20 +117,20 @@ export const generateCertificatePage1 = async (
 
   pdf.text(`Issued on ${formattedDate}`, pageWidth / 2, currentY, { align: 'center' });
 
-  // QR Code at the bottom
+  // QR Code at the bottom with proper spacing
   await addQRCode(pdf, certificateUrl, pageWidth, pageHeight, margin);
 
-  // Footer
-  const footerY = pageHeight - margin - 25;
+  // Footer - positioned above QR code
+  const footerY = pageHeight - margin - 40;
   pdf.setTextColor(100, 100, 100);
-  pdf.setFontSize(10);
+  pdf.setFontSize(8);
   pdf.text(
     'This certificate was issued as part of the Learnathon 3.0 program,',
     pageWidth / 2,
     footerY,
     { align: 'center' }
   );
-  pdf.text('organized by Geeky Solutions.', pageWidth / 2, footerY + 8, {
+  pdf.text('organized by Geeky Solutions.', pageWidth / 2, footerY + 6, {
     align: 'center',
   });
 };
