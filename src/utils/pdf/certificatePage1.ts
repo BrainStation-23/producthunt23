@@ -102,23 +102,9 @@ export const generateCertificatePage1 = async (
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(70, 60, 120);
     pdf.setFontSize(28);
-    pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, zones.score.start + 25, { align: 'center' });
+    pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, zones.score.start + 5, { align: 'center' });
   }
 
-  // Issued Date (positioned above footer zone)
-  pdf.setTextColor(100, 100, 100);
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'normal');
-
-  const formattedDate = product.created_at
-    ? new Date(product.created_at).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : 'Unknown Date';
-
-  pdf.text(`Issued on ${formattedDate}`, pageWidth / 2, zones.footer.start - 15, { align: 'center' });
 
   // FOOTER ZONE - QR Code and footer text (fixed positions)
   // QR Code positioned at fixed location
