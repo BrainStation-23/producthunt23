@@ -30,13 +30,13 @@ export const generateCertificatePage1 = async (
   pdf.setTextColor(80, 80, 120);
   pdf.setFontSize(30);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Certificate of Completion', pageWidth / 2, margin + 25, { align: 'center' });
+  pdf.text('Certificate of Completion', pageWidth / 2, margin + 15, { align: 'center' });
 
   // Organization
   pdf.setTextColor(100, 100, 100);
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('Learnathon 3.0 by Geeky Solutions', pageWidth / 2, margin + 38, { align: 'center' });
+  pdf.text('Learnathon 3.0 by Geeky Solutions', pageWidth / 2, margin + 28, { align: 'center' });
 
   // Divider
   pdf.setDrawColor(150, 150, 220);
