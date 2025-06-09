@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { Product, ProductMaker } from '@/types/product';
 import { JudgingCriteria } from '@/components/admin/settings/judging/types';
@@ -58,6 +57,41 @@ const selectTopJudges = (judges: Judge[]): Judge[] => {
 };
 
 /**
+ * Adds image with fixed dimensions and aspect ratio preservation
+ */
+const addImageWithFixedSpace = async (imageUrl: string, x: number, y: number, width: number, height: number, pdf: jsPDF): Promise<void> => {
+  return new Promise<void>((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function() {
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+      
+      // Calculate dimensions to fit within the fixed space while maintaining aspect ratio
+      let newWidth = width;
+      let newHeight = (imgHeight * width) / imgWidth;
+      
+      if (newHeight > height) {
+        newHeight = height;
+        newWidth = (imgWidth * height) / imgHeight;
+      }
+      
+      // Center the image within the fixed space
+      const centerX = x + (width - newWidth) / 2;
+      const centerY = y + (height - newHeight) / 2;
+      
+      pdf.addImage(img, 'PNG', centerX, centerY, newWidth, newHeight);
+      resolve();
+    };
+    img.onerror = function() {
+      console.error("Failed to load image");
+      resolve();
+    };
+    img.src = imageUrl;
+  });
+};
+
+/**
  * Generates a PDF certificate for a product
  */
 export const generateCertificatePdf = async (certificateData: CertificateData): Promise<void> => {
@@ -87,34 +121,10 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 15;
   
-  // Helper function to add image with aspect ratio preservation
-  const addImageWithAspect = async (imageUrl: string, x: number, y: number, maxWidth: number, maxHeight: number) => {
-    return new Promise<{y: number}>((resolve) => {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.onload = function() {
-        const imgWidth = img.width;
-        const imgHeight = img.height;
-        let newWidth = maxWidth;
-        let newHeight = (imgHeight * maxWidth) / imgWidth;
-        
-        if (newHeight > maxHeight) {
-          newHeight = maxHeight;
-          newWidth = (imgWidth * maxHeight) / imgHeight;
-        }
-        
-        const centerX = x + (maxWidth - newWidth) / 2;
-        pdf.addImage(img, 'PNG', centerX, y, newWidth, newHeight);
-        resolve({y: y + newHeight});
-      };
-      img.onerror = function() {
-        console.error("Failed to load image");
-        resolve({y});
-      };
-      img.src = imageUrl;
-    });
-  };
-
+  // Fixed dimensions for different sections
+  const FIXED_IMAGE_HEIGHT = 60; // Fixed height for product image
+  const FIXED_IMAGE_WIDTH = pageWidth - margin * 2 - 80; // Fixed width with margins
+  
   // Function to add QR code
   const addQRCode = async () => {
     if (!certificateUrl) return margin;
@@ -126,8 +136,9 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
         qrImage.onload = function() {
           const qrSize = 30;
           const qrX = (pageWidth - qrSize) / 2;
-          // Adjusted QR code position to be higher up
-          pdf.addImage(qrImage, 'PNG', qrX, pageHeight - 80, qrSize, qrSize);
+          // Fixed position for QR code
+          const qrY = pageHeight - 80;
+          pdf.addImage(qrImage, 'PNG', qrX, qrY, qrSize, qrSize);
           pdf.setFontSize(10);
           pdf.setTextColor(100, 100, 100);
           pdf.text('Scan to verify this certificate', pageWidth / 2, pageHeight - 45, { align: 'center' });
@@ -163,7 +174,6 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     // Add decorative border with more space at the bottom
     pdf.setDrawColor(100, 100, 200);
     pdf.setLineWidth(0.5);
-    // Increase bottom margin to accommodate footer - adjusted for better spacing
     pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2.5), 'S');
     
     // Certificate Title
@@ -212,13 +222,15 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     pdf.text(product.name, pageWidth / 2, currentY, { align: 'center' });
     currentY += 25;
     
-    // Project Image
+    // Fixed space for Project Image
     if (product.image_url) {
-      const imageResult = await addImageWithAspect(product.image_url, margin + 40, currentY, pageWidth - margin * 2 - 80, 70);
-      currentY = imageResult.y + 25;
+      const imageX = margin + 40;
+      await addImageWithFixedSpace(product.image_url, imageX, currentY, FIXED_IMAGE_WIDTH, FIXED_IMAGE_HEIGHT, pdf);
     }
+    // Always advance by the fixed height, regardless of whether image exists
+    currentY += FIXED_IMAGE_HEIGHT + 15;
     
-    // Overall Score
+    // Overall Score - fixed position
     if (overallScore !== null) {
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'normal');
@@ -233,7 +245,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
       currentY += 20;
     }
     
-    // Issue date
+    // Issue date - fixed position
     pdf.setTextColor(100, 100, 100);
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
@@ -246,10 +258,10 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
       : 'Unknown Date';
     pdf.text(`Issued on ${formattedDate}`, pageWidth / 2, currentY, { align: 'center' });
     
-    // QR Code at the bottom - moved up to avoid overflow
-    const qrHeight = await addQRCode();
+    // QR Code at fixed position
+    await addQRCode();
     
-    // Footer - positioned within the border
+    // Footer - positioned within the border at fixed location
     pdf.setTextColor(100, 100, 100);
     pdf.setFontSize(10);
     pdf.text('This certificate was issued as part of the Learnathon 3.0 program,', 
