@@ -196,13 +196,13 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
     pdf.text('Learnathon 3.0 by Geeky Solutions', pageWidth / 2, currentY, { align: 'center' });
-    currentY += 15;
+    currentY += 5;
     
     // Decorative line - Fixed position
     pdf.setDrawColor(150, 150, 220);
     pdf.setLineWidth(0.5);
     pdf.line(margin + 30, currentY, pageWidth - margin - 30, currentY);
-    currentY += 15;
+    currentY += 5;
     
     // "This is to certify that" - Fixed position
     pdf.setTextColor(80, 80, 80);
