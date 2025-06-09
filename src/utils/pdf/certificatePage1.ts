@@ -21,6 +21,37 @@ export const generateCertificatePage1 = async (
     footer: { start: pageHeight - 85, end: pageHeight - margin }
   };
 
+  // Helper function to wrap text and return lines
+  const wrapText = (text: string, maxWidth: number, fontSize: number): string[] => {
+    pdf.setFontSize(fontSize);
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const textWidth = pdf.getTextWidth(testLine);
+      
+      if (textWidth <= maxWidth) {
+        currentLine = testLine;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          // Word is too long, add it anyway
+          lines.push(word);
+        }
+      }
+    }
+    
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+    
+    return lines;
+  };
+
   // Background
   pdf.setFillColor(250, 250, 255);
   pdf.rect(0, 0, pageWidth, pageHeight, 'F');
@@ -57,26 +88,51 @@ export const generateCertificatePage1 = async (
   pdf.setFontSize(14);
   pdf.text('This is to certify that', pageWidth / 2, zones.content.start + 8, { align: 'center' });
 
-  // Makers names
+  // Makers names with wrapping
   const makerNames = makers.map((m) => m.profile?.username || 'Unknown Maker');
+  const allMakersText = makerNames.join(', ');
+  
+  // Calculate available width for maker names (with some padding)
+  const maxTextWidth = pageWidth - margin * 2 - 40;
+  
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(70, 60, 120);
   pdf.setFontSize(20);
-  pdf.text(makerNames.join(', '), pageWidth / 2, zones.content.start + 25, { align: 'center' });
+  
+  // Wrap the maker names
+  const wrappedMakerLines = wrapText(allMakersText, maxTextWidth, 20);
+  
+  // Position the wrapped lines
+  const lineHeight = 6;
+  const startY = zones.content.start + 25;
+  
+  wrappedMakerLines.forEach((line, index) => {
+    pdf.text(line, pageWidth / 2, startY + (index * lineHeight), { align: 'center' });
+  });
+
+  // Adjust subsequent content position based on number of lines
+  const additionalHeight = (wrappedMakerLines.length - 1) * lineHeight;
+  const completionTextY = zones.content.start + 40 + additionalHeight;
 
   // Completion text
   pdf.setTextColor(80, 80, 80);
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('successfully completed the project', pageWidth / 2, zones.content.start + 40, { align: 'center' });
+  pdf.text('successfully completed the project', pageWidth / 2, completionTextY, { align: 'center' });
 
-  // Project Name
+  // Project Name - also wrap if needed
   pdf.setTextColor(70, 60, 120);
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(22);
-  pdf.text(product.name, pageWidth / 2, zones.content.start + 58, { align: 'center' });
+  
+  const wrappedProjectLines = wrapText(product.name, maxTextWidth, 22);
+  const projectStartY = completionTextY + 18;
+  
+  wrappedProjectLines.forEach((line, index) => {
+    pdf.text(line, pageWidth / 2, projectStartY + (index * 7), { align: 'center' });
+  });
 
-  // IMAGE ZONE - Project Image (fixed position and size)
+  // IMAGE ZONE - Project Image (adjust position if needed)
   if (product.image_url) {
     const imageHeight = 40;
     const imageWidth = pageWidth - margin * 2 - 80;
@@ -104,7 +160,6 @@ export const generateCertificatePage1 = async (
     pdf.setFontSize(28);
     pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, zones.score.start + 15, { align: 'center' });
   }
-
 
   // FOOTER ZONE - QR Code and footer text (fixed positions)
   // QR Code positioned at fixed location
