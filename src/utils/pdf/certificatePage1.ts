@@ -103,8 +103,8 @@ export const generateCertificatePage1 = async (
   const wrappedMakerLines = wrapText(allMakersText, maxTextWidth, 20);
   
   // Position the wrapped lines
-  const lineHeight = 6;
-  const startY = zones.content.start + 25;
+  const lineHeight = 8;
+  const startY = zones.content.start + 20;
   
   wrappedMakerLines.forEach((line, index) => {
     pdf.text(line, pageWidth / 2, startY + (index * lineHeight), { align: 'center' });
