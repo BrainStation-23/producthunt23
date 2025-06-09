@@ -97,12 +97,12 @@ export const generateCertificatePage1 = async (
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(80, 80, 80);
-    pdf.text('Overall Score', pageWidth / 2, zones.score.start + 8, { align: 'center' });
+    pdf.text('Overall Score', pageWidth / 2, zones.score.start + 5, { align: 'center' });
 
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(70, 60, 120);
     pdf.setFontSize(28);
-    pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, zones.score.start + 5, { align: 'center' });
+    pdf.text(`${overallScore.toFixed(1)}/10`, pageWidth / 2, zones.score.start + 10, { align: 'center' });
   }
 
 
