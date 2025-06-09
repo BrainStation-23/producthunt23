@@ -126,7 +126,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
   const LAYOUT = {
     HEADER_HEIGHT: 40,
     MAKER_SECTION_HEIGHT: 25,
-    PROJECT_NAME_HEIGHT: 15,
+    PROJECT_NAME_HEIGHT: 10,
     IMAGE_SECTION_HEIGHT: 50, // Fixed height for image area
     IMAGE_WIDTH: 120, // Fixed width for image
     SCORE_SECTION_HEIGHT: 25,
@@ -182,7 +182,7 @@ export const generateCertificatePdf = async (certificateData: CertificateData): 
     pdf.setLineWidth(0.5);
     pdf.rect(margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2), 'S');
     
-    let currentY = margin + 15;
+    let currentY = margin + 5 ;
     
     // Certificate Title - Fixed position
     pdf.setTextColor(80, 80, 120);
